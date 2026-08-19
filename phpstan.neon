@@ -6,8 +6,10 @@ parameters:
     paths:
         - app/
         - bootstrap/app.php
-        - config/
         - database/
         - routes/
 
+    # config/ is intentionally excluded: config files are declarative arrays, and
+    # third-party published configs reference optional Pro classes and env() unions
+    # that are not ours to fix. Application logic lives in app/, not config/.
     level: 7
