@@ -64,6 +64,26 @@ birth (`010299` = 1 Feb 1999).
   reactivated, and errors.
 - The sync must be idempotent — running it twice changes nothing the second time.
 
+## Activation model — confirmed (HR/IT, Aug 2026)
+
+The open questions on `personType` / `assignmentStatus` are resolved:
+
+- **Everyone in the payload gets an account.** `person_type` and `assignment_status`
+  are stored for display/filtering but **do not gate login**. Do not build activation
+  logic on their values.
+- **Activation is payload presence, nothing else.** Present in the payload →
+  `is_active = true`. Departed staff linger in the payload for a week or more with
+  `assignmentEndDate` set; they stay active during that window. Once a person **drops
+  out of the payload** → `is_active = false`. Never hard-delete.
+- **Reactivation by identity.** Match `external_id` first, then `kennitala_hash`. A
+  returning seasonal ranger reactivates their existing disabled account (posts,
+  comments, memberships intact) — kennitala is the reliable key because email can be
+  missing. This is why the circuit breaker is critical: absence is the deactivation
+  signal, so a partial API failure must never mass-disable the workforce.
+- **Missing contact info.** `email` and `phone` may both be null. No-email staff can
+  use neither the email invitation nor the Entra path — their onboarding is an open
+  1D question; the schema allows null.
+
 ## Names
 
 `employeeName` is a single string containing Icelandic patronymics
