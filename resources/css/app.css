@@ -24,22 +24,41 @@
     --color-zinc-950: #0a0a0a;
 
     /*
-     * NVS brand palette — TODO(phase-0): replace with the official Náttúruverndarstofnun
-     * hex values. Define a --color-primary-50..950 ramp here and point --color-accent at
-     * it. Until then the accent falls back to the neutral scale below. Do not invent
-     * brand colours — see .ai/phases/phase-00-foundation.md.
+     * NVS brand palette — official Náttúruverndarstofnun colours.
+     * Primary is the forest green #4E7236, extended into a 50–950 ramp. The remaining
+     * brand colours are exposed as semantic tokens (utilities: bg-sand, text-fjord, …).
      */
+    --color-primary-50: #f5f8f0;
+    --color-primary-100: #e7f0da;
+    --color-primary-200: #cfe1b6;
+    --color-primary-300: #aecb88;
+    --color-primary-400: #89b05e;
+    --color-primary-500: #6a9444;
+    --color-primary-600: #4e7236; /* brand green */
+    --color-primary-700: #405c2d;
+    --color-primary-800: #354928;
+    --color-primary-900: #2d3d24;
+    --color-primary-950: #16200f;
 
-    --color-accent: var(--color-neutral-800);
-    --color-accent-content: var(--color-neutral-800);
+    --color-sand: #f9f1de; /* warm paper — light surfaces */
+    --color-gold: #c69858; /* highlights, accents on dark */
+    --color-clay: #715b4b; /* muted warm brown */
+    --color-terracotta: #d46f51; /* alerts, warm accent */
+    --color-fjord: #6c95c1; /* info, links */
+    --color-ash: #919fa1; /* muted grey */
+    --color-ink: #2d363b; /* dark surface / text */
+
+    --color-accent: var(--color-primary-600);
+    --color-accent-content: var(--color-primary-600);
     --color-accent-foreground: var(--color-white);
 }
 
 @layer theme {
     .dark {
-        --color-accent: var(--color-white);
-        --color-accent-content: var(--color-white);
-        --color-accent-foreground: var(--color-neutral-800);
+        /* Lift the green so it keeps contrast on the dark (ink) surface. */
+        --color-accent: var(--color-primary-400);
+        --color-accent-content: var(--color-primary-400);
+        --color-accent-foreground: var(--color-ink);
     }
 }
 
