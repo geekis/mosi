@@ -44,4 +44,12 @@ return [
         'tenant' => env('AZURE_TENANT_ID'),
     ],
 
+    // NVS staff API — the sole source of accounts (see .ai/rules/staff-api.md).
+    // Set STAFF_API_URL and STAFF_API_TOKEN in .env / Forge.
+    'staff_api' => [
+        'url' => env('STAFF_API_URL'),
+        'token' => env('STAFF_API_TOKEN'),
+        'fetch_size' => (int) env('STAFF_API_FETCH_SIZE', 500),
+    ],
+
 ];

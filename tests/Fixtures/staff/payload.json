@@ -1,0 +1,142 @@
+{
+    "totalRows": 4,
+    "rows": [
+        {
+            "personId": 100001,
+            "nationalIdentifier": "0101907789",
+            "employeeName": "Jóhanna Malen Skúladóttir",
+            "email": "johanna.skuladottir@nattura.is",
+            "gsm_phone": 6612345,
+            "employeeNumber": 4521,
+            "nationality": "IS",
+            "sex": "F",
+            "personType": "Starfsmaður",
+            "assignments": [
+                {
+                    "assignmentNumber": 172239,
+                    "primaryFlag": "Y",
+                    "jobName": "Landvörður",
+                    "jobId": 860,
+                    "organizationId": 39164,
+                    "organizationName": "NVS Norðurland",
+                    "parentOrganizationId": 39162,
+                    "assignmentStatus": "Virkt starf",
+                    "assignmentStartDate": "2021-05-01",
+                    "assignmentEndDate": "4712-12-31",
+                    "assignmentPercent": 100,
+                    "managerFlag": "N",
+                    "supervisorPersonId": 100002,
+                    "locationName": "Akureyri",
+                    "locationAddress": "Hafnarstræti 97, 600 Akureyri"
+                },
+                {
+                    "assignmentNumber": "172239-2",
+                    "primaryFlag": "N",
+                    "jobName": "Verkefnastjóri",
+                    "jobId": 512,
+                    "organizationId": 39171,
+                    "organizationName": "Skrifstofa forstjóra",
+                    "parentOrganizationId": 39162,
+                    "assignmentStatus": "Virkt starf",
+                    "assignmentStartDate": "2023-01-01",
+                    "assignmentEndDate": "4712-12-31",
+                    "assignmentPercent": 20,
+                    "managerFlag": "N",
+                    "supervisorPersonId": 100002,
+                    "locationName": "Reykjavík",
+                    "locationAddress": "Suðurlandsbraut 24, 108 Reykjavík"
+                }
+            ]
+        },
+        {
+            "personId": 100002,
+            "nationalIdentifier": "1202755559",
+            "employeeName": "Sigríður Björnsdóttir",
+            "email": "sigridur.bjornsdottir@nattura.is",
+            "gsm_phone": 6987654,
+            "employeeNumber": 3980,
+            "nationality": "IS",
+            "sex": "F",
+            "personType": "Starfsmaður",
+            "assignments": [
+                {
+                    "assignmentNumber": 168220,
+                    "primaryFlag": "Y",
+                    "jobName": "Sviðsstjóri",
+                    "jobId": 200,
+                    "organizationId": 39164,
+                    "organizationName": "NVS Norðurland",
+                    "parentOrganizationId": 39162,
+                    "assignmentStatus": "Virkt starf",
+                    "assignmentStartDate": "2018-09-01",
+                    "assignmentEndDate": "4712-12-31",
+                    "assignmentPercent": 100,
+                    "managerFlag": "Y",
+                    "supervisorPersonId": null,
+                    "locationName": "Akureyri",
+                    "locationAddress": "Hafnarstræti 97, 600 Akureyri"
+                }
+            ]
+        },
+        {
+            "personId": 100003,
+            "nationalIdentifier": "2508912229",
+            "employeeName": "Aron Þórsson",
+            "email": "aron.thorsson91@gmail.com",
+            "gsm_phone": 7734512,
+            "employeeNumber": "164653",
+            "nationality": "IS",
+            "sex": "M",
+            "personType": "Starfsmaður",
+            "assignments": [
+                {
+                    "assignmentNumber": "164653-2",
+                    "primaryFlag": "Y",
+                    "jobName": "Landvörður",
+                    "jobId": 860,
+                    "organizationId": 39166,
+                    "organizationName": "NVS Austurland",
+                    "parentOrganizationId": 39162,
+                    "assignmentStatus": "Virkt starf",
+                    "assignmentStartDate": "2024-05-15",
+                    "assignmentEndDate": "2024-09-30",
+                    "assignmentPercent": 100,
+                    "managerFlag": "N",
+                    "supervisorPersonId": 100002,
+                    "locationName": "Egilsstaðir",
+                    "locationAddress": "Tjarnarbraut 39, 700 Egilsstaðir"
+                }
+            ]
+        },
+        {
+            "personId": 100004,
+            "nationalIdentifier": "3006883339",
+            "employeeName": "Erla Gunnarsdóttir",
+            "email": "erla.gunnarsdottir@nattura.is",
+            "gsm_phone": 8552210,
+            "employeeNumber": 4102,
+            "nationality": "DK",
+            "sex": "F",
+            "personType": "Starfsmaður",
+            "assignments": [
+                {
+                    "assignmentNumber": 170001,
+                    "primaryFlag": "Y",
+                    "jobName": "Sérfræðingur",
+                    "jobId": 340,
+                    "organizationId": 39171,
+                    "organizationName": "Skrifstofa forstjóra",
+                    "parentOrganizationId": 39162,
+                    "assignmentStatus": "Virkt starf",
+                    "assignmentStartDate": "2022-02-01",
+                    "assignmentEndDate": "4712-12-31",
+                    "assignmentPercent": 80,
+                    "managerFlag": "N",
+                    "supervisorPersonId": 100002,
+                    "locationName": "Reykjavík",
+                    "locationAddress": "Suðurlandsbraut 24, 108 Reykjavík"
+                }
+            ]
+        }
+    ]
+}
