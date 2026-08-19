@@ -22,7 +22,10 @@ jobs:
       - name: Setup PHP
         uses: shivammathur/setup-php@f3e473d116dcccaddc5834248c87452386958240 # v2
         with:
-          php-version: '8.3'
+          php-version: '8.4'
+          # pcntl and posix are Horizon's; they ship with Linux PHP so no ignore flags
+          # are needed here (unlike local Windows installs).
+          extensions: mbstring, pdo_sqlite, sqlite3, bcmath, intl, gd, zip, redis, pcntl, posix
           tools: composer:v2
           coverage: none
 
@@ -31,8 +34,31 @@ jobs:
         with:
           node-version: '22'
 
-      - name: Setup Application
-        run: composer setup
+      # Flux Pro is a private Composer package; composer install 401s without credentials.
+      # Add FLUX_USERNAME and FLUX_LICENSE_KEY as repository secrets (Settings → Secrets).
+      - name: Authenticate Flux Pro
+        run: composer config http-basic.composer.fluxui.dev "${{ secrets.FLUX_USERNAME }}" "${{ secrets.FLUX_LICENSE_KEY }}"
 
-      - name: Run CI Checks
-        run: composer ci:check
+      - name: Install PHP dependencies
+        run: composer install --no-interaction --prefer-dist --no-progress
+
+      - name: Prepare application
+        run: |
+          cp .env.example .env
+          php artisan key:generate
+
+      - name: Install and build front-end
+        run: |
+          npm ci
+          npm run build
+
+      - name: Lint (Pint)
+        run: vendor/bin/pint --test
+
+      - name: Static analysis (Larastan)
+        run: vendor/bin/phpstan analyse --no-progress
+
+      # Tests run against the in-memory sqlite connection configured in phpunit.xml, so
+      # no MySQL/Redis services are required. Browser tests are opt-in and excluded.
+      - name: Tests (Pest)
+        run: php artisan test

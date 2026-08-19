@@ -18,6 +18,12 @@ pest()->extend(TestCase::class)
     ->use(RefreshDatabase::class)
     ->in('Feature');
 
+// Browser tests drive a real Chromium via Playwright and are opt-in: they are not in
+// the default phpunit test suites, so `php artisan test` skips them. Run explicitly
+// with `php artisan test tests/Browser`.
+pest()->extend(TestCase::class)
+    ->in('Browser');
+
 /*
 |--------------------------------------------------------------------------
 | Expectations
