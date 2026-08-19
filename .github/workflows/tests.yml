@@ -22,7 +22,7 @@ jobs:
       - name: Setup PHP
         uses: shivammathur/setup-php@f3e473d116dcccaddc5834248c87452386958240 # v2
         with:
-          php-version: '8.4'
+          php-version: '8.5'
           # pcntl and posix are Horizon's; they ship with Linux PHP so no ignore flags
           # are needed here (unlike local Windows installs).
           extensions: mbstring, pdo_sqlite, sqlite3, bcmath, intl, gd, zip, redis, pcntl, posix

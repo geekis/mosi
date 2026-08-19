@@ -9,7 +9,7 @@
     ],
     "license": "MIT",
     "require": {
-        "php": "^8.3",
+        "php": "^8.5",
         "filament/filament": "^5.7",
         "intervention/image": "^4.2",
         "laravel/chisel": "^0.1.0",
@@ -129,8 +129,9 @@
         "preferred-install": "dist",
         "sort-packages": true,
         "platform": {
-            "ext-pcntl": "8.4",
-            "ext-posix": "8.4"
+            "php": "8.5.9",
+            "ext-pcntl": "8.5",
+            "ext-posix": "8.5"
         },
         "allow-plugins": {
             "pestphp/pest-plugin": true,
