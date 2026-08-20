@@ -146,5 +146,11 @@
     "Category": "Flokkur",
     "File": "Skrá",
     "Uncategorised": "Óflokkað",
-    "No documents yet.": "Engin skjöl ennþá."
+    "No documents yet.": "Engin skjöl ennþá.",
+
+    "Published": "Birt",
+    "Body": "Meginmál",
+    "Run staff sync now": "Keyra starfsmannasamstillingu núna",
+    "Staff sync started.": "Starfsmannasamstilling hafin.",
+    "No sync runs recorded yet.": "Engar samstillingar skráðar ennþá."
 }

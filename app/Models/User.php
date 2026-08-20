@@ -7,6 +7,10 @@ use App\Enums\AssignmentStatus;
 use App\Enums\AuthMethod;
 use App\Enums\PersonType;
 use Database\Factories\UserFactory;
+use Filament\Models\Contracts\FilamentUser;
+use Filament\Models\Contracts\HasAvatar;
+use Filament\Models\Contracts\HasName;
+use Filament\Panel;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Builder;
@@ -74,7 +78,7 @@ use Spatie\Permission\Traits\HasRoles;
     'auth_method', 'locale', 'bio', 'notification_preferences', 'is_active', 'password_changed_at', 'password',
 ])]
 #[Hidden(['kennitala', 'kennitala_hash', 'password', 'two_factor_secret', 'two_factor_recovery_codes', 'remember_token'])]
-class User extends Authenticatable implements HasMedia, PasskeyUser
+class User extends Authenticatable implements FilamentUser, HasAvatar, HasMedia, HasName, PasskeyUser
 {
     /** @use HasFactory<UserFactory> */
     use HasFactory, HasRoles, InteractsWithMedia, Notifiable, PasskeyAuthenticatable, TwoFactorAuthenticatable;
@@ -105,6 +109,25 @@ class User extends Authenticatable implements HasMedia, PasskeyUser
     public function wantsNotification(string $key): bool
     {
         return ($this->notification_preferences[$key] ?? true) !== false;
+    }
+
+    /**
+     * Who reaches the Filament admin panel. employee never; group-owner's scoped access
+     * is handled per-resource by policies (.ai/rules/admin.md).
+     */
+    public function canAccessPanel(Panel $panel): bool
+    {
+        return $this->hasAnyRoleName('super-admin', 'comms', 'group-owner');
+    }
+
+    public function getFilamentName(): string
+    {
+        return $this->display_name;
+    }
+
+    public function getFilamentAvatarUrl(): ?string
+    {
+        return $this->avatarUrl();
     }
 
     /**

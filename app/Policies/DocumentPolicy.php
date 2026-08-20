@@ -13,6 +13,11 @@ use App\Models\User;
  */
 class DocumentPolicy
 {
+    public function viewAny(User $user): bool
+    {
+        return $this->manage($user);
+    }
+
     public function view(User $user, Document $document): bool
     {
         return $document->is_published || $this->manage($user);
