@@ -128,7 +128,7 @@ new #[Title('Mosi')] class extends Component {
     </div>
 
     {{-- Right rail: widgets arrive with later phases (directory, events). Placeholders for now. --}}
-    <aside class="hidden w-80 shrink-0 space-y-4 xl:block">
+    <aside class="hidden w-80 shrink-0 space-y-4 lg:block">
         <x-rail.placeholder :heading="__('Birthdays today')" icon="cake" />
         <x-rail.placeholder :heading="__('Upcoming events')" icon="calendar" />
         <x-rail.placeholder :heading="__('New colleagues')" icon="user-plus" />
