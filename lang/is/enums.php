@@ -27,4 +27,22 @@ return [
         'Virkt starf' => 'Virkt starf',
     ],
 
+    'group_type' => [
+        'department' => 'Deild',
+        'interest' => 'Áhugahópur',
+        'project' => 'Verkefni',
+    ],
+
+    'group_visibility' => [
+        'open' => 'Opinn',
+        'closed' => 'Lokaður',
+        'secret' => 'Leynilegur',
+    ],
+
+    'group_role' => [
+        'owner' => 'Eigandi',
+        'moderator' => 'Umsjónarmaður',
+        'member' => 'Meðlimur',
+    ],
+
 ];

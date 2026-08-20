@@ -29,4 +29,22 @@ return [
         'Virkt starf' => 'Active assignment',
     ],
 
+    'group_type' => [
+        'department' => 'Department',
+        'interest' => 'Interest',
+        'project' => 'Project',
+    ],
+
+    'group_visibility' => [
+        'open' => 'Open',
+        'closed' => 'Closed',
+        'secret' => 'Secret',
+    ],
+
+    'group_role' => [
+        'owner' => 'Owner',
+        'moderator' => 'Moderator',
+        'member' => 'Member',
+    ],
+
 ];

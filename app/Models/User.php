@@ -167,6 +167,15 @@ class User extends Authenticatable implements PasskeyUser
         $query->where('is_active', true);
     }
 
+    /**
+     * Whether the user has any of the given app-wide roles, checked via a query so the
+     * strict lazy-loading guard is not tripped when `roles` is not eager-loaded.
+     */
+    public function hasAnyRoleName(string ...$roles): bool
+    {
+        return $this->roles()->whereIn('name', $roles)->exists();
+    }
+
     public static function findByKennitala(string $kennitala): ?self
     {
         return static::query()
