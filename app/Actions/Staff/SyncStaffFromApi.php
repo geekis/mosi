@@ -34,6 +34,10 @@ final class SyncStaffFromApi
     /** A payload more than this fraction below the last successful run aborts the sync. */
     private const float CIRCUIT_BREAKER_THRESHOLD = 0.15;
 
+    public function __construct(
+        private readonly EnrolIntoGroups $enrolIntoGroups,
+    ) {}
+
     public function __invoke(): StaffSyncRun
     {
         $run = StaffSyncRun::create([
@@ -61,6 +65,7 @@ final class SyncStaffFromApi
 
             $deactivated = $this->deactivateAbsent($seenExternalIds);
             $this->resolveSupervisors($processed);
+            $this->enrolIntoGroups($processed);
 
             $run->update([
                 'status' => StaffSyncRun::STATUS_SUCCESS,
@@ -298,6 +303,19 @@ final class SyncStaffFromApi
                 $user->supervisor_id = $supervisorId;
                 $user->save();
             }
+        }
+    }
+
+    /**
+     * Auto-enrol every synced (active) member into their department and org-wide groups.
+     * Deactivated staff are absent from $processed and keep the memberships they have.
+     *
+     * @param  array<string, User>  $processed
+     */
+    private function enrolIntoGroups(array $processed): void
+    {
+        foreach ($processed as $user) {
+            ($this->enrolIntoGroups)($user);
         }
     }
 
