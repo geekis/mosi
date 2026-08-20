@@ -99,6 +99,15 @@ return [
             'expire' => 60,
             'throttle' => 60,
         ],
+
+        // Staff invitations reuse the password-broker machinery (single-use, expiring
+        // tokens) but with a long window, since invitations sit in an inbox for days.
+        'invitations' => [
+            'provider' => 'users',
+            'table' => 'invitation_tokens',
+            'expire' => 20160, // 14 days
+            'throttle' => 0,
+        ],
     ],
 
     /*

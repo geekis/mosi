@@ -10,4 +10,13 @@ return [
         'action' => 'Athugaðu vefþjónustu starfsmanna áður en næsta keyrsla fer af stað.',
     ],
 
+    'invitation' => [
+        'subject' => 'Velkomin í Mosa',
+        'greeting' => 'Hæ :name,',
+        'greeting_generic' => 'Hæ,',
+        'intro' => 'Þér hefur verið boðið í Mosa, innri vef starfsfólks NVS. Stilltu lykilorðið þitt til að byrja.',
+        'action' => 'Stilla lykilorð',
+        'expiry' => 'Þessi hlekkur rennur út eftir :days daga. Ef það gerist skaltu biðja kerfisstjóra um nýjan.',
+    ],
+
 ];
