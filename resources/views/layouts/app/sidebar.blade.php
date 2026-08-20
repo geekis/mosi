@@ -30,6 +30,12 @@
                 <flux:sidebar.item icon="chat-bubble-left-right" :href="route('chat')" :current="request()->routeIs('chat')" wire:navigate>
                     {{ __('Chat') }}
                 </flux:sidebar.item>
+                <flux:sidebar.item icon="newspaper" :href="route('news')" :current="request()->routeIs('news')" wire:navigate>
+                    {{ __('News') }}
+                </flux:sidebar.item>
+                <flux:sidebar.item icon="document-text" :href="route('documents')" :current="request()->routeIs('documents')" wire:navigate>
+                    {{ __('Documents') }}
+                </flux:sidebar.item>
                 {{-- The Groups section arrives with a later phase. --}}
             </flux:sidebar.nav>
 

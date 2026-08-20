@@ -135,5 +135,16 @@
     "Search Mosi…": "Leita í Mosa…",
     "Search people, groups, posts and events.": "Leitaðu að fólki, hópum, færslum og viðburðum.",
     "Nothing found for “:term”.": "Ekkert fannst fyrir „:term“.",
-    "People": "Fólk"
+    "People": "Fólk",
+
+    "News": "Fréttir",
+    "No news yet.": "Engar fréttir ennþá.",
+    "Documents": "Skjöl",
+    "Upload": "Hlaða upp",
+    "Upload a document": "Hlaða upp skjali",
+    "Document uploaded.": "Skjal hlaðið upp.",
+    "Category": "Flokkur",
+    "File": "Skrá",
+    "Uncategorised": "Óflokkað",
+    "No documents yet.": "Engin skjöl ennþá."
 }
