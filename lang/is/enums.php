@@ -45,4 +45,13 @@ return [
         'member' => 'Meðlimur',
     ],
 
+    'reaction' => [
+        'like' => 'Líka við',
+        'love' => 'Elska',
+        'celebrate' => 'Fagna',
+        'insightful' => 'Innsæi',
+        'funny' => 'Fyndið',
+        'support' => 'Stuðningur',
+    ],
+
 ];

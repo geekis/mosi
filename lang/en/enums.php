@@ -47,4 +47,13 @@ return [
         'member' => 'Member',
     ],
 
+    'reaction' => [
+        'like' => 'Like',
+        'love' => 'Love',
+        'celebrate' => 'Celebrate',
+        'insightful' => 'Insightful',
+        'funny' => 'Funny',
+        'support' => 'Support',
+    ],
+
 ];
