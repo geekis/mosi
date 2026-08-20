@@ -161,7 +161,7 @@ return [
     */
 
     'features' => [
-        Features::registration(),
+        // No self-registration — accounts come only from the staff sync (.ai/rules/auth.md).
         Features::resetPasswords(),
         Features::emailVerification(),
         Features::twoFactorAuthentication([

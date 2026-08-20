@@ -13,6 +13,19 @@ login method creates a user. There is no registration route.
 - Roughly 25% of staff (seasonal rangers) have personal email addresses and no
   Microsoft account. They are not an edge case — design for them first.
 
+## Interim: Entra deferred (Aug 2026)
+
+Tenant access for Entra SSO is not yet available, so 1C is on hold. Confirmed decisions:
+
+- **Every user logs in with an email** (any domain — `@nattura.is`, gmail, …). There is
+  no no-email onboarding path; a synced record without an email is a data-quality
+  exception to flag, not a supported login state.
+- **Until 1C ships, everyone authenticates with email + password**, including
+  `@nattura.is` users, who are invited to set a password like anyone else. The
+  identifier-first login therefore always reveals the password field (there is no
+  Microsoft redirect yet). When Entra lands, `@nattura.is` users migrate to `entra`
+  (or `both`) and the redirect branch is switched on.
+
 ## Identifier-first login
 
 One email field on the login page. On submit, look up the user, then either redirect

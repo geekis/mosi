@@ -1,19 +1,18 @@
 <?php
 
-use App\Concerns\ProfileValidationRules;
+use App\Models\User;
 /* @chisel-email-verification */
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 /* @end-chisel-email-verification */
 use Flux\Flux;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Session;
+use Illuminate\Validation\Rule;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Title;
 use Livewire\Component;
 
 new #[Title('Profile settings')] class extends Component {
-    use ProfileValidationRules;
-
     public string $display_name = '';
     public string $email = '';
 
@@ -35,7 +34,7 @@ new #[Title('Profile settings')] class extends Component {
 
         $validated = $this->validate([
             'display_name' => ['required', 'string', 'max:255'],
-            'email' => $this->emailRules($user->id),
+            'email' => ['required', 'string', 'email', 'max:255', Rule::unique(User::class)->ignore($user->id)],
         ]);
 
         $user->fill($validated);
