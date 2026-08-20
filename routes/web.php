@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Auth\InvitationController;
+use App\Http\Controllers\DataExportController;
 use App\Http\Controllers\DocumentDownloadController;
 use App\Http\Controllers\EventIcsController;
 use Illuminate\Support\Facades\Route;
@@ -41,6 +42,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::livewire('documents', 'pages::documents')->name('documents');
     Route::get('documents/{document}/download', DocumentDownloadController::class)->name('documents.download');
     Route::livewire('p/{page:slug}', 'pages::page')->name('pages.show');
+
+    Route::get('me/export', DataExportController::class)->name('me.export');
 });
 
 require __DIR__.'/settings.php';

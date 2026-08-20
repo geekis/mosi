@@ -152,5 +152,9 @@
     "Body": "Meginmál",
     "Run staff sync now": "Keyra starfsmannasamstillingu núna",
     "Staff sync started.": "Starfsmannasamstilling hafin.",
-    "No sync runs recorded yet.": "Engar samstillingar skráðar ennþá."
+    "No sync runs recorded yet.": "Engar samstillingar skráðar ennþá.",
+
+    "Your data": "Gögnin þín",
+    "Download a copy of your personal data.": "Sæktu afrit af persónuupplýsingum þínum.",
+    "Download": "Sækja"
 }

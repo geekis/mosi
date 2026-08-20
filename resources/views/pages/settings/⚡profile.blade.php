@@ -187,6 +187,20 @@ new #[Title('Profile settings')] class extends Component {
             </div>
         </form>
 
+        <flux:separator variant="subtle" class="my-6" />
+
+        <div class="flex items-center justify-between">
+            <div>
+                <flux:heading size="sm">{{ __('Your data') }}</flux:heading>
+                <flux:text size="sm" class="text-zinc-500 dark:text-zinc-400">{{ __('Download a copy of your personal data.') }}</flux:text>
+            </div>
+            <flux:button size="sm" variant="ghost" icon="arrow-down-tray" href="{{ route('me.export') }}">
+                {{ __('Download') }}
+            </flux:button>
+        </div>
+
+        <flux:separator variant="subtle" class="my-6" />
+
         {{-- @chisel-email-verification --}}
         @if ($this->showDeleteUser)
         {{-- @end-chisel-email-verification --}}
