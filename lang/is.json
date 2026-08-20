@@ -120,5 +120,14 @@
     "Choose what you want to be notified about": "Veldu um hvað þú vilt fá tilkynningar",
     "When someone mentions me": "Þegar einhver nefnir mig",
     "When someone comments on my post": "Þegar einhver gerir athugasemd við færsluna mína",
-    "When someone follows me": "Þegar einhver fer að fylgja mér"
+    "When someone follows me": "Þegar einhver fer að fylgja mér",
+
+    "Chat": "Spjall",
+    "Message": "Senda skilaboð",
+    "No conversations yet.": "Engin samtöl ennþá.",
+    "Write a message…": "Skrifaðu skilaboð…",
+    "Send": "Senda",
+    "Select a conversation to start chatting.": "Veldu samtal til að byrja að spjalla.",
+    "Group chat": "Hópspjall",
+    "Conversation": "Samtal"
 }

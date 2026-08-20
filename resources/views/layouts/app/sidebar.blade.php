@@ -24,6 +24,9 @@
                 <flux:sidebar.item icon="calendar-days" :href="route('events')" :current="request()->routeIs('events', 'events.show')" wire:navigate>
                     {{ __('Events') }}
                 </flux:sidebar.item>
+                <flux:sidebar.item icon="chat-bubble-left-right" :href="route('chat')" :current="request()->routeIs('chat')" wire:navigate>
+                    {{ __('Chat') }}
+                </flux:sidebar.item>
                 {{-- The Groups section arrives with a later phase. --}}
             </flux:sidebar.nav>
 

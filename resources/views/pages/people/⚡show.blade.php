@@ -1,5 +1,6 @@
 <?php
 
+use App\Actions\Chat\StartDirectConversation;
 use App\Actions\Follows\FollowUser;
 use App\Actions\Follows\UnfollowUser;
 use App\Models\Post;
@@ -28,6 +29,17 @@ new #[Title('Mosi')] class extends Component {
     public function unfollow(UnfollowUser $unfollow): void
     {
         $unfollow(Auth::user(), $this->user);
+    }
+
+    public function message(StartDirectConversation $startDirectConversation): void
+    {
+        if (Auth::user()->is($this->user)) {
+            return;
+        }
+
+        $conversation = $startDirectConversation(Auth::user(), $this->user);
+
+        $this->redirect(route('chat', ['conversation' => $conversation->id]), navigate: true);
     }
 
     /**
@@ -73,6 +85,13 @@ new #[Title('Mosi')] class extends Component {
                         <flux:button :href="route('profile.edit')" size="sm" variant="ghost" icon="pencil-square" wire:navigate>
                             {{ __('Edit profile') }}
                         </flux:button>
+                    @else
+                        <flux:button size="sm" variant="ghost" icon="chat-bubble-left-right" wire:click="message">
+                            {{ __('Message') }}
+                        </flux:button>
+                    @endif
+                    @if ($isSelf)
+                        {{-- no follow button on your own profile --}}
                     @elseif ($isFollowing)
                         <flux:button size="sm" variant="ghost" icon="user-minus" wire:click="unfollow">
                             {{ __('Following') }}

@@ -32,6 +32,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('events/{event:slug}/ics', EventIcsController::class)->name('events.ics');
 
     Route::livewire('notifications', 'pages::notifications')->name('notifications');
+
+    Route::livewire('chat', 'pages::chat')->name('chat');
 });
 
 require __DIR__.'/settings.php';
