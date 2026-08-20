@@ -1,0 +1,47 @@
+{
+    "Log in": "Innskrá",
+    "Log in to your account": "Skráðu þig inn á aðganginn þinn",
+    "Enter your email and password below to log in": "Sláðu inn netfang og lykilorð til að skrá þig inn",
+    "Email address": "Netfang",
+    "Email": "Netfang",
+    "Password": "Lykilorð",
+    "Confirm password": "Staðfestu lykilorð",
+    "Forgot your password?": "Gleymdirðu lykilorðinu?",
+    "Forgot password": "Gleymt lykilorð",
+    "Remember me": "Muna eftir mér",
+    "Log out": "Útskrá",
+    "Log in to Mosi": "Skráðu þig inn í Mosa",
+
+    "Welcome to Mosi": "Velkomin í Mosa",
+    "Set your password": "Stilltu lykilorðið þitt",
+    "Set a password to activate your account": "Stilltu lykilorð til að virkja aðganginn þinn",
+    "Set password and sign in": "Stilla lykilorð og skrá inn",
+
+    "Reset password": "Endurstilla lykilorð",
+    "Please enter your new password below": "Sláðu inn nýtt lykilorð hér að neðan",
+    "Enter your email to receive a password reset link": "Sláðu inn netfangið þitt til að fá hlekk til að endurstilla lykilorð",
+    "Email password reset link": "Senda endurstillingarhlekk",
+    "Or, return to": "Eða snúðu aftur í",
+    "log in": "innskráningu",
+
+    "Two-factor authentication": "Tveggja þrepa auðkenning",
+    "Authentication code": "Auðkenniskóði",
+    "Enter the authentication code provided by your authenticator application.": "Sláðu inn auðkenniskóðann úr auðkenningarforritinu þínu.",
+    "Recovery code": "Endurheimtarkóði",
+    "Please confirm access to your account by entering one of your emergency recovery codes.": "Staðfestu aðgang að aðganginum þínum með því að slá inn einn af neyðarendurheimtarkóðunum þínum.",
+    "login using a recovery code": "skrá inn með endurheimtarkóða",
+    "login using an authentication code": "skrá inn með auðkenniskóða",
+    "or you can": "eða þú getur",
+
+    "Confirm": "Staðfesta",
+    "Confirm with passkey": "Staðfesta með aðgangslykli",
+    "Confirming...": "Staðfesti…",
+    "Continue": "Halda áfram",
+    "Or confirm with password": "Eða staðfesta með lykilorði",
+    "This is a secure area of the application. Please confirm your password before continuing.": "Þetta er öruggt svæði kerfisins. Staðfestu lykilorðið þitt áður en þú heldur áfram.",
+
+    "Email verification": "Staðfesting netfangs",
+    "Please verify your email address by clicking on the link we just emailed to you.": "Staðfestu netfangið þitt með því að smella á hlekkinn sem við sendum þér.",
+    "A new verification link has been sent to the email address you provided during registration.": "Nýr staðfestingarhlekkur hefur verið sendur á netfangið þitt.",
+    "Resend verification email": "Endursenda staðfestingarpóst"
+}
