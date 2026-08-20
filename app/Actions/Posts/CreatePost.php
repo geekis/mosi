@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Actions\Posts;
 
+use App\Actions\Mentions\NotifyMentions;
 use App\Models\Group;
 use App\Models\Post;
 use App\Models\User;
@@ -17,6 +18,10 @@ use Illuminate\Support\Carbon;
  */
 final class CreatePost
 {
+    public function __construct(
+        private readonly NotifyMentions $notifyMentions,
+    ) {}
+
     /**
      * @param  array{body: string, group_id?: int|null, is_official?: bool, published_at?: Carbon|string|null}  $data
      */
@@ -32,12 +37,16 @@ final class CreatePost
             }
         }
 
-        return Post::create([
+        $post = Post::create([
             'user_id' => $author->id,
             'group_id' => $groupId,
             'body' => $data['body'],
             'is_official' => ($data['is_official'] ?? false) && $author->hasAnyRoleName('comms', 'super-admin'),
             'published_at' => array_key_exists('published_at', $data) ? $data['published_at'] : now(),
         ]);
+
+        ($this->notifyMentions)($post, $author, $post->body);
+
+        return $post;
     }
 }
