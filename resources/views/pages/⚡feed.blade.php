@@ -44,27 +44,70 @@ new #[Title('Mosi')] class extends Component {
     }
 
     /**
-     * @return array{posts: \Illuminate\Contracts\Pagination\CursorPaginator}
+     * @return array{me: \App\Models\User, posts: \Illuminate\Contracts\Pagination\CursorPaginator, myGroups: \Illuminate\Support\Collection<int, \App\Models\Group>}
      */
     public function with(BuildFeed $buildFeed, BuildLatest $buildLatest): array
     {
         $user = Auth::user();
 
         return [
+            'me' => $user,
             'posts' => $this->tab === 'latest'
                 ? $buildLatest($user, 15)
                 : $buildFeed($user, 15),
+            'myGroups' => $user->groups()->orderBy('id')->get(),
         ];
     }
 }; ?>
 
-<div class="mx-auto flex w-full max-w-6xl gap-6">
+<div class="mx-auto flex w-full max-w-7xl gap-6">
+    {{-- Left rail: who you are, your groups, quick links. Appears at lg. --}}
+    <aside class="hidden w-72 shrink-0 space-y-4 lg:block">
+        <flux:card class="space-y-3">
+            <div class="flex items-center gap-3">
+                <flux:avatar :name="$me->display_name" :initials="$me->initials()" size="lg" />
+                <div class="min-w-0">
+                    <flux:heading class="truncate">{{ $me->display_name }}</flux:heading>
+                    @if ($me->job_title)
+                        <flux:text size="sm" class="truncate">{{ $me->job_title }}</flux:text>
+                    @endif
+                </div>
+            </div>
+            @if ($me->organization_name)
+                <flux:text size="sm" class="truncate text-zinc-500 dark:text-zinc-400">{{ $me->organization_name }}</flux:text>
+            @endif
+            <flux:button :href="route('profile.edit')" size="sm" variant="ghost" icon="user" class="w-full" wire:navigate>
+                {{ __('My profile') }}
+            </flux:button>
+        </flux:card>
+
+        <flux:card class="space-y-3">
+            <flux:heading size="sm">{{ __('My groups') }}</flux:heading>
+            @forelse ($myGroups as $group)
+                <div wire:key="rail-group-{{ $group->id }}" class="flex items-center gap-2 text-sm">
+                    <flux:icon icon="user-group" variant="mini" class="text-zinc-400" />
+                    <span class="truncate">{{ $group->name }}</span>
+                </div>
+            @empty
+                <flux:text size="sm" class="text-zinc-500 dark:text-zinc-400">
+                    {{ __('You are not in any groups yet.') }}
+                </flux:text>
+            @endforelse
+        </flux:card>
+
+        <flux:card>
+            <flux:heading size="sm" class="mb-2">{{ __('Quick links') }}</flux:heading>
+            <flux:navlist>
+                <flux:navlist.item icon="home" :href="route('dashboard')" wire:navigate>{{ __('Home') }}</flux:navlist.item>
+                <flux:navlist.item icon="cog-6-tooth" :href="route('profile.edit')" wire:navigate>{{ __('Settings') }}</flux:navlist.item>
+            </flux:navlist>
+        </flux:card>
+    </aside>
+
     {{-- Center column: composer, tabs and the feed --}}
     <div class="min-w-0 flex-1">
-    <flux:heading size="xl">{{ __('Feed') }}</flux:heading>
-
     {{-- Composer --}}
-    <flux:card class="mt-4">
+    <flux:card>
         <flux:editor wire:model="composer" :placeholder="__('Share something with your colleagues…')" />
 
         <div class="mt-3 flex justify-end">
@@ -128,7 +171,7 @@ new #[Title('Mosi')] class extends Component {
     </div>
 
     {{-- Right rail: widgets arrive with later phases (directory, events). Placeholders for now. --}}
-    <aside class="hidden w-80 shrink-0 space-y-4 lg:block">
+    <aside class="hidden w-80 shrink-0 space-y-4 xl:block">
         <x-rail.placeholder :heading="__('Birthdays today')" icon="cake" />
         <x-rail.placeholder :heading="__('Upcoming events')" icon="calendar" />
         <x-rail.placeholder :heading="__('New colleagues')" icon="user-plus" />

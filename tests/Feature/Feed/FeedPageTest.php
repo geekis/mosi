@@ -56,6 +56,26 @@ test('publishing is a no-op for empty content', function () {
     expect(Post::query()->where('user_id', $user->id)->count())->toBe(0);
 });
 
+test('the left rail shows the user profile and their groups', function () {
+    $user = User::factory()->create(['job_title' => 'Landvörður']);
+    $group = Group::factory()->create(['name' => ['en' => 'Trail Crew', 'is' => 'Stígahópur']]);
+    $group->members()->attach($user->id, ['role' => GroupRole::Member->value]);
+
+    Livewire::actingAs($user)
+        ->test('pages::feed')
+        ->assertSee($user->job_title)
+        ->assertSee($group->name);
+});
+
+test('the left rail shows a stranger who is not in the user’s groups is not listed', function () {
+    $user = User::factory()->create();
+    $group = Group::factory()->create(['name' => ['en' => 'Secret Society', 'is' => 'Leynifélag']]);
+    // user is NOT a member
+    Livewire::actingAs($user)
+        ->test('pages::feed')
+        ->assertDontSee($group->name);
+});
+
 test('switching to the latest tab surfaces a stranger’s public post', function () {
     $user = User::factory()->create();
     $stranger = User::factory()->create(['display_name' => 'Fjalar Þjóðólfsson']);

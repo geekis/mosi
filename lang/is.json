@@ -43,5 +43,27 @@
     "Email verification": "Staðfesting netfangs",
     "Please verify your email address by clicking on the link we just emailed to you.": "Staðfestu netfangið þitt með því að smella á hlekkinn sem við sendum þér.",
     "A new verification link has been sent to the email address you provided during registration.": "Nýr staðfestingarhlekkur hefur verið sendur á netfangið þitt.",
-    "Resend verification email": "Endursenda staðfestingarpóst"
+    "Resend verification email": "Endursenda staðfestingarpóst",
+
+    "Home": "Heim",
+    "Search…": "Leita…",
+    "Settings": "Stillingar",
+    "Notifications": "Tilkynningar",
+    "Account menu": "Aðgangsvalmynd",
+    "My profile": "Prófíllinn minn",
+    "My groups": "Hóparnir mínir",
+    "You are not in any groups yet.": "Þú ert ekki í neinum hópum enn.",
+    "Quick links": "Flýtileiðir",
+
+    "For you": "Fyrir þig",
+    "Latest": "Nýjast",
+    "Post": "Birta",
+    "Official": "Opinbert",
+    "Share something with your colleagues…": "Deildu einhverju með samstarfsfólki þínu…",
+    "Your post is published.": "Færslan þín hefur verið birt.",
+    "Your feed is quiet. Join a group or follow colleagues to see their posts here.": "Streymið þitt er rólegt. Skráðu þig í hóp eða fylgstu með samstarfsfólki til að sjá færslur hér.",
+
+    "Birthdays today": "Afmæli í dag",
+    "Upcoming events": "Viðburðir framundan",
+    "New colleagues": "Nýir samstarfsmenn"
 }

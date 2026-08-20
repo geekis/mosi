@@ -4,78 +4,65 @@
         @include('partials.head')
     </head>
     <body class="min-h-screen bg-white dark:bg-zinc-800">
-        <flux:sidebar sticky collapsible="mobile" class="border-e border-zinc-200 bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900">
+        {{-- Left nav: brand, search, primary nav, and a secondary nav pinned to the bottom. --}}
+        <flux:sidebar sticky collapsible class="border-e border-zinc-200 bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900">
             <flux:sidebar.header>
                 <x-app-logo :sidebar="true" href="{{ route('dashboard') }}" wire:navigate />
-                <flux:sidebar.collapse class="lg:hidden" />
+                <flux:sidebar.collapse class="in-data-flux-sidebar-on-desktop:not-in-data-flux-sidebar-collapsed-desktop:-mr-2" />
             </flux:sidebar.header>
 
-            {{-- Profile card: current user's name and role. Attributes are columns already loaded on the authenticated user, so this adds no query. --}}
-            <a href="{{ route('profile.edit') }}" wire:navigate class="mb-2 flex items-center gap-3 rounded-lg px-2 py-2 hover:bg-zinc-100 dark:hover:bg-zinc-800">
-                <flux:avatar :name="auth()->user()->display_name" :initials="auth()->user()->initials()" size="sm" />
-                <div class="min-w-0">
-                    <flux:heading size="sm" class="truncate">{{ auth()->user()->display_name }}</flux:heading>
-                    @if (auth()->user()->job_title)
-                        <flux:text size="xs" class="truncate">{{ auth()->user()->job_title }}</flux:text>
-                    @endif
-                </div>
-            </a>
+            {{-- Global search lands in phase 10; the control is part of the shell chrome now. --}}
+            <flux:sidebar.search :placeholder="__('Search…')" />
 
             <flux:sidebar.nav>
-                <flux:sidebar.group :heading="__('Platform')" class="grid">
-                    <flux:sidebar.item icon="home" :href="route('dashboard')" :current="request()->routeIs('dashboard')" wire:navigate>
-                        {{ __('Dashboard') }}
-                    </flux:sidebar.item>
-                </flux:sidebar.group>
+                <flux:sidebar.item icon="home" :href="route('dashboard')" :current="request()->routeIs('dashboard')" wire:navigate>
+                    {{ __('Home') }}
+                </flux:sidebar.item>
+                {{-- Groups, Directory and Events sections arrive with later phases. --}}
             </flux:sidebar.nav>
 
-            <flux:spacer />
+            <flux:sidebar.spacer />
 
             <flux:sidebar.nav>
                 <flux:sidebar.item icon="cog-6-tooth" :href="route('profile.edit')" :current="request()->routeIs('profile.edit', 'appearance.edit', 'security.edit')" wire:navigate>
                     {{ __('Settings') }}
                 </flux:sidebar.item>
             </flux:sidebar.nav>
-
-            <x-desktop-user-menu class="hidden lg:block" :name="auth()->user()->display_name" />
         </flux:sidebar>
 
-        <!-- Mobile User Menu -->
-        <flux:header class="lg:hidden">
-            <flux:sidebar.toggle class="lg:hidden" icon="bars-2" inset="left" />
+        {{-- Top nav: mobile sidebar toggle, breadcrumb, then account actions on the right. --}}
+        <flux:header container class="border-b border-zinc-200 bg-white lg:bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900">
+            <flux:sidebar.toggle class="me-4 lg:hidden" icon="bars-2" inset="left" />
+
+            <flux:breadcrumbs class="max-sm:hidden">
+                <flux:breadcrumbs.item :href="route('dashboard')" icon="home">{{ __('Home') }}</flux:breadcrumbs.item>
+            </flux:breadcrumbs>
 
             <flux:spacer />
 
-            <flux:dropdown position="top" align="end">
-                <flux:profile
-                    :initials="auth()->user()->initials()"
-                    icon-trailing="chevron-down"
-                />
+            <div class="me-4 flex items-center gap-1">
+                <flux:button :href="route('profile.edit')" icon="cog-6-tooth" variant="ghost" size="sm" aria-label="{{ __('Settings') }}" wire:navigate />
+                {{-- Notifications bell is wired in phase 8. --}}
+                <flux:button icon="bell" variant="ghost" size="sm" aria-label="{{ __('Notifications') }}" />
+            </div>
+
+            <flux:dropdown align="end">
+                <flux:profile :initials="auth()->user()->initials()" :aria-label="__('Account menu')" icon-trailing="chevron-down" />
 
                 <flux:menu>
-                    <flux:menu.radio.group>
-                        <div class="p-0 text-sm font-normal">
-                            <div class="flex items-center gap-2 px-1 py-1.5 text-start text-sm">
-                                <flux:avatar
-                                    :name="auth()->user()->display_name"
-                                    :initials="auth()->user()->initials()"
-                                />
-
-                                <div class="grid flex-1 text-start text-sm leading-tight">
-                                    <flux:heading class="truncate">{{ auth()->user()->display_name }}</flux:heading>
-                                    <flux:text class="truncate">{{ auth()->user()->email }}</flux:text>
-                                </div>
-                            </div>
+                    <div class="flex items-center gap-2 px-1 py-1.5 text-start text-sm">
+                        <flux:avatar :name="auth()->user()->display_name" :initials="auth()->user()->initials()" />
+                        <div class="grid flex-1 text-start text-sm leading-tight">
+                            <flux:heading class="truncate">{{ auth()->user()->display_name }}</flux:heading>
+                            <flux:text class="truncate">{{ auth()->user()->email }}</flux:text>
                         </div>
-                    </flux:menu.radio.group>
+                    </div>
 
                     <flux:menu.separator />
 
-                    <flux:menu.radio.group>
-                        <flux:menu.item :href="route('profile.edit')" icon="cog" wire:navigate>
-                            {{ __('Settings') }}
-                        </flux:menu.item>
-                    </flux:menu.radio.group>
+                    <flux:menu.item :href="route('profile.edit')" icon="cog" wire:navigate>
+                        {{ __('Settings') }}
+                    </flux:menu.item>
 
                     <flux:menu.separator />
 
