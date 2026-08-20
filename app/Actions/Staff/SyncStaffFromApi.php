@@ -22,10 +22,12 @@ use Throwable;
  * matched by external_id first, then kennitala, so their existing record — and its
  * posts, comments and memberships — is reactivated rather than duplicated.
  *
- * NOTE: the payload shape (a person record with a nested `assignments` array, paginated
- * as `{ totalRows, rows }`) is assumed from the field mapping and isolated in
- * fetchAll()/normalise(). Verify it against the live API and adjust those two methods
- * only — the rest of the sync is shape-agnostic.
+ * SOURCE: Oracle APEX ORDS endpoint (/ords/oebs/…) behind HTTP basic auth, paginated by
+ * row_offset/fetch_size. The transport (basic auth, both the ORDS `items`/`hasMore` and a
+ * `rows`/`totalRows` envelope) is handled in fetchAll(). The per-record shape — a person
+ * with a nested `assignments` array — is still ASSUMED from the field mapping and lives in
+ * normalise(). Verify it against a real response and adjust only normalise() if the ORDS
+ * handler returns flat assignment rows or different field casing; the rest is shape-agnostic.
  */
 final class SyncStaffFromApi
 {
@@ -82,32 +84,86 @@ final class SyncStaffFromApi
     }
 
     /**
+     * Fetch every page from the Oracle ORDS endpoint. Paginates by row_offset until the
+     * envelope's `hasMore` is false (or, if absent, until a short page is returned).
+     * Handles both the ORDS `items` envelope and a `rows`/`totalRows` one.
+     *
      * @return array{0: array<int, array<string, mixed>>, 1: int}
      */
     private function fetchAll(): array
     {
-        $url = (string) config('services.staff_api.url');
-        $token = config('services.staff_api.token');
-        $fetchSize = (int) config('services.staff_api.fetch_size', 500);
+        /** @var array<string, mixed> $config */
+        $config = config('services.staff_api');
+        [$baseUrl, $query] = $this->parseUrl((string) ($config['url'] ?? ''));
+
+        $fetchSize = (int) ($query['fetch_size'] ?? $config['fetch_size'] ?? 1000);
+        unset($query['row_offset'], $query['fetch_size']);
 
         $rows = [];
-        $totalRows = 0;
+        $total = null;
         $offset = 0;
 
         do {
-            $body = Http::withToken($token)
-                ->acceptJson()
-                ->get($url, ['rowOffset' => $offset, 'fetchSize' => $fetchSize])
+            $request = Http::acceptJson();
+
+            if (filled($config['username'] ?? null)) {
+                $request = $request->withBasicAuth((string) $config['username'], (string) ($config['password'] ?? ''));
+            }
+
+            $response = $request
+                ->get($baseUrl, array_merge($query, ['row_offset' => $offset, 'fetch_size' => $fetchSize]))
                 ->throw()
                 ->json();
 
-            $page = $body['rows'] ?? [];
-            $totalRows = (int) ($body['totalRows'] ?? count($page));
+            $body = is_array($response) ? $response : [];
+            $page = $this->extractRows($body);
             $rows = array_merge($rows, $page);
-            $offset += $fetchSize;
-        } while (count($page) === $fetchSize && count($rows) < $totalRows);
 
-        return [$rows, $totalRows];
+            if (isset($body['totalRows'])) {
+                $total = (int) $body['totalRows'];
+            }
+
+            $hasMore = array_key_exists('hasMore', $body)
+                ? (bool) $body['hasMore']
+                : count($page) === $fetchSize;
+
+            $offset += $fetchSize;
+        } while ($hasMore && $page !== []);
+
+        return [$rows, $total ?? count($rows)];
+    }
+
+    /**
+     * @param  array<string, mixed>  $body
+     * @return array<int, array<string, mixed>>
+     */
+    private function extractRows(array $body): array
+    {
+        $rows = $body['items'] ?? $body['rows'] ?? [];
+
+        return is_array($rows)
+            ? array_values(array_filter($rows, is_array(...)))
+            : [];
+    }
+
+    /**
+     * Split a configured URL into its base and query params, so pagination params can
+     * be overridden per page without duplicating any already present in the URL.
+     *
+     * @return array{0: string, 1: array<array-key, mixed>}
+     */
+    private function parseUrl(string $url): array
+    {
+        $parts = parse_url($url);
+
+        $base = ($parts['scheme'] ?? 'https').'://'.($parts['host'] ?? '')
+            .(isset($parts['port']) ? ':'.$parts['port'] : '')
+            .($parts['path'] ?? '');
+
+        $query = [];
+        parse_str($parts['query'] ?? '', $query);
+
+        return [$base, $query];
     }
 
     private function lastSuccessfulTotal(): ?int

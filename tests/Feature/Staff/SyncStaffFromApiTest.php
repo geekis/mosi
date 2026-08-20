@@ -26,8 +26,9 @@ function staffPayload(): array
 function fakeStaffApi(array $rows, ?int $totalRows = null): void
 {
     config([
-        'services.staff_api.url' => 'https://staff.test/api/employees',
-        'services.staff_api.token' => 'test-token',
+        'services.staff_api.url' => 'https://staff.test/api/employees?row_offset=0&fetch_size=1000',
+        'services.staff_api.username' => 'svc',
+        'services.staff_api.password' => 'secret',
     ]);
 
     Http::fake([
@@ -257,10 +258,11 @@ it('does not abort when the drop is within 15%', function () {
     expect(runSync()->status)->toBe(StaffSyncRun::STATUS_SUCCESS);
 });
 
-it('paginates with rowOffset and fetchSize', function () {
+it('paginates by row_offset and honours the ORDS items/hasMore envelope', function () {
     config([
         'services.staff_api.url' => 'https://staff.test/api/employees',
-        'services.staff_api.token' => 'test-token',
+        'services.staff_api.username' => 'svc',
+        'services.staff_api.password' => 'secret',
         'services.staff_api.fetch_size' => 2,
     ]);
 
@@ -268,11 +270,12 @@ it('paginates with rowOffset and fetchSize', function () {
 
     Http::fake([
         'staff.test/*' => function ($request) use ($rows) {
-            $offset = (int) ($request->data()['rowOffset'] ?? 0);
+            parse_str((string) parse_url($request->url(), PHP_URL_QUERY), $query);
+            $offset = (int) ($query['row_offset'] ?? 0);
 
             return Http::response([
-                'totalRows' => count($rows),
-                'rows' => array_slice($rows, $offset, 2),
+                'items' => array_slice($rows, $offset, 2),
+                'hasMore' => ($offset + 2) < count($rows),
             ]);
         },
     ]);
@@ -281,6 +284,16 @@ it('paginates with rowOffset and fetchSize', function () {
 
     expect($run->created_count)->toBe(4)
         ->and(User::count())->toBe(4);
+});
+
+it('sends basic auth and the row_offset pagination param', function () {
+    fakeStaffApi(staffPayload()['rows']);
+
+    runSync();
+
+    Http::assertSent(fn ($request) => $request->hasHeader('Authorization')
+        && str_starts_with((string) $request->header('Authorization')[0], 'Basic ')
+        && str_contains($request->url(), 'row_offset=0'));
 });
 
 it('populates users through the app:sync-staff command', function () {

@@ -45,11 +45,14 @@ return [
     ],
 
     // NVS staff API — the sole source of accounts (see .ai/rules/staff-api.md).
-    // Set STAFF_API_URL and STAFF_API_TOKEN in .env / Forge.
+    // Oracle APEX ORDS endpoint behind HTTP basic auth. Set STAFF_API_URL,
+    // STAFF_API_USER and STAFF_API_PASSWORD in .env / Forge. The URL may carry its own
+    // row_offset/fetch_size query params; the sync overrides row_offset while paginating.
     'staff_api' => [
         'url' => env('STAFF_API_URL'),
-        'token' => env('STAFF_API_TOKEN'),
-        'fetch_size' => (int) env('STAFF_API_FETCH_SIZE', 500),
+        'username' => env('STAFF_API_USER'),
+        'password' => env('STAFF_API_PASSWORD'),
+        'fetch_size' => (int) env('STAFF_API_FETCH_SIZE', 1000),
     ],
 
 ];
