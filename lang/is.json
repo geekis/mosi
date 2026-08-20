@@ -129,5 +129,11 @@
     "Send": "Senda",
     "Select a conversation to start chatting.": "Veldu samtal til að byrja að spjalla.",
     "Group chat": "Hópspjall",
-    "Conversation": "Samtal"
+    "Conversation": "Samtal",
+
+    "Search": "Leita",
+    "Search Mosi…": "Leita í Mosa…",
+    "Search people, groups, posts and events.": "Leitaðu að fólki, hópum, færslum og viðburðum.",
+    "Nothing found for “:term”.": "Ekkert fannst fyrir „:term“.",
+    "People": "Fólk"
 }

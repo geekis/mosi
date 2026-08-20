@@ -11,8 +11,11 @@
                 <flux:sidebar.collapse class="in-data-flux-sidebar-on-desktop:not-in-data-flux-sidebar-collapsed-desktop:-mr-2" />
             </flux:sidebar.header>
 
-            {{-- Global search lands in phase 10; the control is part of the shell chrome now. --}}
-            <flux:sidebar.search :placeholder="__('Search…')" />
+            {{-- Global search: submits to the search page. A Meilisearch-backed command
+                 palette is the eventual upgrade; the query is visibility-scoped either way. --}}
+            <form method="GET" action="{{ route('search') }}">
+                <flux:sidebar.search name="q" :placeholder="__('Search…')" />
+            </form>
 
             <flux:sidebar.nav>
                 <flux:sidebar.item icon="home" :href="route('dashboard')" :current="request()->routeIs('dashboard')" wire:navigate>

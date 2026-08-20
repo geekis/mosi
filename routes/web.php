@@ -34,6 +34,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::livewire('notifications', 'pages::notifications')->name('notifications');
 
     Route::livewire('chat', 'pages::chat')->name('chat');
+    Route::livewire('search', 'pages::search')->name('search');
 });
 
 require __DIR__.'/settings.php';
