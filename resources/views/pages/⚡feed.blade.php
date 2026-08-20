@@ -28,6 +28,7 @@ new #[Title('Mosi')] class extends Component {
         $createPost(Auth::user(), ['body' => $this->composer]);
 
         $this->composer = '';
+        Flux::modal('composer')->close();
         Flux::toast(text: __('Your post is published.'), variant: 'success');
     }
 
@@ -136,16 +137,45 @@ new #[Title('Mosi')] class extends Component {
 
     {{-- Center column: composer, tabs and the feed --}}
     <div class="min-w-0 flex-1">
-    {{-- Composer --}}
+    {{-- Composer trigger: opens the post modal. --}}
     <flux:card>
-        <flux:editor wire:model="composer" :placeholder="__('Share something with your colleagues…')" />
+        <div class="flex items-center gap-3">
+            <flux:avatar :name="$me->display_name" :initials="$me->initials()" :src="$me->avatarUrl()" size="sm" />
 
-        <div class="mt-3 flex justify-end">
-            <flux:button variant="primary" wire:click="publish" data-test="publish-button">
-                {{ __('Post') }}
-            </flux:button>
+            <flux:modal.trigger name="composer" class="flex-1">
+                <button type="button" class="w-full rounded-full bg-zinc-100 px-4 py-2 text-start text-sm text-zinc-500 hover:bg-zinc-200 dark:bg-zinc-700 dark:text-zinc-300 dark:hover:bg-zinc-600">
+                    {{ __("What's going on, :name?", ['name' => $me->given_name ?? $me->display_name]) }}
+                </button>
+            </flux:modal.trigger>
+        </div>
+
+        <flux:separator class="my-3" variant="subtle" />
+
+        <div class="flex flex-wrap items-center justify-between gap-1">
+            <flux:modal.trigger name="composer">
+                <flux:button size="sm" variant="ghost" icon="hand-thumb-up">{{ __('Give a Shout-Out') }}</flux:button>
+            </flux:modal.trigger>
+            <flux:modal.trigger name="composer">
+                <flux:button size="sm" variant="ghost" icon="sparkles">{{ __('Post a Value Update') }}</flux:button>
+            </flux:modal.trigger>
+            <flux:modal.trigger name="composer">
+                <flux:button size="sm" variant="ghost" icon="question-mark-circle">{{ __('Ask a Question') }}</flux:button>
+            </flux:modal.trigger>
         </div>
     </flux:card>
+
+    {{-- Composer modal --}}
+    <flux:modal name="composer" class="w-full max-w-lg">
+        <div class="space-y-4">
+            <flux:heading size="lg">{{ __('Create a post') }}</flux:heading>
+            <flux:editor wire:model="composer" :placeholder="__('Share something with your colleagues…')" />
+            <div class="flex justify-end">
+                <flux:button variant="primary" wire:click="publish" data-test="publish-button">
+                    {{ __('Post') }}
+                </flux:button>
+            </div>
+        </div>
+    </flux:modal>
 
     {{-- Tabs --}}
     <flux:tabs wire:model.live="tab" class="mt-6">
