@@ -48,8 +48,7 @@
 
             <div class="me-4 flex items-center gap-1">
                 <flux:button :href="route('profile.edit')" icon="cog-6-tooth" variant="ghost" size="sm" aria-label="{{ __('Settings') }}" wire:navigate />
-                {{-- Notifications bell is wired in phase 8. --}}
-                <flux:button icon="bell" variant="ghost" size="sm" aria-label="{{ __('Notifications') }}" />
+                <livewire:pages::notification-bell />
             </div>
 
             <flux:dropdown align="end">

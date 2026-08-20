@@ -27,7 +27,11 @@ class YouWereMentioned extends Notification
      */
     public function via(object $notifiable): array
     {
-        return ['mail'];
+        if ($notifiable instanceof User && ! $notifiable->wantsNotification('mention')) {
+            return [];
+        }
+
+        return ['database', 'mail'];
     }
 
     public function toMail(object $notifiable): MailMessage
@@ -47,9 +51,12 @@ class YouWereMentioned extends Notification
     public function toArray(object $notifiable): array
     {
         return [
+            'key' => 'mention',
+            'params' => ['name' => $this->author->display_name],
+            'url' => route('dashboard'),
+            'actor_id' => $this->author->id,
             'mentionable_type' => $this->mentionable->getMorphClass(),
             'mentionable_id' => $this->mentionable->getKey(),
-            'author_id' => $this->author->id,
         ];
     }
 }

@@ -30,6 +30,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::livewire('events', 'pages::events')->name('events');
     Route::livewire('events/{event:slug}', 'pages::events.show')->name('events.show');
     Route::get('events/{event:slug}/ics', EventIcsController::class)->name('events.ics');
+
+    Route::livewire('notifications', 'pages::notifications')->name('notifications');
 });
 
 require __DIR__.'/settings.php';

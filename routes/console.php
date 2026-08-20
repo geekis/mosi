@@ -11,3 +11,6 @@ Artisan::command('inspire', function () {
 // Hourly staff sync. Requires the Forge Scheduler (schedule:run every minute).
 // withoutOverlapping guards against a slow run colliding with the next tick.
 Schedule::command('app:sync-staff')->hourly()->withoutOverlapping();
+
+// Daily notification digest, sent each morning in Reykjavík time.
+Schedule::command('app:send-digest')->dailyAt('07:00')->timezone('Atlantic/Reykjavik');

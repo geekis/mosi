@@ -10,4 +10,22 @@ return [
         'action' => 'Skoða á Mosa',
     ],
 
+    'comment' => [
+        'subject' => 'Ný athugasemd við færsluna þína',
+        'body' => ':name gerði athugasemd við færsluna þína.',
+        'action' => 'Skoða á Mosa',
+    ],
+
+    'new_follower' => [
+        'body' => ':name er farin(n) að fylgja þér.',
+    ],
+
+    'digest' => [
+        'subject' => 'Samantekt frá Mosa',
+        'greeting' => 'Hæ :name,',
+        'intro' => 'Hér er það sem þú misstir af á Mosa:',
+        'unread' => ':count ólesin tilkynning|:count ólesnar tilkynningar',
+        'action' => 'Opna Mosa',
+    ],
+
 ];

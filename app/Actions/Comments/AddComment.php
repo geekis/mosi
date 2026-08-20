@@ -8,6 +8,7 @@ use App\Actions\Mentions\NotifyMentions;
 use App\Models\Comment;
 use App\Models\Post;
 use App\Models\User;
+use App\Notifications\CommentOnYourPost;
 use App\Support\HtmlContent;
 use DomainException;
 
@@ -44,6 +45,13 @@ final class AddComment
         ]);
 
         ($this->notifyMentions)($comment, $author, $clean);
+
+        // Tell the post's author, unless they commented on their own post or were the
+        // one @mentioned (NotifyMentions already covered that case for the body author).
+        $post->loadMissing('author');
+        if ($post->author !== null && $post->author->isNot($author)) {
+            $post->author->notify(new CommentOnYourPost($comment, $author));
+        }
 
         return $comment;
     }

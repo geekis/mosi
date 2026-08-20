@@ -111,5 +111,14 @@
     "attending": "mæta",
     "No upcoming events.": "Engir viðburðir framundan.",
     "Add to calendar": "Bæta í dagatal",
-    "No one has responded yet.": "Enginn hefur svarað ennþá."
+    "No one has responded yet.": "Enginn hefur svarað ennþá.",
+
+    "Mark all read": "Merkja allt lesið",
+    "See all notifications": "Sjá allar tilkynningar",
+    "No notifications yet.": "Engar tilkynningar ennþá.",
+    "Preferences saved.": "Stillingar vistaðar.",
+    "Choose what you want to be notified about": "Veldu um hvað þú vilt fá tilkynningar",
+    "When someone mentions me": "Þegar einhver nefnir mig",
+    "When someone comments on my post": "Þegar einhver gerir athugasemd við færsluna mína",
+    "When someone follows me": "Þegar einhver fer að fylgja mér"
 }

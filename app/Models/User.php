@@ -57,6 +57,7 @@ use Spatie\Permission\Traits\HasRoles;
  * @property AuthMethod $auth_method
  * @property string|null $locale
  * @property string|null $bio
+ * @property array<string, bool>|null $notification_preferences
  * @property bool $is_active
  * @property Carbon|null $password_changed_at
  * @property Carbon|null $email_verified_at
@@ -70,7 +71,7 @@ use Spatie\Permission\Traits\HasRoles;
     'job_title', 'job_id', 'organization_id', 'organization_name', 'parent_organization_id',
     'assignment_status', 'assignment_starts_at', 'assignment_ends_at', 'assignment_percent',
     'is_manager', 'supervisor_external_id', 'supervisor_id', 'location_name', 'location_address',
-    'auth_method', 'locale', 'bio', 'is_active', 'password_changed_at', 'password',
+    'auth_method', 'locale', 'bio', 'notification_preferences', 'is_active', 'password_changed_at', 'password',
 ])]
 #[Hidden(['kennitala', 'kennitala_hash', 'password', 'two_factor_secret', 'two_factor_recovery_codes', 'remember_token'])]
 class User extends Authenticatable implements HasMedia, PasskeyUser
@@ -93,7 +94,17 @@ class User extends Authenticatable implements HasMedia, PasskeyUser
             'assignment_starts_at' => 'date',
             'assignment_ends_at' => 'date',
             'assignment_percent' => 'integer',
+            'notification_preferences' => 'array',
         ];
+    }
+
+    /**
+     * Whether the user wants a given notification type. Opt-out model: unknown or unset
+     * keys default to enabled. Gates every channel (database, mail, push).
+     */
+    public function wantsNotification(string $key): bool
+    {
+        return ($this->notification_preferences[$key] ?? true) !== false;
     }
 
     /**
