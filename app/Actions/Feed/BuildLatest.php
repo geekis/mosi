@@ -22,7 +22,7 @@ final class BuildLatest
     {
         return Post::query()
             ->latestFor($user)
-            ->with(['author', 'group', 'media'])
+            ->with(['author.media', 'group', 'media'])
             ->withCount(['reactions', 'comments'])
             ->cursorPaginate($perPage);
     }

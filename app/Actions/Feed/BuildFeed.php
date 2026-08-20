@@ -22,7 +22,7 @@ final class BuildFeed
     {
         return Post::query()
             ->feedFor($user)
-            ->with(['author', 'group', 'media'])
+            ->with(['author.media', 'group', 'media'])
             ->withCount(['reactions', 'comments'])
             ->cursorPaginate($perPage);
     }

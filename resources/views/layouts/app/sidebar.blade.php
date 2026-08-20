@@ -18,7 +18,10 @@
                 <flux:sidebar.item icon="home" :href="route('dashboard')" :current="request()->routeIs('dashboard')" wire:navigate>
                     {{ __('Home') }}
                 </flux:sidebar.item>
-                {{-- Groups, Directory and Events sections arrive with later phases. --}}
+                <flux:sidebar.item icon="users" :href="route('directory')" :current="request()->routeIs('directory')" wire:navigate>
+                    {{ __('Directory') }}
+                </flux:sidebar.item>
+                {{-- Groups and Events sections arrive with later phases. --}}
             </flux:sidebar.nav>
 
             <flux:sidebar.spacer />
