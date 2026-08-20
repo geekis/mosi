@@ -1,6 +1,7 @@
 <?php
 
 use App\Actions\Feed\BuildFeed;
+use App\Actions\Feed\BuildLatest;
 use App\Actions\Posts\CreatePost;
 use App\Actions\Reactions\React;
 use App\Enums\ReactionType;
@@ -45,13 +46,21 @@ new #[Title('Mosi')] class extends Component {
     /**
      * @return array{posts: \Illuminate\Contracts\Pagination\CursorPaginator}
      */
-    public function with(BuildFeed $buildFeed): array
+    public function with(BuildFeed $buildFeed, BuildLatest $buildLatest): array
     {
-        return ['posts' => $buildFeed(Auth::user(), 15)];
+        $user = Auth::user();
+
+        return [
+            'posts' => $this->tab === 'latest'
+                ? $buildLatest($user, 15)
+                : $buildFeed($user, 15),
+        ];
     }
 }; ?>
 
-<div class="mx-auto w-full max-w-2xl">
+<div class="mx-auto flex w-full max-w-6xl gap-6">
+    {{-- Center column: composer, tabs and the feed --}}
+    <div class="min-w-0 flex-1">
     <flux:heading size="xl">{{ __('Feed') }}</flux:heading>
 
     {{-- Composer --}}
@@ -116,4 +125,12 @@ new #[Title('Mosi')] class extends Component {
             </flux:callout>
         @endforelse
     </div>
+    </div>
+
+    {{-- Right rail: widgets arrive with later phases (directory, events). Placeholders for now. --}}
+    <aside class="hidden w-80 shrink-0 space-y-4 xl:block">
+        <x-rail.placeholder :heading="__('Birthdays today')" icon="cake" />
+        <x-rail.placeholder :heading="__('Upcoming events')" icon="calendar" />
+        <x-rail.placeholder :heading="__('New colleagues')" icon="user-plus" />
+    </aside>
 </div>

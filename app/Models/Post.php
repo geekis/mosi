@@ -137,4 +137,19 @@ class Post extends Model implements HasMedia
             ->orderByDesc('published_at')
             ->orderByDesc('id');
     }
+
+    /**
+     * The "Latest" tab: every published post the user is allowed to see, newest first —
+     * unfiltered by group membership or follows, but still intersected with visibleTo()
+     * so a secret group never leaks. Ordering ends on id for stable cursor pagination.
+     *
+     * @param  Builder<Post>  $query
+     */
+    public function scopeLatestFor(Builder $query, User $user): void
+    {
+        $query->visibleTo($user)
+            ->published()
+            ->orderByDesc('published_at')
+            ->orderByDesc('id');
+    }
 }

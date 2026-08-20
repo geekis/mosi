@@ -56,6 +56,17 @@ test('publishing is a no-op for empty content', function () {
     expect(Post::query()->where('user_id', $user->id)->count())->toBe(0);
 });
 
+test('switching to the latest tab surfaces a stranger’s public post', function () {
+    $user = User::factory()->create();
+    $stranger = User::factory()->create(['display_name' => 'Fjalar Þjóðólfsson']);
+    Post::factory()->create(['user_id' => $stranger->id]);
+
+    Livewire::actingAs($user)
+        ->test('pages::feed')
+        ->set('tab', 'latest')
+        ->assertSee('Fjalar Þjóðólfsson');
+});
+
 test('reacting to a visible post records the reaction', function () {
     $user = User::factory()->create();
     $post = Post::factory()->create(['user_id' => $user->id]);

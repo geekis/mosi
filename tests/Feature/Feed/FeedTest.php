@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Actions\Feed\BuildFeed;
+use App\Actions\Feed\BuildLatest;
 use App\Enums\GroupRole;
 use App\Models\Group;
 use App\Models\Post;
@@ -99,6 +100,48 @@ it('cursor-paginates the feed', function () {
 
     expect($page->count())->toBe(2)
         ->and($page->hasMorePages())->toBeTrue();
+});
+
+/**
+ * @return array<int, int>
+ */
+function latestIds(User $user, int $perPage = 50): array
+{
+    return app(BuildLatest::class)($user, $perPage)->pluck('id')->all();
+}
+
+it('latest surfaces published posts the user can see, regardless of follow or membership', function () {
+    $user = User::factory()->create();
+    $stranger = User::factory()->create();
+    $own = Post::factory()->create(['user_id' => $user->id]);
+    $strangerPost = Post::factory()->create(['user_id' => $stranger->id]);
+
+    $ids = latestIds($user);
+
+    expect($ids)->toContain($own->id)->and($ids)->toContain($strangerPost->id);
+});
+
+it('latest never leaks a secret-group post to a non-member', function () {
+    $user = User::factory()->create();
+    $author = User::factory()->create();
+    $secret = Group::factory()->secret()->create();
+    $secret->members()->attach($author->id, ['role' => GroupRole::Member->value]);
+    $post = Post::factory()->inGroup($secret)->create(['user_id' => $author->id]);
+
+    expect(latestIds($user))->not->toContain($post->id);
+});
+
+it('latest excludes drafts and scheduled posts', function () {
+    $user = User::factory()->create();
+    $draft = Post::factory()->draft()->create(['user_id' => $user->id]);
+    $scheduled = Post::factory()->scheduled()->create(['user_id' => $user->id]);
+    $published = Post::factory()->create(['user_id' => $user->id]);
+
+    $ids = latestIds($user);
+
+    expect($ids)->toContain($published->id)
+        ->and($ids)->not->toContain($draft->id)
+        ->and($ids)->not->toContain($scheduled->id);
 });
 
 it('renders a feed page in a constant number of queries', function () {
