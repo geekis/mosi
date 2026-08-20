@@ -2,7 +2,10 @@
 
 namespace Database\Seeders;
 
+use App\Actions\Staff\EnrolIntoGroups;
 use App\Enums\AuthMethod;
+use App\Enums\GroupRole;
+use App\Models\Group;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 
@@ -38,5 +41,39 @@ class StaffSeeder extends Seeder
 
         User::query()->where('auth_method', AuthMethod::Entra->value)
             ->with('roles')->first()?->assignRole('super-admin');
+
+        $this->seedGroupsAndFollows();
+    }
+
+    private function seedGroupsAndFollows(): void
+    {
+        // Auto-enrol everyone into their department and the org-wide group, exactly as the
+        // staff sync would — this creates the department groups from the seeded org data.
+        $enrol = app(EnrolIntoGroups::class);
+        User::query()->each(fn (User $user) => $enrol($user));
+
+        // A spread of interest groups with random members, including a closed and a secret
+        // one, so visibility scopes have something to hide.
+        Group::factory()->count(6)->create()->each($this->addRandomMembers(...));
+        Group::factory()->closed()->create()->each($this->addRandomMembers(...));
+        Group::factory()->secret()->create()->each($this->addRandomMembers(...));
+
+        // A realistic follow graph: each active user follows a handful of others.
+        $activeIds = User::query()->where('is_active', true)->pluck('id');
+
+        User::query()->where('is_active', true)->each(function (User $user) use ($activeIds): void {
+            $candidates = $activeIds->reject(fn (int $id): bool => $id === $user->id);
+            $targets = $candidates->random(min(random_int(3, 10), $candidates->count()));
+            $user->following()->syncWithoutDetaching($targets->all());
+        });
+    }
+
+    private function addRandomMembers(Group $group): void
+    {
+        $members = User::query()->where('is_active', true)
+            ->inRandomOrder()->limit(random_int(8, 40))->pluck('id')
+            ->mapWithKeys(fn (int $id): array => [$id => ['role' => GroupRole::Member->value]]);
+
+        $group->members()->syncWithoutDetaching($members->all());
     }
 }

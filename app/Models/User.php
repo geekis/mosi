@@ -13,6 +13,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -157,6 +158,31 @@ class User extends Authenticatable implements PasskeyUser
     public function subordinates(): HasMany
     {
         return $this->hasMany(self::class, 'supervisor_id');
+    }
+
+    /**
+     * People this user follows.
+     *
+     * @return BelongsToMany<User, $this>
+     */
+    public function following(): BelongsToMany
+    {
+        return $this->belongsToMany(self::class, 'follows', 'follower_id', 'followed_id')->withTimestamps();
+    }
+
+    /**
+     * People who follow this user.
+     *
+     * @return BelongsToMany<User, $this>
+     */
+    public function followers(): BelongsToMany
+    {
+        return $this->belongsToMany(self::class, 'follows', 'followed_id', 'follower_id')->withTimestamps();
+    }
+
+    public function isFollowing(User $user): bool
+    {
+        return $this->following()->whereKey($user->id)->exists();
     }
 
     /**
