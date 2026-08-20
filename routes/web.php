@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Auth\InvitationController;
+use App\Http\Controllers\EventIcsController;
 use Illuminate\Support\Facades\Route;
 
 Route::view('/', 'welcome')->name('home');
@@ -25,6 +26,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::livewire('dashboard', 'pages::feed')->name('dashboard');
     Route::livewire('directory', 'pages::directory')->name('directory');
     Route::livewire('people/{user:external_id}', 'pages::people.show')->name('people.show');
+
+    Route::livewire('events', 'pages::events')->name('events');
+    Route::livewire('events/{event:slug}', 'pages::events.show')->name('events.show');
+    Route::get('events/{event:slug}/ics', EventIcsController::class)->name('events.ics');
 });
 
 require __DIR__.'/settings.php';

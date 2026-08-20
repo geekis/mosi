@@ -5,6 +5,7 @@ use App\Actions\Feed\BuildLatest;
 use App\Actions\Posts\CreatePost;
 use App\Actions\Reactions\React;
 use App\Enums\ReactionType;
+use App\Models\Event;
 use App\Models\Post;
 use Flux\Flux;
 use Illuminate\Support\Facades\Auth;
@@ -60,6 +61,7 @@ new #[Title('Mosi')] class extends Component {
             'followersCount' => $user->followers()->count(),
             'followingCount' => $user->following()->count(),
             'postsCount' => Post::where('user_id', $user->id)->count(),
+            'upcomingEvents' => Event::query()->visibleTo($user)->upcoming()->limit(3)->get(),
         ];
     }
 }; ?>
@@ -239,7 +241,22 @@ new #[Title('Mosi')] class extends Component {
     {{-- Right rail: widgets arrive with later phases (directory, events). Placeholders for now. --}}
     <aside class="hidden w-80 shrink-0 space-y-4 xl:block">
         <x-rail.placeholder :heading="__('Birthdays today')" icon="cake" />
-        <x-rail.placeholder :heading="__('Upcoming events')" icon="calendar" />
+
+        <flux:card class="space-y-3">
+            <div class="flex items-center gap-2 text-zinc-500 dark:text-zinc-400">
+                <flux:icon icon="calendar" variant="mini" />
+                <flux:heading size="sm">{{ __('Upcoming events') }}</flux:heading>
+            </div>
+            @forelse ($upcomingEvents as $event)
+                <a wire:key="rail-event-{{ $event->id }}" href="{{ route('events.show', $event) }}" wire:navigate class="block hover:opacity-80">
+                    <flux:text class="truncate font-medium">{{ $event->title }}</flux:text>
+                    <flux:text size="sm" class="text-zinc-500 dark:text-zinc-400">{{ $event->starts_at->translatedFormat('j. M, H:i') }}</flux:text>
+                </a>
+            @empty
+                <flux:text size="sm" class="text-zinc-500 dark:text-zinc-400">{{ __('No upcoming events.') }}</flux:text>
+            @endforelse
+        </flux:card>
+
         <x-rail.placeholder :heading="__('New colleagues')" icon="user-plus" />
     </aside>
 </div>

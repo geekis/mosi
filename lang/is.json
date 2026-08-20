@@ -96,5 +96,20 @@
 
     "Search people…": "Leita að fólki…",
     "All departments": "Allar deildir",
-    "No one matches your search.": "Enginn passar við leitina þína."
+    "No one matches your search.": "Enginn passar við leitina þína.",
+
+    "Events": "Viðburðir",
+    "New event": "Nýr viðburður",
+    "Title": "Titill",
+    "Location": "Staðsetning",
+    "Starts at": "Hefst",
+    "Create event": "Stofna viðburð",
+    "Event created.": "Viðburður stofnaður.",
+    "Going": "Mæti",
+    "Maybe": "Kannski",
+    "Can’t go": "Kemst ekki",
+    "attending": "mæta",
+    "No upcoming events.": "Engir viðburðir framundan.",
+    "Add to calendar": "Bæta í dagatal",
+    "No one has responded yet.": "Enginn hefur svarað ennþá."
 }
