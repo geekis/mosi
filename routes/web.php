@@ -23,6 +23,7 @@ Route::get('locale/{locale}', function (string $locale) {
 
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::livewire('dashboard', 'pages::feed')->name('dashboard');
+    Route::livewire('people/{user:external_id}', 'pages::people.show')->name('people.show');
 });
 
 require __DIR__.'/settings.php';

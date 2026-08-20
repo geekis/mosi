@@ -23,6 +23,10 @@ use Illuminate\Support\Str;
 use Laravel\Fortify\Contracts\PasskeyUser;
 use Laravel\Fortify\PasskeyAuthenticatable;
 use Laravel\Fortify\TwoFactorAuthenticatable;
+use Spatie\Image\Enums\Fit;
+use Spatie\MediaLibrary\HasMedia;
+use Spatie\MediaLibrary\InteractsWithMedia;
+use Spatie\MediaLibrary\MediaCollections\Models\Media;
 use Spatie\Permission\Traits\HasRoles;
 
 /**
@@ -52,6 +56,7 @@ use Spatie\Permission\Traits\HasRoles;
  * @property string|null $location_address
  * @property AuthMethod $auth_method
  * @property string|null $locale
+ * @property string|null $bio
  * @property bool $is_active
  * @property Carbon|null $password_changed_at
  * @property Carbon|null $email_verified_at
@@ -65,13 +70,13 @@ use Spatie\Permission\Traits\HasRoles;
     'job_title', 'job_id', 'organization_id', 'organization_name', 'parent_organization_id',
     'assignment_status', 'assignment_starts_at', 'assignment_ends_at', 'assignment_percent',
     'is_manager', 'supervisor_external_id', 'supervisor_id', 'location_name', 'location_address',
-    'auth_method', 'locale', 'is_active', 'password_changed_at', 'password',
+    'auth_method', 'locale', 'bio', 'is_active', 'password_changed_at', 'password',
 ])]
 #[Hidden(['kennitala', 'kennitala_hash', 'password', 'two_factor_secret', 'two_factor_recovery_codes', 'remember_token'])]
-class User extends Authenticatable implements PasskeyUser
+class User extends Authenticatable implements HasMedia, PasskeyUser
 {
     /** @use HasFactory<UserFactory> */
-    use HasFactory, HasRoles, Notifiable, PasskeyAuthenticatable, TwoFactorAuthenticatable;
+    use HasFactory, HasRoles, InteractsWithMedia, Notifiable, PasskeyAuthenticatable, TwoFactorAuthenticatable;
 
     /**
      * @return array<string, string>
@@ -236,5 +241,46 @@ class User extends Authenticatable implements PasskeyUser
         return Str::length($initials) > 1
             ? Str::substr($initials, 0, 1).Str::substr($initials, -1)
             : $initials;
+    }
+
+    /**
+     * Profile imagery is user-uploaded, one file each: a square avatar and a wide
+     * banner. Both are self-service (never from the staff sync).
+     */
+    public function registerMediaCollections(): void
+    {
+        $this->addMediaCollection('avatar')
+            ->singleFile()
+            ->acceptsMimeTypes(['image/jpeg', 'image/png', 'image/webp']);
+
+        $this->addMediaCollection('banner')
+            ->singleFile()
+            ->acceptsMimeTypes(['image/jpeg', 'image/png', 'image/webp']);
+    }
+
+    public function registerMediaConversions(?Media $media = null): void
+    {
+        $this->addMediaConversion('thumb')
+            ->performOnCollections('avatar')
+            ->nonQueued()
+            ->fit(Fit::Crop, 128, 128);
+    }
+
+    /**
+     * The avatar URL (thumb conversion) or null when the user has not uploaded one —
+     * the view falls back to initials.
+     */
+    public function avatarUrl(): ?string
+    {
+        $url = $this->getFirstMediaUrl('avatar', 'thumb');
+
+        return $url === '' ? null : $url;
+    }
+
+    public function bannerUrl(): ?string
+    {
+        $url = $this->getFirstMediaUrl('banner');
+
+        return $url === '' ? null : $url;
     }
 }

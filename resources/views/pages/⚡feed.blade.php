@@ -65,7 +65,7 @@ new #[Title('Mosi')] class extends Component {
     <aside class="hidden w-72 shrink-0 space-y-4 lg:block">
         <flux:card class="space-y-3">
             <div class="flex items-center gap-3">
-                <flux:avatar :name="$me->display_name" :initials="$me->initials()" size="lg" />
+                <flux:avatar :name="$me->display_name" :initials="$me->initials()" :src="$me->avatarUrl()" size="lg" />
                 <div class="min-w-0">
                     <flux:heading class="truncate">{{ $me->display_name }}</flux:heading>
                     @if ($me->job_title)
@@ -76,9 +76,11 @@ new #[Title('Mosi')] class extends Component {
             @if ($me->organization_name)
                 <flux:text size="sm" class="truncate text-zinc-500 dark:text-zinc-400">{{ $me->organization_name }}</flux:text>
             @endif
-            <flux:button :href="route('profile.edit')" size="sm" variant="ghost" icon="user" class="w-full" wire:navigate>
-                {{ __('My profile') }}
-            </flux:button>
+            @if ($me->external_id)
+                <flux:button :href="route('people.show', $me)" size="sm" variant="ghost" icon="user" class="w-full" wire:navigate>
+                    {{ __('My profile') }}
+                </flux:button>
+            @endif
         </flux:card>
 
         <flux:card class="space-y-3">
@@ -128,10 +130,16 @@ new #[Title('Mosi')] class extends Component {
         @forelse ($posts as $post)
             <flux:card wire:key="post-{{ $post->id }}" @class(['ring-1 ring-primary-500/40' => $post->is_official])>
                 <div class="flex items-center gap-3">
-                    <flux:avatar :name="$post->author?->display_name" size="sm" />
+                    <flux:avatar :name="$post->author?->display_name" :src="$post->author?->avatarUrl()" size="sm" />
 
                     <div class="min-w-0">
-                        <flux:heading class="truncate">{{ $post->author?->display_name }}</flux:heading>
+                        @if ($post->author?->external_id)
+                            <a href="{{ route('people.show', $post->author) }}" class="hover:underline" wire:navigate>
+                                <flux:heading class="truncate">{{ $post->author->display_name }}</flux:heading>
+                            </a>
+                        @else
+                            <flux:heading class="truncate">{{ $post->author?->display_name }}</flux:heading>
+                        @endif
 
                         <flux:text size="sm" class="flex items-center gap-1 truncate">
                             @if ($post->group)

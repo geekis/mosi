@@ -65,5 +65,16 @@
 
     "Birthdays today": "Afmæli í dag",
     "Upcoming events": "Viðburðir framundan",
-    "New colleagues": "Nýir samstarfsmenn"
+    "New colleagues": "Nýir samstarfsmenn",
+
+    "Edit profile": "Breyta prófíl",
+    "Follow": "Fylgja",
+    "Following": "Fylgi",
+    "Details": "Upplýsingar",
+    "Groups": "Hópar",
+    "No shared groups.": "Engir sameiginlegir hópar.",
+    "Recent posts": "Nýlegar færslur",
+    "No posts to show.": "Engar færslur að sýna.",
+    "Directory": "Starfsmannaskrá",
+    "No shared groups": "Engir sameiginlegir hópar"
 }
