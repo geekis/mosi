@@ -56,6 +56,9 @@ new #[Title('Mosi')] class extends Component {
                 ? $buildLatest($user, 15)
                 : $buildFeed($user, 15),
             'myGroups' => $user->groups()->orderBy('id')->get(),
+            'followersCount' => $user->followers()->count(),
+            'followingCount' => $user->following()->count(),
+            'postsCount' => Post::where('user_id', $user->id)->count(),
         ];
     }
 }; ?>
@@ -63,24 +66,49 @@ new #[Title('Mosi')] class extends Component {
 <div class="mx-auto flex w-full max-w-7xl gap-6">
     {{-- Left rail: who you are, your groups, quick links. Appears at lg. --}}
     <aside class="hidden w-72 shrink-0 space-y-4 lg:block">
-        <flux:card class="space-y-3">
-            <div class="flex items-center gap-3">
-                <flux:avatar :name="$me->display_name" :initials="$me->initials()" :src="$me->avatarUrl()" size="lg" />
-                <div class="min-w-0">
-                    <flux:heading class="truncate">{{ $me->display_name }}</flux:heading>
+        <flux:card class="overflow-hidden p-0">
+            {{-- Banner --}}
+            <div class="h-20 w-full bg-gradient-to-br from-primary-600 to-primary-800">
+                @if ($me->bannerUrl())
+                    <img src="{{ $me->bannerUrl() }}" alt="" class="h-20 w-full object-cover" />
+                @endif
+            </div>
+
+            <div class="px-4 pb-4 text-center">
+                {{-- Avatar overlapping the banner --}}
+                <div class="-mt-10 flex justify-center">
+                    <flux:avatar :name="$me->display_name" :initials="$me->initials()" :src="$me->avatarUrl()" size="xl" class="ring-4 ring-white dark:ring-zinc-800" />
+                </div>
+
+                <div class="mt-2">
+                    @if ($me->external_id)
+                        <a href="{{ route('people.show', $me) }}" wire:navigate class="hover:underline">
+                            <flux:heading size="lg">{{ $me->display_name }}</flux:heading>
+                        </a>
+                    @else
+                        <flux:heading size="lg">{{ $me->display_name }}</flux:heading>
+                    @endif
                     @if ($me->job_title)
-                        <flux:text size="sm" class="truncate">{{ $me->job_title }}</flux:text>
+                        <flux:text size="sm" class="text-zinc-500 dark:text-zinc-400">{{ $me->job_title }}</flux:text>
                     @endif
                 </div>
+
+                {{-- Stats --}}
+                <div class="mt-4 grid grid-cols-3 divide-x divide-zinc-200 dark:divide-zinc-700">
+                    <div class="px-1">
+                        <flux:heading size="lg">{{ $followersCount }}</flux:heading>
+                        <flux:text size="sm" class="text-zinc-500 dark:text-zinc-400">{{ __('Followers') }}</flux:text>
+                    </div>
+                    <div class="px-1">
+                        <flux:heading size="lg">{{ $followingCount }}</flux:heading>
+                        <flux:text size="sm" class="text-zinc-500 dark:text-zinc-400">{{ __('Following') }}</flux:text>
+                    </div>
+                    <div class="px-1">
+                        <flux:heading size="lg">{{ $postsCount }}</flux:heading>
+                        <flux:text size="sm" class="text-zinc-500 dark:text-zinc-400">{{ __('Posts') }}</flux:text>
+                    </div>
+                </div>
             </div>
-            @if ($me->organization_name)
-                <flux:text size="sm" class="truncate text-zinc-500 dark:text-zinc-400">{{ $me->organization_name }}</flux:text>
-            @endif
-            @if ($me->external_id)
-                <flux:button :href="route('people.show', $me)" size="sm" variant="ghost" icon="user" class="w-full" wire:navigate>
-                    {{ __('My profile') }}
-                </flux:button>
-            @endif
         </flux:card>
 
         <flux:card class="space-y-3">
