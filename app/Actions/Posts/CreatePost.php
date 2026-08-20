@@ -8,6 +8,7 @@ use App\Actions\Mentions\NotifyMentions;
 use App\Models\Group;
 use App\Models\Post;
 use App\Models\User;
+use App\Support\HtmlContent;
 use DomainException;
 use Illuminate\Support\Carbon;
 
@@ -37,15 +38,17 @@ final class CreatePost
             }
         }
 
+        $body = HtmlContent::sanitize($data['body']);
+
         $post = Post::create([
             'user_id' => $author->id,
             'group_id' => $groupId,
-            'body' => $data['body'],
+            'body' => $body,
             'is_official' => ($data['is_official'] ?? false) && $author->hasAnyRoleName('comms', 'super-admin'),
             'published_at' => array_key_exists('published_at', $data) ? $data['published_at'] : now(),
         ]);
 
-        ($this->notifyMentions)($post, $author, $post->body);
+        ($this->notifyMentions)($post, $author, $body);
 
         return $post;
     }

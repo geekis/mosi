@@ -8,6 +8,7 @@ use App\Actions\Mentions\NotifyMentions;
 use App\Models\Comment;
 use App\Models\Post;
 use App\Models\User;
+use App\Support\HtmlContent;
 use DomainException;
 
 /**
@@ -33,14 +34,16 @@ final class AddComment
             }
         }
 
+        $clean = HtmlContent::sanitize($body);
+
         $comment = Comment::create([
             'post_id' => $post->id,
             'user_id' => $author->id,
             'parent_id' => $parent?->id,
-            'body' => $body,
+            'body' => $clean,
         ]);
 
-        ($this->notifyMentions)($comment, $author, $comment->body);
+        ($this->notifyMentions)($comment, $author, $clean);
 
         return $comment;
     }
