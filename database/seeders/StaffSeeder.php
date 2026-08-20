@@ -43,6 +43,8 @@ class StaffSeeder extends Seeder
             ->with('roles')->first()?->assignRole('super-admin');
 
         $this->seedGroupsAndFollows();
+
+        $this->call(PostSeeder::class);
     }
 
     private function seedGroupsAndFollows(): void

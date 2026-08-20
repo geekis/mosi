@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Carbon;
 use Spatie\MediaLibrary\HasMedia;
@@ -70,6 +71,14 @@ class Post extends Model implements HasMedia
         return $this->belongsTo(Group::class);
     }
 
+    /**
+     * @return HasMany<Comment, $this>
+     */
+    public function comments(): HasMany
+    {
+        return $this->hasMany(Comment::class);
+    }
+
     public function isPublished(): bool
     {
         return $this->published_at !== null && $this->published_at->isPast();
@@ -101,5 +110,31 @@ class Post extends Model implements HasMedia
                     });
                 });
         });
+    }
+
+    /**
+     * The personalised feed (fan-out-on-read): published posts from the user's groups,
+     * from people they follow, and their own — always intersected with visibleTo() so a
+     * secret group never leaks even if the author is followed. Pinned and official posts
+     * are boosted; the ordering ends on id so cursor pagination is stable.
+     *
+     * @param  Builder<Post>  $query
+     */
+    public function scopeFeedFor(Builder $query, User $user): void
+    {
+        $memberGroupIds = $user->groups()->pluck('groups.id')->all();
+        $followedIds = $user->following()->pluck('users.id')->all();
+
+        $query->visibleTo($user)
+            ->published()
+            ->where(function (Builder $relevant) use ($user, $memberGroupIds, $followedIds): void {
+                $relevant->whereIn('group_id', $memberGroupIds)
+                    ->orWhereIn('user_id', $followedIds)
+                    ->orWhere('user_id', $user->id);
+            })
+            ->orderByDesc('is_pinned')
+            ->orderByDesc('is_official')
+            ->orderByDesc('published_at')
+            ->orderByDesc('id');
     }
 }

@@ -186,6 +186,16 @@ class User extends Authenticatable implements PasskeyUser
     }
 
     /**
+     * Groups this user belongs to.
+     *
+     * @return BelongsToMany<Group, $this>
+     */
+    public function groups(): BelongsToMany
+    {
+        return $this->belongsToMany(Group::class)->withPivot('role')->withTimestamps();
+    }
+
+    /**
      * @param  Builder<User>  $query
      */
     public function scopeActive($query): void
