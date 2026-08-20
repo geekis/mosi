@@ -76,5 +76,14 @@
     "Recent posts": "Nýlegar færslur",
     "No posts to show.": "Engar færslur að sýna.",
     "Directory": "Starfsmannaskrá",
-    "No shared groups": "Engir sameiginlegir hópar"
+    "No shared groups": "Engir sameiginlegir hópar",
+
+    "About": "Um mig",
+    "A short introduction shown on your profile.": "Stutt kynning sem birtist á prófílnum þínum.",
+    "Profile photo": "Prófílmynd",
+    "Profile banner": "Forsíðumynd",
+    "Save photo": "Vista mynd",
+    "Save banner": "Vista forsíðumynd",
+    "Photo updated.": "Mynd uppfærð.",
+    "Banner updated.": "Forsíðumynd uppfærð."
 }

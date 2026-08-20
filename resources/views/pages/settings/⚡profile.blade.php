@@ -1,5 +1,6 @@
 <?php
 
+use App\Actions\Profile\UpdateProfilePhoto;
 use App\Models\User;
 /* @chisel-email-verification */
 use Illuminate\Contracts\Auth\MustVerifyEmail;
@@ -11,10 +12,21 @@ use Illuminate\Validation\Rule;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Title;
 use Livewire\Component;
+use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
+use Livewire\WithFileUploads;
 
 new #[Title('Profile settings')] class extends Component {
+    use WithFileUploads;
+
     public string $display_name = '';
+
     public string $email = '';
+
+    public string $bio = '';
+
+    public ?TemporaryUploadedFile $avatar = null;
+
+    public ?TemporaryUploadedFile $banner = null;
 
     /**
      * Mount the component.
@@ -23,6 +35,7 @@ new #[Title('Profile settings')] class extends Component {
     {
         $this->display_name = Auth::user()->display_name;
         $this->email = Auth::user()->email;
+        $this->bio = (string) Auth::user()->bio;
     }
 
     /**
@@ -35,6 +48,7 @@ new #[Title('Profile settings')] class extends Component {
         $validated = $this->validate([
             'display_name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'email', 'max:255', Rule::unique(User::class)->ignore($user->id)],
+            'bio' => ['nullable', 'string', 'max:1000'],
         ]);
 
         $user->fill($validated);
@@ -46,6 +60,30 @@ new #[Title('Profile settings')] class extends Component {
         $user->save();
 
         Flux::toast(variant: 'success', text: __('Profile updated.'));
+    }
+
+    /**
+     * Store a newly chosen avatar or banner. Each is validated as an image here, then
+     * the action swaps the single-file media collection.
+     */
+    public function saveAvatar(UpdateProfilePhoto $updateProfilePhoto): void
+    {
+        $this->validate(['avatar' => ['required', 'image', 'max:5120']]);
+
+        $updateProfilePhoto(Auth::user(), $this->avatar, 'avatar');
+
+        $this->avatar = null;
+        Flux::toast(variant: 'success', text: __('Photo updated.'));
+    }
+
+    public function saveBanner(UpdateProfilePhoto $updateProfilePhoto): void
+    {
+        $this->validate(['banner' => ['required', 'image', 'max:8192']]);
+
+        $updateProfilePhoto(Auth::user(), $this->banner, 'banner');
+
+        $this->banner = null;
+        Flux::toast(variant: 'success', text: __('Banner updated.'));
     }
 
     /* @chisel-email-verification */
@@ -88,6 +126,28 @@ new #[Title('Profile settings')] class extends Component {
     <flux:heading class="sr-only">{{ __('Profile settings') }}</flux:heading>
 
     <x-pages::settings.layout :heading="__('Profile')" :subheading="__('Update your name and email address')">
+        {{-- Photo & banner: each saves on its own, separate from the details form. --}}
+        <div class="my-6 flex items-center gap-4">
+            <flux:avatar :name="auth()->user()->display_name" :initials="auth()->user()->initials()" :src="$avatar && $avatar->isPreviewable() ? $avatar->temporaryUrl() : auth()->user()->avatarUrl()" size="xl" />
+            <div class="space-y-2">
+                <flux:input type="file" wire:model="avatar" :label="__('Profile photo')" accept="image/*" class="max-w-xs" />
+                <flux:error name="avatar" />
+                @if ($avatar)
+                    <flux:button size="sm" variant="primary" wire:click="saveAvatar" data-test="save-avatar-button">{{ __('Save photo') }}</flux:button>
+                @endif
+            </div>
+        </div>
+
+        <div class="my-6 space-y-2">
+            <flux:input type="file" wire:model="banner" :label="__('Profile banner')" accept="image/*" class="max-w-xs" />
+            <flux:error name="banner" />
+            @if ($banner)
+                <flux:button size="sm" variant="primary" wire:click="saveBanner" data-test="save-banner-button">{{ __('Save banner') }}</flux:button>
+            @endif
+        </div>
+
+        <flux:separator variant="subtle" />
+
         <form wire:submit="updateProfileInformation" class="my-6 w-full space-y-6">
             <flux:input wire:model="display_name" :label="__('Name')" type="text" required autofocus autocomplete="name" />
 
@@ -114,6 +174,8 @@ new #[Title('Profile settings')] class extends Component {
                 @endif
                 {{-- @end-chisel-email-verification --}}
             </div>
+
+            <flux:textarea wire:model="bio" :label="__('About')" :placeholder="__('A short introduction shown on your profile.')" rows="4" />
 
             <div class="flex items-center gap-4">
                 <div class="flex items-center justify-end">
