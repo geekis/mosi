@@ -173,5 +173,17 @@
     "You left :group.": "Þú yfirgafst :group.",
     "Your request to join has been sent.": "Beiðni þín um aðild hefur verið send.",
     "Share something with :group…": "Deildu einhverju með :group…",
-    "No posts in this group yet.": "Engar færslur í þessum hópi ennþá."
+    "No posts in this group yet.": "Engar færslur í þessum hópi ennþá.",
+
+    "Edit group": "Breyta hópi",
+    "Group updated.": "Hópur uppfærður.",
+    "Name (Icelandic)": "Heiti (íslenska)",
+    "Name (English)": "Heiti (enska)",
+    "Description (Icelandic)": "Lýsing (íslenska)",
+    "Description (English)": "Lýsing (enska)",
+    "Banner image": "Forsíðumynd",
+    "Save": "Vista",
+    "Join requests": "Aðildarbeiðnir",
+    "Request approved.": "Beiðni samþykkt.",
+    "Request declined.": "Beiðni hafnað."
 }

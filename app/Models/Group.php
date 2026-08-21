@@ -13,6 +13,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Carbon;
+use Spatie\MediaLibrary\HasMedia;
+use Spatie\MediaLibrary\InteractsWithMedia;
 use Spatie\Sluggable\HasSlug;
 use Spatie\Sluggable\SlugOptions;
 use Spatie\Translatable\HasTranslations;
@@ -27,10 +29,10 @@ use Spatie\Translatable\HasTranslations;
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
  */
-class Group extends Model
+class Group extends Model implements HasMedia
 {
     /** @use HasFactory<GroupFactory> */
-    use HasFactory, HasSlug, HasTranslations, SoftDeletes;
+    use HasFactory, HasSlug, HasTranslations, InteractsWithMedia, SoftDeletes;
 
     /** @var list<string> */
     protected $fillable = [
@@ -59,7 +61,23 @@ class Group extends Model
 
                 return $names['is'] ?? $names['en'] ?? (reset($names) ?: 'group');
             })
-            ->saveSlugsTo('slug');
+            ->saveSlugsTo('slug')
+            // The slug is a permalink — renaming a group must not break its URL.
+            ->doNotGenerateSlugsOnUpdate();
+    }
+
+    public function registerMediaCollections(): void
+    {
+        $this->addMediaCollection('banner')
+            ->singleFile()
+            ->acceptsMimeTypes(['image/jpeg', 'image/png', 'image/webp']);
+    }
+
+    public function bannerUrl(): ?string
+    {
+        $banner = $this->getFirstMedia('banner');
+
+        return $banner?->getUrl();
     }
 
     public function getRouteKeyName(): string

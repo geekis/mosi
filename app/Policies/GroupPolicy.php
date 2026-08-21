@@ -41,6 +41,15 @@ class GroupPolicy
             || $this->owns($user, $group);
     }
 
+    /**
+     * Approve or decline requests to join a closed group. Same set as {@see update()}:
+     * owners, moderators, comms and super-admins.
+     */
+    public function manageJoinRequests(User $user, Group $group): bool
+    {
+        return $this->update($user, $group);
+    }
+
     private function moderates(User $user, Group $group): bool
     {
         return $group->members()
