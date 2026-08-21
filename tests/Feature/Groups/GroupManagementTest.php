@@ -38,6 +38,22 @@ test('an owner can edit the group name and description', function () {
         ->and($group->getTranslation('description', 'en', false))->toBe('New description');
 });
 
+test('opening the edit form works when a locale translation is missing', function () {
+    // A synced department group may only carry the Icelandic name.
+    $group = Group::factory()->create([
+        'name' => ['is' => 'Bara íslenska'],
+        'description' => ['is' => 'Aðeins íslensk lýsing'],
+    ]);
+    $owner = ownerOf($group);
+
+    Livewire::actingAs($owner)
+        ->test('pages::groups.show', ['group' => $group])
+        ->call('openEdit')
+        ->assertSet('name_is', 'Bara íslenska')
+        ->assertSet('name_en', '')
+        ->assertSet('description_en', '');
+});
+
 test('renaming a group does not change its slug', function () {
     $group = Group::factory()->create(['name' => ['is' => 'Gamli', 'en' => 'Old']]);
     $owner = ownerOf($group);

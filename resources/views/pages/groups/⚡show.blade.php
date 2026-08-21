@@ -82,10 +82,10 @@ new #[Title('Mosi')] class extends Component {
     {
         $this->authorize('update', $this->group);
 
-        $this->name_is = $this->group->getTranslation('name', 'is', false);
-        $this->name_en = $this->group->getTranslation('name', 'en', false);
-        $this->description_is = $this->group->getTranslation('description', 'is', false);
-        $this->description_en = $this->group->getTranslation('description', 'en', false);
+        $this->name_is = (string) $this->group->getTranslation('name', 'is', false);
+        $this->name_en = (string) $this->group->getTranslation('name', 'en', false);
+        $this->description_is = (string) $this->group->getTranslation('description', 'is', false);
+        $this->description_en = (string) $this->group->getTranslation('description', 'en', false);
 
         Flux::modal('edit-group')->show();
     }
