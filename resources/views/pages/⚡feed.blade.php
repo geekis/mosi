@@ -115,12 +115,16 @@ new #[Title('Mosi')] class extends Component {
         </flux:card>
 
         <flux:card class="space-y-3">
-            <flux:heading size="sm">{{ __('My groups') }}</flux:heading>
+            <div class="flex items-center justify-between">
+                <flux:heading size="sm">{{ __('My groups') }}</flux:heading>
+                <a href="{{ route('groups') }}" wire:navigate class="text-sm text-primary-600 hover:underline">{{ __('Browse') }}</a>
+            </div>
             @forelse ($myGroups as $group)
-                <div wire:key="rail-group-{{ $group->id }}" class="flex items-center gap-2 text-sm">
+                <a wire:key="rail-group-{{ $group->id }}" href="{{ route('groups.show', $group) }}" wire:navigate
+                    class="flex items-center gap-2 text-sm hover:underline">
                     <flux:icon icon="user-group" variant="mini" class="text-zinc-400" />
                     <span class="truncate">{{ $group->name }}</span>
-                </div>
+                </a>
             @empty
                 <flux:text size="sm" class="text-zinc-500 dark:text-zinc-400">
                     {{ __('You are not in any groups yet.') }}
@@ -203,7 +207,7 @@ new #[Title('Mosi')] class extends Component {
 
                         <flux:text size="sm" class="flex items-center gap-1 truncate">
                             @if ($post->group)
-                                <span class="truncate">{{ $post->group->name }}</span>
+                                <a href="{{ route('groups.show', $post->group) }}" wire:navigate class="truncate hover:underline">{{ $post->group->name }}</a>
                                 <span>·</span>
                             @endif
                             <span>{{ $post->published_at?->diffForHumans() }}</span>

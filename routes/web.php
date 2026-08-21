@@ -29,6 +29,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::livewire('directory', 'pages::directory')->name('directory');
     Route::livewire('people/{user:external_id}', 'pages::people.show')->name('people.show');
 
+    Route::livewire('groups', 'pages::groups')->name('groups');
+    Route::livewire('groups/{group:slug}', 'pages::groups.show')->name('groups.show');
+
     Route::livewire('events', 'pages::events')->name('events');
     Route::livewire('events/{event:slug}', 'pages::events.show')->name('events.show');
     Route::get('events/{event:slug}/ics', EventIcsController::class)->name('events.ics');

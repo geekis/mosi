@@ -156,5 +156,22 @@
 
     "Your data": "Gögnin þín",
     "Download a copy of your personal data.": "Sæktu afrit af persónuupplýsingum þínum.",
-    "Download": "Sækja"
+    "Download": "Sækja",
+
+    "Browse": "Skoða",
+    "All groups": "Allir hópar",
+    "Search groups…": "Leita að hópum…",
+    "No groups found.": "Engir hópar fundust.",
+    ":count members": ":count meðlimir",
+    "Members": "Meðlimir",
+    "+:count more": "+:count í viðbót",
+    "Join group": "Ganga í hóp",
+    "Leave group": "Yfirgefa hóp",
+    "Request to join": "Óska eftir aðild",
+    "Request pending": "Beiðni í bið",
+    "You joined :group.": "Þú gekkst í :group.",
+    "You left :group.": "Þú yfirgafst :group.",
+    "Your request to join has been sent.": "Beiðni þín um aðild hefur verið send.",
+    "Share something with :group…": "Deildu einhverju með :group…",
+    "No posts in this group yet.": "Engar færslur í þessum hópi ennþá."
 }
