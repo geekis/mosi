@@ -42,6 +42,36 @@ new #[Title('Chat')] class extends Component {
         $this->openActive();
     }
 
+    /**
+     * Subscribe to the open thread's Reverb channel so incoming messages appear live.
+     *
+     * @return array<string, string>
+     */
+    public function getListeners(): array
+    {
+        if ($this->conversation === null) {
+            return [];
+        }
+
+        return ["echo-private:conversation.{$this->conversation},MessageSent" => 'onMessageReceived'];
+    }
+
+    /**
+     * A message arrived over Reverb for the open thread: re-render to show it, mark the
+     * thread read (the user is looking at it), and scroll to the newest message.
+     */
+    public function onMessageReceived(): void
+    {
+        $active = $this->active();
+
+        if ($active !== null) {
+            app(MarkConversationRead::class)(Auth::user(), $active);
+            $this->dispatch('chat-read');
+        }
+
+        $this->dispatch('chat-scroll');
+    }
+
     public function removeAttachment(int $index): void
     {
         unset($this->attachments[$index]);
@@ -249,7 +279,7 @@ new #[Title('Chat')] class extends Component {
                 @endif
             </div>
 
-            <div class="flex flex-1 flex-col overflow-y-auto p-4" wire:poll.5s
+            <div class="flex flex-1 flex-col overflow-y-auto p-4" wire:poll.15s
                 x-data x-init="$el.scrollTop = $el.scrollHeight"
                 x-on:chat-scroll.window="$nextTick(() => $el.scrollTop = $el.scrollHeight)">
                 {{-- mt-auto pins the thread to the bottom so early messages start at the floor, not the ceiling. --}}

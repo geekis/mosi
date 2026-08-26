@@ -1,15 +1,16 @@
 <?php
 
+use App\Models\Conversation;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-use Livewire\Attributes\On;
 use Livewire\Component;
 
 /**
  * The sidebar "Chat" link with a live unread badge. The count is the sum of the
  * denormalised unread_count across the user's conversations, so it covers both direct
- * messages and messages in any group they belong to. It refreshes on a slow poll and
- * immediately when a conversation is read (the chat page dispatches "chat-read").
+ * messages and messages in any group they belong to. It updates live over Reverb — it
+ * subscribes to each of the user's conversation channels — refreshes when a thread is
+ * read ("chat-read"), and keeps a slow poll as a reconnect fallback.
  */
 new class extends Component {
     public int $unread = 0;
@@ -19,7 +20,18 @@ new class extends Component {
         $this->refreshUnread();
     }
 
-    #[On('chat-read')]
+    /**
+     * @return array<string, string>
+     */
+    public function getListeners(): array
+    {
+        $echo = Conversation::query()->forUser(Auth::user())->pluck('id')
+            ->mapWithKeys(fn (int $id): array => ["echo-private:conversation.{$id},MessageSent" => 'refreshUnread'])
+            ->all();
+
+        return array_merge(['chat-read' => 'refreshUnread'], $echo);
+    }
+
     public function refreshUnread(): void
     {
         $this->unread = (int) DB::table('conversation_user')
