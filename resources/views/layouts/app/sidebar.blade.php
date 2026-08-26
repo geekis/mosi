@@ -35,48 +35,9 @@
                 </flux:sidebar.item>
             </flux:sidebar.nav>
 
-            {{-- The groups the current user belongs to. Queried (not lazy-loaded) with the
-                 media eager-loaded for the avatars; membership-scoped, so a secret group
-                 only ever shows to its own members. A plain nav (not sidebar.group) is used
-                 so the items stay visible as icons when the sidebar is collapsed. --}}
-            @php($myGroups = auth()->user()->groups()->with('media')->get()->sortBy(fn ($group) => $group->name))
-
-            {{-- Unread new-post counts per group, from the group_post notifications. Keyed
-                 by group id; a group visit marks its notifications read (MarkGroupNotificationsRead). --}}
-            @php($unreadByGroup = auth()->user()->unreadNotifications()
-                ->where('type', \App\Notifications\NewGroupPost::class)
-                ->get()
-                ->groupBy(fn ($notification) => (int) ($notification->data['group_id'] ?? 0))
-                ->map->count())
-
-            @if ($myGroups->isNotEmpty())
-                <flux:sidebar.nav>
-                    {{-- Mirrors Flux's own sidebar-group label; hidden when the rail collapses. --}}
-                    <div class="px-3 py-2 text-sm font-medium leading-none text-zinc-400 in-data-flux-sidebar-collapsed-desktop:hidden">
-                        {{ __('My groups') }}
-                    </div>
-
-                    @foreach ($myGroups as $group)
-                        <flux:sidebar.item
-                            :href="route('groups.show', $group)"
-                            :current="request()->routeIs('groups.show') && request()->route('group')?->is($group)"
-                            :badge="($unreadByGroup[$group->id] ?? 0) ?: null"
-                            wire:navigate
-                            wire:key="sidebar-group-{{ $group->id }}"
-                        >
-                            <x-slot:icon>
-                                @if ($group->avatarUrl())
-                                    <flux:avatar :src="$group->avatarUrl()" size="xs" />
-                                @else
-                                    <flux:icon icon="user-group" variant="outline" class="size-4" />
-                                @endif
-                            </x-slot:icon>
-
-                            {{ $group->name }}
-                        </flux:sidebar.item>
-                    @endforeach
-                </flux:sidebar.nav>
-            @endif
+            {{-- The user's groups with a live unread-post badge — a Livewire island that
+                 subscribes to each group's Reverb channel. Membership-scoped. --}}
+            <livewire:pages::my-groups-nav />
 
             <flux:sidebar.spacer />
 

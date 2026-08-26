@@ -1,3 +1,6 @@
+// Laravel Echo (Reverb) — sets up window.Echo for Livewire broadcast listeners.
+import './echo';
+
 // Registers the <emoji-picker> custom element used by the post composer. It is a
 // self-contained, accessible web component — no framework glue, no build config.
 import 'emoji-picker-element';

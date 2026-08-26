@@ -14,3 +14,11 @@ use Illuminate\Support\Facades\Broadcast;
 Broadcast::channel('conversation.{conversation}', function (User $user, Conversation $conversation): bool {
     return $conversation->hasParticipant($user);
 });
+
+/*
+ * A group's live channel carries new-post pings for the sidebar badge. Only members may
+ * subscribe, so it never reveals activity in a secret group (.ai/rules/realtime.md).
+ */
+Broadcast::channel('group.{groupId}', function (User $user, int $groupId): bool {
+    return $user->groups()->whereKey($groupId)->exists();
+});

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Actions\Posts;
 
+use App\Events\GroupPostPublished;
 use App\Models\Post;
 use App\Models\User;
 use App\Notifications\NewGroupPost;
@@ -39,5 +40,8 @@ final class NotifyGroupPost
             ->get();
 
         Notification::send($recipients, new NewGroupPost($post, $author));
+
+        // Ping the group's channel so members' sidebar badges refresh live.
+        GroupPostPublished::dispatch($post->group_id);
     }
 }
