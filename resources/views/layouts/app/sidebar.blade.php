@@ -35,26 +35,37 @@
                 </flux:sidebar.item>
             </flux:sidebar.nav>
 
-            {{-- The groups the current user belongs to. Queried (not lazy-loaded) so the
-                 strict lazy-loading guard is not tripped; membership-scoped, so a secret
-                 group only ever shows to its own members. --}}
-            @php($myGroups = auth()->user()->groups()->get()->sortBy(fn ($group) => $group->name))
+            {{-- The groups the current user belongs to. Queried (not lazy-loaded) with the
+                 media eager-loaded for the avatars; membership-scoped, so a secret group
+                 only ever shows to its own members. A plain nav (not sidebar.group) is used
+                 so the items stay visible as icons when the sidebar is collapsed. --}}
+            @php($myGroups = auth()->user()->groups()->with('media')->get()->sortBy(fn ($group) => $group->name))
 
             @if ($myGroups->isNotEmpty())
                 <flux:sidebar.nav>
-                    <flux:sidebar.group :heading="__('My groups')">
-                        @foreach ($myGroups as $group)
-                            <flux:sidebar.item
-                                icon="user-group"
-                                :href="route('groups.show', $group)"
-                                :current="request()->routeIs('groups.show') && request()->route('group')?->is($group)"
-                                wire:navigate
-                                wire:key="sidebar-group-{{ $group->id }}"
-                            >
-                                {{ $group->name }}
-                            </flux:sidebar.item>
-                        @endforeach
-                    </flux:sidebar.group>
+                    {{-- Mirrors Flux's own sidebar-group label; hidden when the rail collapses. --}}
+                    <div class="px-3 py-2 text-sm font-medium leading-none text-zinc-400 in-data-flux-sidebar-collapsed-desktop:hidden">
+                        {{ __('My groups') }}
+                    </div>
+
+                    @foreach ($myGroups as $group)
+                        <flux:sidebar.item
+                            :href="route('groups.show', $group)"
+                            :current="request()->routeIs('groups.show') && request()->route('group')?->is($group)"
+                            wire:navigate
+                            wire:key="sidebar-group-{{ $group->id }}"
+                        >
+                            <x-slot:icon>
+                                @if ($group->avatarUrl())
+                                    <flux:avatar :src="$group->avatarUrl()" size="xs" />
+                                @else
+                                    <flux:icon icon="user-group" variant="outline" class="size-4" />
+                                @endif
+                            </x-slot:icon>
+
+                            {{ $group->name }}
+                        </flux:sidebar.item>
+                    @endforeach
                 </flux:sidebar.nav>
             @endif
 
