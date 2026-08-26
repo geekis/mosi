@@ -35,6 +35,29 @@
                 </flux:sidebar.item>
             </flux:sidebar.nav>
 
+            {{-- The groups the current user belongs to. Queried (not lazy-loaded) so the
+                 strict lazy-loading guard is not tripped; membership-scoped, so a secret
+                 group only ever shows to its own members. --}}
+            @php($myGroups = auth()->user()->groups()->get()->sortBy(fn ($group) => $group->name))
+
+            @if ($myGroups->isNotEmpty())
+                <flux:sidebar.nav>
+                    <flux:sidebar.group :heading="__('My groups')">
+                        @foreach ($myGroups as $group)
+                            <flux:sidebar.item
+                                icon="user-group"
+                                :href="route('groups.show', $group)"
+                                :current="request()->routeIs('groups.show') && request()->route('group')?->is($group)"
+                                wire:navigate
+                                wire:key="sidebar-group-{{ $group->id }}"
+                            >
+                                {{ $group->name }}
+                            </flux:sidebar.item>
+                        @endforeach
+                    </flux:sidebar.group>
+                </flux:sidebar.nav>
+            @endif
+
             <flux:sidebar.spacer />
 
             <flux:sidebar.nav>
