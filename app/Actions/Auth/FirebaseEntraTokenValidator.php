@@ -32,7 +32,9 @@ final class FirebaseEntraTokenValidator implements EntraTokenValidator
         }
 
         try {
-            $claims = JWT::decode($jwt, JWK::parseKeySet($this->signingKeys($tenant)));
+            // Microsoft's JWKS keys omit the per-key "alg", so supply the expected
+            // default. JWT::decode still enforces the token header algorithm against it.
+            $claims = JWT::decode($jwt, JWK::parseKeySet($this->signingKeys($tenant), 'RS256'));
         } catch (Throwable $e) {
             throw new RuntimeException('Token signature or format is invalid: '.$e->getMessage(), previous: $e);
         }

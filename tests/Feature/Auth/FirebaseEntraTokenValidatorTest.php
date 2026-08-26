@@ -27,11 +27,12 @@ function fakeEntraToken(array $claims = []): string
     $details = openssl_pkey_get_details(openssl_pkey_get_private($privateKey));
     $base64Url = fn (string $bytes): string => rtrim(strtr(base64_encode($bytes), '+/', '-_'), '=');
 
+    // No per-key "alg" — mirrors Microsoft's real JWKS, which forces the validator to
+    // supply the default algorithm to parseKeySet().
     $kid = 'test-key';
     $jwks = ['keys' => [[
         'kty' => 'RSA',
         'use' => 'sig',
-        'alg' => 'RS256',
         'kid' => $kid,
         'n' => $base64Url($details['rsa']['n']),
         'e' => $base64Url($details['rsa']['e']),
