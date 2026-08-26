@@ -42,6 +42,12 @@ return [
         'client_secret' => env('AZURE_CLIENT_SECRET'),
         'redirect' => env('AZURE_REDIRECT_URI'),
         'tenant' => env('AZURE_TENANT_ID'),
+
+        // Email domain whose users sign in with Microsoft. The identifier-first login
+        // redirects these addresses to Entra instead of showing a password field
+        // (.ai/rules/auth.md). Overridable per environment so a test tenant can use a
+        // different domain than production's `nattura.is`.
+        'entra_domain' => env('AZURE_ENTRA_DOMAIN', 'nattura.is'),
     ],
 
     // NVS staff API — the sole source of accounts (see .ai/rules/staff-api.md).

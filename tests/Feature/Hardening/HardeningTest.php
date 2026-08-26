@@ -16,6 +16,37 @@ test('security headers are present on web responses', function () {
         ->assertHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
 });
 
+test('the teams tab context relaxes framing to the teams host set', function () {
+    $user = User::factory()->create();
+
+    $response = $this->actingAs($user)->get(route('dashboard', ['context' => 'teams']));
+
+    $response->assertHeaderMissing('X-Frame-Options')
+        ->assertHeader('Content-Security-Policy', "frame-ancestors 'self' https://teams.microsoft.com https://*.teams.microsoft.com https://*.skype.com https://*.office.com https://*.microsoft.com;")
+        ->assertPlainCookie('mosi_teams_embed', '1');
+});
+
+test('the teams embed cookie keeps framing relaxed without the query param', function () {
+    $user = User::factory()->create();
+
+    $response = $this->actingAs($user)
+        ->withUnencryptedCookie('mosi_teams_embed', '1')
+        ->get(route('dashboard'));
+
+    $response->assertHeaderMissing('X-Frame-Options')
+        ->assertHeader('Content-Security-Policy', "frame-ancestors 'self' https://teams.microsoft.com https://*.teams.microsoft.com https://*.skype.com https://*.office.com https://*.microsoft.com;");
+});
+
+test('the account menu shows in the browser but is hidden inside the teams tab', function () {
+    $user = User::factory()->create();
+
+    $this->actingAs($user)->get(route('dashboard'))
+        ->assertSee('logout-button');
+
+    $this->actingAs($user)->get(route('dashboard', ['context' => 'teams']))
+        ->assertDontSee('logout-button');
+});
+
 test('the data export includes the user own content', function () {
     $user = User::factory()->create(['display_name' => 'Gagna Gunnar']);
     Post::factory()->create(['user_id' => $user->id, 'body' => 'MY-EXPORTED-POST']);

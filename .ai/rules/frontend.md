@@ -60,7 +60,16 @@ most common Livewire bug class.
 - Reusable components → `resources/views/components/`
 
 The application shell (top nav, left nav, right rail) is a **separate layout** from
-page content. V2's Teams webview needs a chrome-less variant; retrofitting is painful.
+page content.
+
+**Teams tab (V2 phase 15) keeps the full shell** — top nav and left sidebar stay
+present inside the Teams webview. "Chrome-less" is *not* a requirement: the only hard
+constraint for a Teams tab is that the page is iframe-embeddable (relax
+`X-Frame-Options` / set CSP `frame-ancestors` for the Teams route) and calls
+`app.initialize()` from the Teams JS SDK. Keep the sidebar so Groups/Events/News/Chat
+navigation still works inside Teams — Teams' own chrome does not provide it. Reuse
+`app.sidebar` as-is; do not build a stripped-down variant. Only caveat: test at 375px,
+since Teams' mobile chrome plus our sidebar toggle can get cramped.
 
 ## Mobile
 

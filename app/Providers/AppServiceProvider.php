@@ -2,13 +2,18 @@
 
 namespace App\Providers;
 
+use App\Actions\Auth\EntraTokenValidator;
+use App\Actions\Auth\FirebaseEntraTokenValidator;
 use Carbon\Carbon;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Validation\Rules\Password;
+use SocialiteProviders\Azure\Provider as AzureProvider;
+use SocialiteProviders\Manager\SocialiteWasCalled;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -17,6 +22,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
+        $this->app->bind(EntraTokenValidator::class, FirebaseEntraTokenValidator::class);
+
         // Telescope is a dev-only dependency and must never load in production, where
         // its classes are absent. Register it (and its app provider) only in local.
         if ($this->app->environment('local') && class_exists(\Laravel\Telescope\TelescopeServiceProvider::class)) {
@@ -33,6 +40,19 @@ class AppServiceProvider extends ServiceProvider
         $this->configureDefaults();
         $this->configureModels();
         $this->configureDates();
+        $this->configureSocialite();
+    }
+
+    /**
+     * Register the Microsoft Entra (Azure AD) driver with Socialite. The driver is only
+     * usable once AZURE_* credentials are set (config/services.php); until then the
+     * redirect endpoint simply cannot mint a valid request (.ai/rules/auth.md).
+     */
+    protected function configureSocialite(): void
+    {
+        Event::listen(function (SocialiteWasCalled $event): void {
+            $event->extendSocialite('azure', AzureProvider::class);
+        });
     }
 
     /**

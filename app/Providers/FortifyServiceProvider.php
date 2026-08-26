@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use App\Actions\Fortify\ResetUserPassword;
+use App\Http\Controllers\Auth\LoginController;
 use App\Models\User;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
@@ -61,7 +62,16 @@ class FortifyServiceProvider extends ServiceProvider
      */
     private function configureViews(): void
     {
-        Fortify::loginView(fn () => view('pages::auth.login'));
+        // Identifier-first: the password field appears only once an email has been
+        // entered (via the identify step, or bounced back from a failed attempt) and
+        // that email is not a Microsoft-federated address (.ai/rules/auth.md).
+        Fortify::loginView(function () {
+            $email = is_string($old = old('email')) ? $old : null;
+
+            return view('pages::auth.login', [
+                'revealPassword' => filled($email) && ! LoginController::isEntraDomain($email),
+            ]);
+        });
         Fortify::verifyEmailView(fn () => view('pages::auth.verify-email'));
         Fortify::twoFactorChallengeView(fn () => view('pages::auth.two-factor-challenge'));
         Fortify::confirmPasswordView(fn () => view('pages::auth.confirm-password'));

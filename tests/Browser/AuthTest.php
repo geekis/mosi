@@ -31,6 +31,7 @@ it('logs a staff member in and lands on the dashboard', function () {
     visit('/login')
         ->assertNoJavaScriptErrors()
         ->fill('email', $user->email)
+        ->press('Continue')
         ->fill('password', 'password')
         ->press('Log in')
         ->assertPathIs('/dashboard');
