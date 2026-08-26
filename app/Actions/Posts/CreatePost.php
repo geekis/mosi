@@ -23,6 +23,7 @@ final class CreatePost
 {
     public function __construct(
         private readonly NotifyMentions $notifyMentions,
+        private readonly NotifyGroupPost $notifyGroupPost,
     ) {}
 
     /**
@@ -51,6 +52,7 @@ final class CreatePost
         ]);
 
         ($this->notifyMentions)($post, $author, $body);
+        ($this->notifyGroupPost)($post, $author);
 
         return $post;
     }

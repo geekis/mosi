@@ -41,6 +41,14 @@
                  so the items stay visible as icons when the sidebar is collapsed. --}}
             @php($myGroups = auth()->user()->groups()->with('media')->get()->sortBy(fn ($group) => $group->name))
 
+            {{-- Unread new-post counts per group, from the group_post notifications. Keyed
+                 by group id; a group visit marks its notifications read (MarkGroupNotificationsRead). --}}
+            @php($unreadByGroup = auth()->user()->unreadNotifications()
+                ->where('type', \App\Notifications\NewGroupPost::class)
+                ->get()
+                ->groupBy(fn ($notification) => (int) ($notification->data['group_id'] ?? 0))
+                ->map->count())
+
             @if ($myGroups->isNotEmpty())
                 <flux:sidebar.nav>
                     {{-- Mirrors Flux's own sidebar-group label; hidden when the rail collapses. --}}
@@ -52,6 +60,7 @@
                         <flux:sidebar.item
                             :href="route('groups.show', $group)"
                             :current="request()->routeIs('groups.show') && request()->route('group')?->is($group)"
+                            :badge="($unreadByGroup[$group->id] ?? 0) ?: null"
                             wire:navigate
                             wire:key="sidebar-group-{{ $group->id }}"
                         >

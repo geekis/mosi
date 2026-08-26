@@ -7,6 +7,7 @@ use App\Actions\Groups\DeclineJoinRequest;
 use App\Actions\Groups\JoinGroup;
 use App\Actions\Groups\LeaveGroup;
 use App\Actions\Groups\InviteToGroup;
+use App\Actions\Groups\MarkGroupNotificationsRead;
 use App\Actions\Groups\RequestToJoinGroup;
 use App\Actions\Groups\UpdateGroup;
 use App\Actions\Groups\UpdateGroupAvatar;
@@ -52,7 +53,7 @@ new #[Title('Mosi')] class extends Component {
 
     public string $inviteSearch = '';
 
-    public function mount(Group $group): void
+    public function mount(Group $group, MarkGroupNotificationsRead $markRead): void
     {
         abort_unless(Auth::user()->can('view', $group), 404);
 
@@ -60,6 +61,9 @@ new #[Title('Mosi')] class extends Component {
         $group->load('media');
 
         $this->group = $group;
+
+        // Opening the group clears its unread-post badge (and the matching bell items).
+        $markRead(Auth::user(), $group);
     }
 
     public function join(JoinGroup $join): void

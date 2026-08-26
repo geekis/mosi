@@ -24,6 +24,10 @@ return [
         'body' => ':name invited you to the group :group.',
     ],
 
+    'group_post' => [
+        'body' => ':name posted in :group.',
+    ],
+
     'digest' => [
         'subject' => 'Your Mosi digest',
         'greeting' => 'Hi :name,',

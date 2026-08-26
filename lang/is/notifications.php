@@ -24,6 +24,10 @@ return [
         'body' => ':name bauð þér í hópinn :group.',
     ],
 
+    'group_post' => [
+        'body' => ':name birti færslu í :group.',
+    ],
+
     'digest' => [
         'subject' => 'Samantekt frá Mosa',
         'greeting' => 'Hæ :name,',
