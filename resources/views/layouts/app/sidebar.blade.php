@@ -7,7 +7,9 @@
         {{-- Left nav: brand, search, primary nav, and a secondary nav pinned to the bottom. --}}
         <flux:sidebar sticky collapsible class="border-e border-zinc-200 bg-[#FFFDF8] dark:border-zinc-700 dark:bg-zinc-900">
             <flux:sidebar.header>
-                <x-app-logo :sidebar="true" href="{{ route('dashboard') }}" wire:navigate />
+                <span data-hide-in-teams>
+                    <x-app-logo :sidebar="true" href="{{ route('dashboard') }}" wire:navigate />
+                </span>
                 <flux:sidebar.collapse class="in-data-flux-sidebar-on-desktop:not-in-data-flux-sidebar-collapsed-desktop:-mr-2" />
             </flux:sidebar.header>
 
@@ -44,7 +46,7 @@
 
         {{-- Top nav: mobile sidebar toggle, shortcuts mega menu, search, then account actions on the right. --}}
         <flux:header container class="border-b border-zinc-200 bg-[#FFFDF8] lg:bg-[#FFFDF8] dark:border-zinc-700 dark:bg-zinc-900">
-            <flux:sidebar.toggle class="me-2 lg:hidden" icon="bars-2" inset="left" />
+            <flux:sidebar.toggle class="me-2 lg:hidden" icon="bars-2" inset="left" data-hide-in-teams />
 
             {{-- Mega menu of staff shortcuts, then global search. --}}
             <livewire:pages::shortcut-menu />

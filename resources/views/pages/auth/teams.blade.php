@@ -4,6 +4,10 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mosi</title>
+    {{-- Mark this browsing context as the Teams tab. The app shell (partials/head) reads
+         this to hide chrome Teams already provides. sessionStorage is per-tab/frame, so
+         it never leaks into a normal browser session. --}}
+    <script>try { sessionStorage.setItem('mosi_teams', '1'); } catch (e) {}</script>
     @vite(['resources/js/teams-auth.js'])
 </head>
 <body>

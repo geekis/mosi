@@ -1,14 +1,23 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-{{-- Mosi is only ever framed by the Microsoft Teams tab — the security headers forbid
-     any other framer — so being embedded means we are in Teams. Mark it on <html>
-     before paint, so Teams-only chrome (the account menu) can be hidden without a flash
-     and without leaking into normal browser sessions the way a cookie would. --}}
+{{-- The Teams entry page (pages/auth/teams) sets a `mosi_teams` sessionStorage flag.
+     sessionStorage is isolated per browsing context, so it marks the Teams tab without
+     leaking into normal browser tabs the way a cookie does. Applied on <html> before
+     paint (no flash) and re-applied after Livewire navigation, which morphs the class
+     away, so Teams-only chrome (account menu, logo, sidebar toggle) stays hidden. --}}
 <script>
-    if (window.self !== window.top) {
-        document.documentElement.classList.add('teams-embed');
-    }
+    (function () {
+        var mark = function () {
+            try {
+                if (sessionStorage.getItem('mosi_teams') === '1') {
+                    document.documentElement.classList.add('teams-embed');
+                }
+            } catch (e) {}
+        };
+        mark();
+        document.addEventListener('livewire:navigated', mark);
+    })();
 </script>
 <style>html.teams-embed [data-hide-in-teams]{display:none !important}</style>
 
