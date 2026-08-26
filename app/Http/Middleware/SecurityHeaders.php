@@ -56,11 +56,15 @@ class SecurityHeaders
         $response->headers->set('X-Permitted-Cross-Domain-Policies', 'none');
         $response->headers->set('Permissions-Policy', 'geolocation=(), microphone=(), camera=()');
 
+        // Allow the Teams tab (and same-origin) to frame every page, unconditionally.
+        // It must not be gated on the Teams cookie: browsers block that cookie as a
+        // third-party cookie inside the Teams *web* client, which would then leave the
+        // app sending X-Frame-Options and refusing to load. `frame-ancestors 'self'`
+        // still blocks all other origins, so it replaces X-Frame-Options entirely.
+        $response->headers->set('Content-Security-Policy', self::TEAMS_FRAME_ANCESTORS);
+
         if ($inTeams) {
-            $response->headers->set('Content-Security-Policy', self::TEAMS_FRAME_ANCESTORS);
             $this->rememberTeamsEmbed($response);
-        } else {
-            $response->headers->set('X-Frame-Options', 'SAMEORIGIN');
         }
 
         return $response;

@@ -11,30 +11,20 @@ test('security headers are present on web responses', function () {
 
     $response = $this->actingAs($user)->get(route('dashboard'));
 
+    // Framing is governed by CSP frame-ancestors (self + Teams), not X-Frame-Options,
+    // so the Teams web client can embed the app even when its context cookie is blocked
+    // as third-party.
     $response->assertHeader('X-Content-Type-Options', 'nosniff')
-        ->assertHeader('X-Frame-Options', 'SAMEORIGIN')
-        ->assertHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
-});
-
-test('the teams tab context relaxes framing to the teams host set', function () {
-    $user = User::factory()->create();
-
-    $response = $this->actingAs($user)->get(route('dashboard', ['context' => 'teams']));
-
-    $response->assertHeaderMissing('X-Frame-Options')
-        ->assertHeader('Content-Security-Policy', "frame-ancestors 'self' https://teams.microsoft.com https://*.teams.microsoft.com https://*.skype.com https://*.office.com https://*.microsoft.com;")
-        ->assertPlainCookie('mosi_teams_embed', '1');
-});
-
-test('the teams embed cookie keeps framing relaxed without the query param', function () {
-    $user = User::factory()->create();
-
-    $response = $this->actingAs($user)
-        ->withUnencryptedCookie('mosi_teams_embed', '1')
-        ->get(route('dashboard'));
-
-    $response->assertHeaderMissing('X-Frame-Options')
+        ->assertHeader('Referrer-Policy', 'strict-origin-when-cross-origin')
+        ->assertHeaderMissing('X-Frame-Options')
         ->assertHeader('Content-Security-Policy', "frame-ancestors 'self' https://teams.microsoft.com https://*.teams.microsoft.com https://*.skype.com https://*.office.com https://*.microsoft.com;");
+});
+
+test('the teams tab context is remembered with a cookie', function () {
+    $user = User::factory()->create();
+
+    $this->actingAs($user)->get(route('dashboard', ['context' => 'teams']))
+        ->assertPlainCookie('mosi_teams_embed', '1');
 });
 
 test('the account menu is always rendered and marked for client-side hiding in Teams', function () {
