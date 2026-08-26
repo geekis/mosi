@@ -1,21 +1,15 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="dark">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
     <head>
         @include('partials.head')
     </head>
-    <body class="min-h-screen bg-white dark:bg-zinc-800">
+    <body class="min-h-screen bg-[#FFFDF8] dark:bg-zinc-800">
         {{-- Left nav: brand, search, primary nav, and a secondary nav pinned to the bottom. --}}
-        <flux:sidebar sticky collapsible class="border-e border-zinc-200 bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900">
+        <flux:sidebar sticky collapsible class="border-e border-zinc-200 bg-[#FFFDF8] dark:border-zinc-700 dark:bg-zinc-900">
             <flux:sidebar.header>
                 <x-app-logo :sidebar="true" href="{{ route('dashboard') }}" wire:navigate />
                 <flux:sidebar.collapse class="in-data-flux-sidebar-on-desktop:not-in-data-flux-sidebar-collapsed-desktop:-mr-2" />
             </flux:sidebar.header>
-
-            {{-- Global search: submits to the search page. A Meilisearch-backed command
-                 palette is the eventual upgrade; the query is visibility-scoped either way. --}}
-            <form method="GET" action="{{ route('search') }}">
-                <flux:sidebar.search name="q" :placeholder="__('Search…')" />
-            </form>
 
             <flux:sidebar.nav>
                 <flux:sidebar.item icon="home" :href="route('dashboard')" :current="request()->routeIs('dashboard')" wire:navigate>
@@ -30,9 +24,7 @@
                 <flux:sidebar.item icon="calendar-days" :href="route('events')" :current="request()->routeIs('events', 'events.show')" wire:navigate>
                     {{ __('Events') }}
                 </flux:sidebar.item>
-                <flux:sidebar.item icon="chat-bubble-left-right" :href="route('chat')" :current="request()->routeIs('chat')" wire:navigate>
-                    {{ __('Chat') }}
-                </flux:sidebar.item>
+                <livewire:pages::chat-nav-item />
                 <flux:sidebar.item icon="newspaper" :href="route('news')" :current="request()->routeIs('news')" wire:navigate>
                     {{ __('News') }}
                 </flux:sidebar.item>
@@ -44,19 +36,22 @@
             <flux:sidebar.spacer />
 
             <flux:sidebar.nav>
-                <flux:sidebar.item icon="cog-6-tooth" :href="route('profile.edit')" :current="request()->routeIs('profile.edit', 'appearance.edit', 'security.edit')" wire:navigate>
+                <flux:sidebar.item icon="cog-6-tooth" :href="route('profile.edit')" :current="request()->routeIs('profile.edit', 'security.edit')" wire:navigate>
                     {{ __('Settings') }}
                 </flux:sidebar.item>
             </flux:sidebar.nav>
         </flux:sidebar>
 
-        {{-- Top nav: mobile sidebar toggle, breadcrumb, then account actions on the right. --}}
-        <flux:header container class="border-b border-zinc-200 bg-white lg:bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900">
-            <flux:sidebar.toggle class="me-4 lg:hidden" icon="bars-2" inset="left" />
+        {{-- Top nav: mobile sidebar toggle, shortcuts mega menu, search, then account actions on the right. --}}
+        <flux:header container class="border-b border-zinc-200 bg-[#FFFDF8] lg:bg-[#FFFDF8] dark:border-zinc-700 dark:bg-zinc-900">
+            <flux:sidebar.toggle class="me-2 lg:hidden" icon="bars-2" inset="left" />
 
-            <flux:breadcrumbs class="max-sm:hidden">
-                <flux:breadcrumbs.item :href="route('dashboard')" icon="home">{{ __('Home') }}</flux:breadcrumbs.item>
-            </flux:breadcrumbs>
+            {{-- Mega menu of staff shortcuts, then global search. --}}
+            <livewire:pages::shortcut-menu />
+
+            <form method="GET" action="{{ route('search') }}" class="ms-2 w-full max-w-xs">
+                <flux:input type="search" name="q" icon="magnifying-glass" :placeholder="__('Search…')" size="sm" clearable />
+            </form>
 
             <flux:spacer />
 
@@ -65,6 +60,9 @@
                 <livewire:pages::notification-bell />
             </div>
 
+            {{-- Inside the Teams tab, identity is managed by Teams itself, so the
+                 account menu (profile, settings, log out) is redundant and omitted. --}}
+            @unless ($inTeams)
             <flux:dropdown align="end">
                 <flux:profile :initials="auth()->user()->initials()" :aria-label="__('Account menu')" icon-trailing="chevron-down" />
 
@@ -99,6 +97,7 @@
                     </form>
                 </flux:menu>
             </flux:dropdown>
+            @endunless
         </flux:header>
 
         {{ $slot }}

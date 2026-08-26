@@ -3,6 +3,7 @@
 use App\Http\Middleware\RequireTwoFactorForPrivilegedRoles;
 use App\Http\Middleware\SecurityHeaders;
 use App\Http\Middleware\SetLocale;
+use App\Http\Middleware\TrackLastActive;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -20,6 +21,14 @@ return Application::configure(basePath: dirname(__DIR__))
             SecurityHeaders::class,
             SetLocale::class,
             RequireTwoFactorForPrivilegedRoles::class,
+            TrackLastActive::class,
+        ]);
+
+        // Non-sensitive marker read to relax framing for the Teams tab; kept
+        // unencrypted so it survives the cross-site Teams iframe round-trip and the
+        // raw value stays readable (see SecurityHeaders).
+        $middleware->encryptCookies(except: [
+            'mosi_teams_embed',
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

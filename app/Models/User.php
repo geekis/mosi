@@ -59,10 +59,12 @@ use Spatie\Permission\Traits\HasRoles;
  * @property string|null $location_name
  * @property string|null $location_address
  * @property AuthMethod $auth_method
+ * @property string|null $entra_oid Immutable Entra object ID; bound on first SSO login.
  * @property string|null $locale
  * @property string|null $bio
  * @property array<string, bool>|null $notification_preferences
  * @property bool $is_active
+ * @property Carbon|null $last_active_at
  * @property Carbon|null $password_changed_at
  * @property Carbon|null $email_verified_at
  * @property string|null $password
@@ -99,7 +101,22 @@ class User extends Authenticatable implements FilamentUser, HasAvatar, HasMedia,
             'assignment_ends_at' => 'date',
             'assignment_percent' => 'integer',
             'notification_preferences' => 'array',
+            'last_active_at' => 'datetime',
         ];
+    }
+
+    /**
+     * A user is considered online if they made a request within this many minutes.
+     */
+    public const int ONLINE_WITHIN_MINUTES = 5;
+
+    /**
+     * Whether the user has been active recently enough to show as online.
+     */
+    public function isOnline(): bool
+    {
+        return $this->last_active_at !== null
+            && $this->last_active_at->greaterThan(now()->subMinutes(self::ONLINE_WITHIN_MINUTES));
     }
 
     /**
