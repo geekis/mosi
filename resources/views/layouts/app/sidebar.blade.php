@@ -60,10 +60,10 @@
                 <livewire:pages::notification-bell />
             </div>
 
-            {{-- Inside the Teams tab, identity is managed by Teams itself, so the
-                 account menu (profile, settings, log out) is redundant and omitted. --}}
-            @unless ($inTeams)
-            <flux:dropdown align="end">
+            {{-- Inside the Teams tab, identity is managed by Teams itself, so the account
+                 menu is redundant. Hidden client-side when actually framed by Teams (see
+                 partials/head), so a browser session that once visited Teams still shows it. --}}
+            <flux:dropdown align="end" data-hide-in-teams>
                 <flux:profile :initials="auth()->user()->initials()" :aria-label="__('Account menu')" icon-trailing="chevron-down" />
 
                 <flux:menu>
@@ -97,7 +97,6 @@
                     </form>
                 </flux:menu>
             </flux:dropdown>
-            @endunless
         </flux:header>
 
         {{ $slot }}

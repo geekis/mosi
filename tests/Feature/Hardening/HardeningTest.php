@@ -37,14 +37,16 @@ test('the teams embed cookie keeps framing relaxed without the query param', fun
         ->assertHeader('Content-Security-Policy', "frame-ancestors 'self' https://teams.microsoft.com https://*.teams.microsoft.com https://*.skype.com https://*.office.com https://*.microsoft.com;");
 });
 
-test('the account menu shows in the browser but is hidden inside the teams tab', function () {
+test('the account menu is always rendered and marked for client-side hiding in Teams', function () {
     $user = User::factory()->create();
 
+    // The menu is always in the DOM; it is hidden purely client-side when the page is
+    // actually framed by Teams, so a browser session that once visited Teams still shows
+    // it (the previous cookie-based approach leaked the hidden state into the browser).
     $this->actingAs($user)->get(route('dashboard'))
-        ->assertSee('logout-button');
-
-    $this->actingAs($user)->get(route('dashboard', ['context' => 'teams']))
-        ->assertDontSee('logout-button');
+        ->assertSee('logout-button')
+        ->assertSee('data-hide-in-teams', false)
+        ->assertSee('teams-embed', false);
 });
 
 test('the data export includes the user own content', function () {

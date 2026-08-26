@@ -6,7 +6,6 @@ namespace App\Http\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\View;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
@@ -40,11 +39,6 @@ class SecurityHeaders
     {
         $inTeams = self::isTeamsEmbed($request);
 
-        // Share before the response is built so the app shell can drop chrome that
-        // Teams already provides (e.g. the account menu). Computed per request here
-        // rather than once at provider boot, so it tracks each request correctly.
-        View::share('inTeams', $inTeams);
-
         if ($inTeams) {
             // The tab frames Mosi cross-site, so the session and CSRF cookies must be
             // SameSite=None; Secure to be sent inside the iframe at all. Set before
@@ -75,7 +69,9 @@ class SecurityHeaders
     /**
      * A request is a Teams embed when it arrives with the manifest's `?context=teams`
      * marker, or when the persistence cookie from an earlier framed load is present.
-     * Public and static so views (via the shared `inTeams` flag) share one definition.
+     * Drives the framing headers and cookie SameSite only — the account menu is hidden
+     * client-side by actual frame detection (partials/head), which cannot leak into a
+     * normal browser session the way this cookie can.
      */
     public static function isTeamsEmbed(Request $request): bool
     {
