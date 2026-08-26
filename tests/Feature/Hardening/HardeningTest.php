@@ -17,7 +17,7 @@ test('security headers are present on web responses', function () {
     $response->assertHeader('X-Content-Type-Options', 'nosniff')
         ->assertHeader('Referrer-Policy', 'strict-origin-when-cross-origin')
         ->assertHeaderMissing('X-Frame-Options')
-        ->assertHeader('Content-Security-Policy', "frame-ancestors 'self' https://teams.microsoft.com https://*.teams.microsoft.com https://*.skype.com https://*.office.com https://*.microsoft.com;");
+        ->assertHeader('Content-Security-Policy', "frame-ancestors 'self' https://teams.microsoft.com https://*.teams.microsoft.com https://*.cloud.microsoft https://*.skype.com https://*.office.com https://*.microsoft.com;");
 });
 
 test('the teams tab context is remembered with a cookie', function () {

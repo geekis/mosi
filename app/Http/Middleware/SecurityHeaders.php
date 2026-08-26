@@ -28,9 +28,10 @@ class SecurityHeaders
     private const string TEAMS_EMBED_COOKIE = 'mosi_teams_embed';
 
     /**
-     * Hosts allowed to frame Mosi when running as a Teams tab.
+     * Hosts allowed to frame Mosi when running as a Teams tab. Includes
+     * `*.cloud.microsoft`, the domain the modern Teams/M365 web clients now frame from.
      */
-    private const string TEAMS_FRAME_ANCESTORS = "frame-ancestors 'self' https://teams.microsoft.com https://*.teams.microsoft.com https://*.skype.com https://*.office.com https://*.microsoft.com;";
+    private const string TEAMS_FRAME_ANCESTORS = "frame-ancestors 'self' https://teams.microsoft.com https://*.teams.microsoft.com https://*.cloud.microsoft https://*.skype.com https://*.office.com https://*.microsoft.com;";
 
     /**
      * @param  Closure(Request): (Response)  $next
