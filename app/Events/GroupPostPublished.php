@@ -6,7 +6,7 @@ namespace App\Events;
 
 use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Broadcasting\PrivateChannel;
-use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
+use Illuminate\Contracts\Broadcasting\ShouldBroadcastNow;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 
@@ -16,7 +16,7 @@ use Illuminate\Queue\SerializesModels;
  * from the notifications table, never from the broadcast. The channel is private and
  * authorised to members only in routes/channels.php (.ai/rules/realtime.md).
  */
-class GroupPostPublished implements ShouldBroadcast
+class GroupPostPublished implements ShouldBroadcastNow
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
