@@ -7,6 +7,7 @@
     "license": "MIT",
     "require": {
         "php": "^8.5",
+        "enshrined/svg-sanitize": "^0.22.0",
         "filament/filament": "^5.7",
         "intervention/image": "^4.2",
         "laravel/chisel": "^0.1.0",

@@ -78,6 +78,39 @@ test('an event in a secret group is visible to a member', function () {
     expect($member->can('view', $event))->toBeTrue();
 });
 
+test('an event in an open group is member-only — invisible to a non-member', function () {
+    $viewer = User::factory()->create();
+    $open = Group::factory()->create(); // open by default
+    $event = Event::factory()->create(['group_id' => $open->id]);
+
+    $ids = Event::query()->visibleTo($viewer)->pluck('id')->all();
+
+    expect($ids)->not->toContain($event->id)
+        ->and($viewer->can('view', $event))->toBeFalse();
+});
+
+test('an event in an open group is visible to a member', function () {
+    $member = User::factory()->create();
+    $open = Group::factory()->create();
+    $open->members()->attach($member->id, ['role' => GroupRole::Member->value]);
+    $event = Event::factory()->create(['group_id' => $open->id]);
+
+    $ids = Event::query()->visibleTo($member)->pluck('id')->all();
+
+    expect($ids)->toContain($event->id)
+        ->and($member->can('view', $event))->toBeTrue();
+});
+
+test('an organisation-wide event with no group is visible to everyone', function () {
+    $viewer = User::factory()->create();
+    $event = Event::factory()->create(['group_id' => null]);
+
+    $ids = Event::query()->visibleTo($viewer)->pluck('id')->all();
+
+    expect($ids)->toContain($event->id)
+        ->and($viewer->can('view', $event))->toBeTrue();
+});
+
 test('the ics export produces a valid calendar document', function () {
     $event = Event::factory()->create([
         'title' => ['is' => 'Ráðstefna', 'en' => 'Conference'],

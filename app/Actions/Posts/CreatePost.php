@@ -8,7 +8,6 @@ use App\Actions\Mentions\NotifyMentions;
 use App\Models\Group;
 use App\Models\Post;
 use App\Models\User;
-use App\Support\HtmlContent;
 use DomainException;
 use Illuminate\Support\Carbon;
 
@@ -16,6 +15,9 @@ use Illuminate\Support\Carbon;
  * Create a post. A group post requires membership; the official flag is honoured only
  * for comms/super-admin. published_at defaults to now — pass null for a draft or a
  * future time to schedule. Media is attached by the caller after creation.
+ *
+ * The body is stored as plain text (trimmed) and escaped when rendered, so no HTML is
+ * interpreted — the composer is a plain textarea, not a rich editor.
  */
 final class CreatePost
 {
@@ -38,7 +40,7 @@ final class CreatePost
             }
         }
 
-        $body = HtmlContent::sanitize($data['body']);
+        $body = trim($data['body']);
 
         $post = Post::create([
             'user_id' => $author->id,

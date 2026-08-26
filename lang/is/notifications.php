@@ -20,6 +20,10 @@ return [
         'body' => ':name er farin(n) að fylgja þér.',
     ],
 
+    'group_invitation' => [
+        'body' => ':name bauð þér í hópinn :group.',
+    ],
+
     'digest' => [
         'subject' => 'Samantekt frá Mosa',
         'greeting' => 'Hæ :name,',

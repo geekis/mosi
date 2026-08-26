@@ -12,5 +12,8 @@ final class LeaveGroup
     public function __invoke(User $user, Group $group): void
     {
         $group->members()->detach($user->id);
+
+        // Leaving the group also removes you from its chat.
+        $group->conversation()->first()?->participants()->detach($user->id);
     }
 }

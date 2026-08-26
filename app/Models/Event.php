@@ -11,6 +11,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Carbon;
+use Spatie\MediaLibrary\HasMedia;
+use Spatie\MediaLibrary\InteractsWithMedia;
 use Spatie\Sluggable\HasSlug;
 use Spatie\Sluggable\SlugOptions;
 use Spatie\Translatable\HasTranslations;
@@ -27,10 +29,10 @@ use Spatie\Translatable\HasTranslations;
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
  */
-class Event extends Model
+class Event extends Model implements HasMedia
 {
     /** @use HasFactory<EventFactory> */
-    use HasFactory, HasSlug, HasTranslations, SoftDeletes;
+    use HasFactory, HasSlug, HasTranslations, InteractsWithMedia, SoftDeletes;
 
     /** @var list<string> */
     protected $fillable = [
@@ -66,6 +68,20 @@ class Event extends Model
     public function getRouteKeyName(): string
     {
         return 'slug';
+    }
+
+    public function registerMediaCollections(): void
+    {
+        $this->addMediaCollection('cover')
+            ->singleFile()
+            ->acceptsMimeTypes(['image/jpeg', 'image/png', 'image/webp']);
+    }
+
+    public function coverUrl(): ?string
+    {
+        $url = $this->getFirstMediaUrl('cover');
+
+        return $url === '' ? null : $url;
     }
 
     /**
@@ -110,8 +126,9 @@ class Event extends Model
     }
 
     /**
-     * Events the user may see: organisation-wide events (no group) plus events whose
-     * group is visible to them. A secret group's events never leak (.ai/rules/auth.md).
+     * Events the user may see: organisation-wide events (no group) plus events in groups
+     * the user is a member of. A group event is member-only — visibility of the group
+     * itself is not enough (.ai/rules/auth.md).
      *
      * @param  Builder<Event>  $query
      */
@@ -119,7 +136,9 @@ class Event extends Model
     {
         $query->where(function (Builder $q) use ($user): void {
             $q->whereNull('group_id')
-                ->orWhereIn('group_id', Group::query()->visibleTo($user)->select('id'));
+                ->orWhereIn('group_id', Group::query()
+                    ->whereHas('members', fn (Builder $m) => $m->whereKey($user->id))
+                    ->select('id'));
         });
     }
 }

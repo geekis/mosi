@@ -9,7 +9,6 @@ use App\Models\Comment;
 use App\Models\Post;
 use App\Models\User;
 use App\Notifications\CommentOnYourPost;
-use App\Support\HtmlContent;
 use DomainException;
 
 /**
@@ -35,7 +34,7 @@ final class AddComment
             }
         }
 
-        $clean = HtmlContent::sanitize($body);
+        $clean = trim($body);
 
         $comment = Comment::create([
             'post_id' => $post->id,

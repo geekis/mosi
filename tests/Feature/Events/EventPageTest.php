@@ -71,3 +71,13 @@ test('the ics route is forbidden for a secret-group event the user cannot see', 
         ->get(route('events.ics', $event))
         ->assertForbidden();
 });
+
+test('the ics route is forbidden for an open-group event when the user is not a member', function () {
+    $user = User::factory()->create();
+    $open = Group::factory()->create(); // open, but events are member-only
+    $event = Event::factory()->create(['group_id' => $open->id, 'starts_at' => now()->addDay()]);
+
+    $this->actingAs($user)
+        ->get(route('events.ics', $event))
+        ->assertForbidden();
+});

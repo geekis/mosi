@@ -3,8 +3,7 @@
 use App\Actions\Feed\BuildFeed;
 use App\Actions\Feed\BuildLatest;
 use App\Actions\Posts\CreatePost;
-use App\Actions\Reactions\React;
-use App\Enums\ReactionType;
+use App\Concerns\InteractsWithPostComposer;
 use App\Models\Event;
 use App\Models\Post;
 use Flux\Flux;
@@ -13,36 +12,28 @@ use Livewire\Attributes\Title;
 use Livewire\Component;
 
 new #[Title('Mosi')] class extends Component {
+    use InteractsWithPostComposer;
+
     public string $tab = 'for-you';
 
-    public string $composer = '';
-
     /**
-     * Publish the composed post. The action sanitises the HTML and notifies mentions.
+     * Publish the composed post with any attachments. The action sanitises the HTML and
+     * notifies mentions; media is routed into its collections afterwards.
      */
     public function publish(CreatePost $createPost): void
     {
-        if (trim(strip_tags($this->composer)) === '') {
+        if (trim(strip_tags($this->composer)) === '' && $this->attachments === []) {
             return;
         }
 
-        $createPost(Auth::user(), ['body' => $this->composer]);
+        $this->validateAttachments();
 
-        $this->composer = '';
+        $post = $createPost(Auth::user(), ['body' => $this->composer]);
+        $this->attachMediaTo($post);
+
+        $this->resetComposer();
         Flux::modal('composer')->close();
         Flux::toast(text: __('Your post is published.'), variant: 'success');
-    }
-
-    public function react(int $postId, string $type, React $react): void
-    {
-        $post = Post::find($postId);
-        $reaction = ReactionType::tryFrom($type);
-
-        if ($post === null || $reaction === null || ! Auth::user()->can('view', $post)) {
-            return;
-        }
-
-        $react(Auth::user(), $post, $reaction);
     }
 
     /**
@@ -51,13 +42,16 @@ new #[Title('Mosi')] class extends Component {
     public function with(BuildFeed $buildFeed, BuildLatest $buildLatest): array
     {
         $user = Auth::user();
+        $mentions = $this->mentionData();
 
         return [
             'me' => $user,
+            'mentionMap' => $mentions['map'],
             'posts' => $this->tab === 'latest'
                 ? $buildLatest($user, 15)
                 : $buildFeed($user, 15),
             'myGroups' => $user->groups()->orderBy('id')->get(),
+            'mentionables' => $mentions['list'],
             'followersCount' => $user->followers()->count(),
             'followingCount' => $user->following()->count(),
             'postsCount' => Post::where('user_id', $user->id)->count(),
@@ -66,7 +60,13 @@ new #[Title('Mosi')] class extends Component {
     }
 }; ?>
 
-<div class="mx-auto flex w-full max-w-7xl gap-6">
+<div class="mx-auto flex w-full max-w-7xl gap-6"
+    x-data="{
+        viewer: null,
+        open(kind, url, name) { this.viewer = { kind, url, name }; },
+        close() { this.viewer = null; },
+    }"
+    x-on:keydown.escape.window="close()">
     {{-- Left rail: who you are, your groups, quick links. Appears at lg. --}}
     <aside class="hidden w-72 shrink-0 space-y-4 lg:block">
         <flux:card class="overflow-hidden p-0">
@@ -143,48 +143,11 @@ new #[Title('Mosi')] class extends Component {
 
     {{-- Center column: composer, tabs and the feed --}}
     <div class="min-w-0 flex-1">
-    {{-- Composer trigger: opens the post modal. --}}
-    <flux:card>
-        <div class="flex items-center gap-3">
-            <flux:avatar :name="$me->display_name" :initials="$me->initials()" :src="$me->avatarUrl()" size="sm" />
-
-            <flux:modal.trigger name="composer" class="flex-1">
-                <button type="button" class="w-full rounded-full bg-zinc-100 px-4 py-2 text-start text-sm text-zinc-500 hover:bg-zinc-200 dark:bg-zinc-700 dark:text-zinc-300 dark:hover:bg-zinc-600">
-                    {{ __("What's going on, :name?", ['name' => $me->given_name ?? $me->display_name]) }}
-                </button>
-            </flux:modal.trigger>
-        </div>
-
-        <flux:separator class="my-3" variant="subtle" />
-
-        <div class="flex flex-wrap items-center justify-between gap-1">
-            <flux:modal.trigger name="composer">
-                <flux:button size="sm" variant="ghost" icon="hand-thumb-up">{{ __('Give a Shout-Out') }}</flux:button>
-            </flux:modal.trigger>
-            <flux:modal.trigger name="composer">
-                <flux:button size="sm" variant="ghost" icon="sparkles">{{ __('Post a Value Update') }}</flux:button>
-            </flux:modal.trigger>
-            <flux:modal.trigger name="composer">
-                <flux:button size="sm" variant="ghost" icon="question-mark-circle">{{ __('Ask a Question') }}</flux:button>
-            </flux:modal.trigger>
-        </div>
-    </flux:card>
-
-    {{-- Composer modal --}}
-    <flux:modal name="composer" class="w-full max-w-lg">
-        <div class="space-y-4">
-            <flux:heading size="lg">{{ __('Create a post') }}</flux:heading>
-            <flux:editor wire:model="composer" :placeholder="__('Share something with your colleagues…')" />
-            <div class="flex justify-end">
-                <flux:button variant="primary" wire:click="publish" data-test="publish-button">
-                    {{ __('Post') }}
-                </flux:button>
-            </div>
-        </div>
-    </flux:modal>
+    <x-post-composer :me="$me" :placeholder="__('Share something with your colleagues…')"
+        :attachments="$attachments" :mentionables="$mentionables" post-test="publish-button" />
 
     {{-- Tabs --}}
-    <flux:tabs wire:model.live="tab" class="mt-6">
+    <flux:tabs wire:model.live="tab" variant="segmented" class="mt-6">
         <flux:tab name="for-you">{{ __('For you') }}</flux:tab>
         <flux:tab name="latest">{{ __('Latest') }}</flux:tab>
     </flux:tabs>
@@ -192,48 +155,7 @@ new #[Title('Mosi')] class extends Component {
     {{-- Feed --}}
     <div class="mt-4 space-y-4">
         @forelse ($posts as $post)
-            <flux:card wire:key="post-{{ $post->id }}" @class(['ring-1 ring-primary-500/40' => $post->is_official])>
-                <div class="flex items-center gap-3">
-                    <flux:avatar :name="$post->author?->display_name" :src="$post->author?->avatarUrl()" size="sm" />
-
-                    <div class="min-w-0">
-                        @if ($post->author?->external_id)
-                            <a href="{{ route('people.show', $post->author) }}" class="hover:underline" wire:navigate>
-                                <flux:heading class="truncate">{{ $post->author->display_name }}</flux:heading>
-                            </a>
-                        @else
-                            <flux:heading class="truncate">{{ $post->author?->display_name }}</flux:heading>
-                        @endif
-
-                        <flux:text size="sm" class="flex items-center gap-1 truncate">
-                            @if ($post->group)
-                                <a href="{{ route('groups.show', $post->group) }}" wire:navigate class="truncate hover:underline">{{ $post->group->name }}</a>
-                                <span>·</span>
-                            @endif
-                            <span>{{ $post->published_at?->diffForHumans() }}</span>
-                            @if ($post->is_official)
-                                <flux:badge size="sm" color="green">{{ __('Official') }}</flux:badge>
-                            @endif
-                        </flux:text>
-                    </div>
-                </div>
-
-                <div class="prose prose-sm mt-3 max-w-none whitespace-pre-line dark:prose-invert">
-                    {!! $post->body !!}
-                </div>
-
-                <flux:separator class="my-3" variant="subtle" />
-
-                <div class="flex items-center gap-2 text-sm">
-                    <flux:button size="xs" variant="ghost" icon="hand-thumb-up" wire:click="react({{ $post->id }}, 'like')">
-                        {{ $post->reactions_count }}
-                    </flux:button>
-
-                    <flux:button size="xs" variant="ghost" icon="chat-bubble-oval-left-ellipsis">
-                        {{ $post->comments_count }}
-                    </flux:button>
-                </div>
-            </flux:card>
+            <x-post-card :post="$post" :mentionables="$mentionables" :mention-map="$mentionMap" wire:key="post-{{ $post->id }}" />
         @empty
             <flux:callout icon="rss">
                 {{ __('Your feed is quiet. Join a group or follow colleagues to see their posts here.') }}
@@ -263,4 +185,7 @@ new #[Title('Mosi')] class extends Component {
 
         <x-rail.placeholder :heading="__('New colleagues')" icon="user-plus" />
     </aside>
+
+    <x-post-media-viewer />
+    <x-post-reactions-modal :reactions="$postReactionList" />
 </div>

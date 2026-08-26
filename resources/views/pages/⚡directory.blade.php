@@ -72,18 +72,20 @@ new #[Title('Directory')] class extends Component {
     {{-- Grid --}}
     <div class="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
         @forelse ($people as $person)
-            <a wire:key="person-{{ $person->id }}" href="{{ $person->external_id ? route('people.show', $person) : '#' }}" wire:navigate
-               class="flex items-center gap-3 rounded-xl border border-zinc-200 p-4 hover:bg-zinc-50 dark:border-zinc-700 dark:hover:bg-zinc-800">
-                <flux:avatar :name="$person->display_name" :initials="$person->initials()" :src="$person->avatarUrl()" size="lg" />
-                <div class="min-w-0">
-                    <flux:heading size="sm" class="truncate">{{ $person->display_name }}</flux:heading>
-                    @if ($person->job_title)
-                        <flux:text size="sm" class="truncate">{{ $person->job_title }}</flux:text>
-                    @endif
-                    @if ($person->organization_name)
-                        <flux:text size="sm" class="truncate text-zinc-500 dark:text-zinc-400">{{ $person->organization_name }}</flux:text>
-                    @endif
-                </div>
+            <a wire:key="person-{{ $person->id }}" href="{{ $person->external_id ? route('people.show', $person) : '#' }}" wire:navigate>
+                <flux:card size="sm" class="flex items-center gap-3 ">
+                    <flux:avatar :name="$person->display_name" :initials="$person->initials()" :src="$person->avatarUrl()" size="lg"
+                        :badge="$person->isOnline()" badge:color="green" badge:circle badge:position="bottom right" />
+                    <div class="min-w-0">
+                        <flux:heading size="sm" class="truncate">{{ $person->display_name }}</flux:heading>
+                        @if ($person->job_title)
+                            <flux:text size="sm" class="truncate">{{ $person->job_title }}</flux:text>
+                        @endif
+                        @if ($person->organization_name)
+                            <flux:text size="sm" class="truncate text-zinc-500 dark:text-zinc-400">{{ $person->organization_name }}</flux:text>
+                        @endif
+                    </div>
+                </flux:card>
             </a>
         @empty
             <flux:callout icon="magnifying-glass" class="sm:col-span-2 lg:col-span-3">

@@ -155,10 +155,14 @@ it('renders a feed page in a constant number of queries', function () {
         $post->reactions_count;
         $post->comments_count;
         $post->getMedia('images');
+        $post->reactions->count();
+        $post->comments->each(fn ($comment) => $comment->author?->display_name);
     });
     $queries = count(DB::getQueryLog());
     DB::disableQueryLog();
 
-    // Feed query + groups + follows + eager loads — bounded, never N+1 across 12 posts.
-    expect($queries)->toBeLessThanOrEqual(10);
+    // Feed query + groups + follows + eager loads (author, media, reactions, comments and
+    // their authors) — a fixed count, never scaling with the 12 posts. A real N+1 would
+    // push this into the dozens.
+    expect($queries)->toBeLessThanOrEqual(13);
 });

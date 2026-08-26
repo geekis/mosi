@@ -52,6 +52,12 @@ class Post extends Model implements HasMedia
         $this->addMediaCollection('images')
             ->acceptsMimeTypes(['image/jpeg', 'image/png', 'image/webp', 'image/gif']);
 
+        // Videos and generic files are unrestricted: the collection is chosen from the
+        // declared mime at publish time, and a stored file whose sniffed mime differs
+        // from what the browser declared must not throw and lose the post (mirrors the
+        // chat attachment rules, .ai/rules/realtime.md).
+        $this->addMediaCollection('videos');
+
         $this->addMediaCollection('attachments');
     }
 

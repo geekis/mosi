@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Actions\Comments\AddComment;
+use App\Actions\Mentions\NotifyMentions;
 use App\Actions\Posts\CreatePost;
 use App\Enums\GroupRole;
 use App\Models\Group;
@@ -14,7 +15,8 @@ use Illuminate\Support\Facades\Notification;
 
 function mentionBody(User $user): string
 {
-    return '<p>Hi <span data-mention="'.$user->id.'">@'.$user->given_name.'</span></p>';
+    // A plain-text mention: the user's handle is their display name without spaces.
+    return 'Hi @'.NotifyMentions::handleFor($user).', welcome!';
 }
 
 it('notifies a mentioned user and records the mention', function () {
@@ -64,4 +66,24 @@ it('notifies mentions in comments', function () {
     app(AddComment::class)($author, $post, mentionBody($mentioned));
 
     Notification::assertSentTo($mentioned, YouWereMentioned::class);
+});
+
+it('resolves a @handle written as the display name without spaces', function () {
+    Notification::fake();
+    $author = User::factory()->create();
+    $egill = User::factory()->create(['display_name' => 'Egill Heinesen']);
+
+    app(CreatePost::class)($author, ['body' => 'Sæll @EgillHeinesen, gaman að sjá þig!']);
+
+    Notification::assertSentTo($egill, YouWereMentioned::class);
+});
+
+it('matches a handle case-insensitively', function () {
+    Notification::fake();
+    $author = User::factory()->create();
+    $egill = User::factory()->create(['display_name' => 'Egill Heinesen']);
+
+    app(CreatePost::class)($author, ['body' => 'hallo @egillheinesen']);
+
+    Notification::assertSentTo($egill, YouWereMentioned::class);
 });

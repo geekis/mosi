@@ -48,10 +48,10 @@ return [
     'reaction' => [
         'like' => 'Líka við',
         'love' => 'Elska',
-        'celebrate' => 'Fagna',
-        'insightful' => 'Innsæi',
-        'funny' => 'Fyndið',
-        'support' => 'Stuðningur',
+        'care' => 'Umhyggja',
+        'haha' => 'Haha',
+        'wow' => 'Vá',
+        'sad' => 'Sorg',
     ],
 
 ];

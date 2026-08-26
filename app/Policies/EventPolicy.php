@@ -9,9 +9,9 @@ use App\Models\Group;
 use App\Models\User;
 
 /**
- * Authorisation for events. `view` mirrors {@see Event::scopeVisibleTo()} — an event in
- * a secret group is invisible to non-members. Editing is limited to the creator, comms,
- * and super-admins.
+ * Authorisation for events. `view` mirrors {@see Event::scopeVisibleTo()} — a group event
+ * is visible only to members of that group; an organisation-wide event (no group) is
+ * visible to everyone. Editing is limited to the creator, comms, and super-admins.
  */
 class EventPolicy
 {
@@ -21,7 +21,7 @@ class EventPolicy
             return true;
         }
 
-        return Group::query()->whereKey($event->group_id)->visibleTo($user)->exists();
+        return Group::query()->whereKey($event->group_id)->first()?->hasMember($user) ?? false;
     }
 
     public function create(User $user): bool

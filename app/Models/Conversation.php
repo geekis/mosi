@@ -13,6 +13,7 @@ use Illuminate\Support\Carbon;
 /**
  * @property int $id
  * @property ConversationType $type
+ * @property int|null $group_id
  * @property string|null $title
  * @property int|null $created_by
  * @property Carbon|null $last_message_at
@@ -22,7 +23,7 @@ use Illuminate\Support\Carbon;
 class Conversation extends Model
 {
     /** @var list<string> */
-    protected $fillable = ['type', 'title', 'created_by', 'last_message_at'];
+    protected $fillable = ['type', 'group_id', 'title', 'created_by', 'last_message_at'];
 
     /**
      * @return array<string, string>
@@ -59,6 +60,16 @@ class Conversation extends Model
     public function creator(): BelongsTo
     {
         return $this->belongsTo(User::class, 'created_by');
+    }
+
+    /**
+     * The group this chat belongs to, for a dedicated group conversation.
+     *
+     * @return BelongsTo<Group, $this>
+     */
+    public function group(): BelongsTo
+    {
+        return $this->belongsTo(Group::class);
     }
 
     public function hasParticipant(User $user): bool

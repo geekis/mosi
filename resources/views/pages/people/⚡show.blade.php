@@ -106,6 +106,7 @@ new #[Title('Mosi')] class extends Component {
 
             <div class="mt-3">
                 <flux:heading size="xl">{{ $user->display_name }}</flux:heading>
+                <x-user-presence :user="$user" class="mt-1" />
                 @if ($user->job_title)
                     <flux:text class="mt-1">{{ $user->job_title }}</flux:text>
                 @endif
@@ -165,7 +166,7 @@ new #[Title('Mosi')] class extends Component {
                     <flux:text size="sm" class="text-zinc-500 dark:text-zinc-400">
                         @if ($post->group){{ $post->group->name }} · @endif{{ $post->published_at?->diffForHumans() }}
                     </flux:text>
-                    <div class="prose prose-sm mt-2 max-w-none whitespace-pre-line dark:prose-invert">{!! $post->body !!}</div>
+                    <div class="prose prose-sm mt-2 max-w-none whitespace-pre-line dark:prose-invert">{{ $post->body }}</div>
                     <flux:text size="sm" class="mt-3 text-zinc-500 dark:text-zinc-400">
                         {{ $post->reactions_count }} · {{ $post->comments_count }}
                     </flux:text>

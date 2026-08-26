@@ -2,10 +2,15 @@
 
 declare(strict_types=1);
 
+use App\Actions\Reactions\React;
 use App\Enums\GroupRole;
+use App\Enums\ReactionType;
+use App\Models\Comment;
 use App\Models\Group;
 use App\Models\Post;
 use App\Models\User;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 use Livewire\Livewire;
 
 test('the group index lists a visible group and hides a secret one from a non-member', function () {
@@ -31,6 +36,25 @@ test('an open group page renders for any user and shows its published posts', fu
         ->assertOk()
         ->assertSee($group->name)
         ->assertSee('GROUP-POST-BODY');
+});
+
+test('a group post with an image, a reaction and a comment renders without a lazy-load error', function () {
+    Storage::fake(config('media-library.disk_name'));
+    $viewer = User::factory()->create();
+    $author = User::factory()->create();
+    $group = Group::factory()->create();
+    $group->members()->attach($author->id, ['role' => GroupRole::Member->value]);
+
+    $post = Post::factory()->inGroup($group)->create(['user_id' => $author->id, 'body' => 'RICH-GROUP-POST']);
+    $post->addMedia(UploadedFile::fake()->image('mynd.jpg'))->toMediaCollection('images');
+    app(React::class)($author, $post, ReactionType::Love);
+    Comment::factory()->create(['post_id' => $post->id, 'user_id' => $author->id, 'body' => 'FYRSTA-ATHUGASEMD']);
+
+    Livewire::actingAs($viewer)
+        ->test('pages::groups.show', ['group' => $group])
+        ->assertOk()
+        ->assertSee('RICH-GROUP-POST')
+        ->assertSee('FYRSTA-ATHUGASEMD');
 });
 
 test('a secret group page returns 404 for a non-member', function () {

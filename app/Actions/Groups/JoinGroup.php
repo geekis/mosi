@@ -25,5 +25,8 @@ final class JoinGroup
         $group->members()->syncWithoutDetaching([
             $user->id => ['role' => GroupRole::Member->value],
         ]);
+
+        // If the group chat already exists, pull the new member straight in.
+        $group->conversation()->first()?->participants()->syncWithoutDetaching([$user->id]);
     }
 }

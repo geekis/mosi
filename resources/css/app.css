@@ -8,6 +8,12 @@
 
 @custom-variant dark (&:where(.dark, .dark *));
 
+/* Keep Alpine-toggled elements (emoji picker, reaction palette) hidden until Alpine
+   initialises, so they never flash open on first paint. */
+[x-cloak] {
+    display: none !important;
+}
+
 @theme {
     --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
 

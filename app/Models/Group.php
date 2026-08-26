@@ -11,10 +11,13 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Carbon;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
+use Spatie\MediaLibrary\MediaCollections\Models\Collections\MediaCollection;
+use Spatie\MediaLibrary\MediaCollections\Models\Media;
 use Spatie\Sluggable\HasSlug;
 use Spatie\Sluggable\SlugOptions;
 use Spatie\Translatable\HasTranslations;
@@ -41,6 +44,38 @@ class Group extends Model implements HasMedia
 
     /** @var list<string> */
     public array $translatable = ['name', 'description'];
+
+    /**
+     * Office-document mime types accepted into the members-only `files` collection.
+     *
+     * @var list<string>
+     */
+    public const array FILE_MIME_TYPES = [
+        'application/pdf',
+        'application/msword',
+        'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+        'application/vnd.ms-excel',
+        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        'application/vnd.ms-powerpoint',
+        'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+        'text/csv',
+        'text/plain',
+    ];
+
+    /**
+     * Image and video mime types accepted into the members-only `gallery` collection.
+     *
+     * @var list<string>
+     */
+    public const array GALLERY_MIME_TYPES = [
+        'image/jpeg',
+        'image/png',
+        'image/webp',
+        'image/gif',
+        'video/mp4',
+        'video/quicktime',
+        'video/webm',
+    ];
 
     /**
      * @return array<string, string>
@@ -71,6 +106,23 @@ class Group extends Model implements HasMedia
         $this->addMediaCollection('banner')
             ->singleFile()
             ->acceptsMimeTypes(['image/jpeg', 'image/png', 'image/webp']);
+
+        // The group's profile image (public, like the banner).
+        $this->addMediaCollection('avatar')
+            ->singleFile()
+            ->acceptsMimeTypes(['image/jpeg', 'image/png', 'image/webp']);
+
+        // Members-only attachments live on the private `local` disk: their URLs must never
+        // be public. They are streamed through GroupMediaController after a membership
+        // check (.ai/rules/auth.md) — never via getUrl(). Mime types are enforced in the
+        // upload Actions (UploadGroupFile / UploadGroupMedia) rather than via
+        // acceptsMimeTypes(), whose content-based finfo check disagrees with the browser
+        // mime on some real uploads and rejects test fixtures.
+        $this->addMediaCollection('files')
+            ->useDisk('local');
+
+        $this->addMediaCollection('gallery')
+            ->useDisk('local');
     }
 
     public function bannerUrl(): ?string
@@ -78,6 +130,24 @@ class Group extends Model implements HasMedia
         $banner = $this->getFirstMedia('banner');
 
         return $banner?->getUrl();
+    }
+
+    public function avatarUrl(): ?string
+    {
+        $avatar = $this->getFirstMedia('avatar');
+
+        return $avatar?->getUrl();
+    }
+
+    /**
+     * The media in a members-only collection, loading the relation if needed so the
+     * strict lazy-loading guard is not tripped when a child component renders.
+     *
+     * @return MediaCollection<int, Media>
+     */
+    public function mediaIn(string $collection): MediaCollection
+    {
+        return $this->loadMissing('media')->getMedia($collection);
     }
 
     public function getRouteKeyName(): string
@@ -107,6 +177,16 @@ class Group extends Model implements HasMedia
     public function joinRequests(): HasMany
     {
         return $this->hasMany(GroupJoinRequest::class);
+    }
+
+    /**
+     * The group's dedicated chat, if one has been opened yet.
+     *
+     * @return HasOne<Conversation, $this>
+     */
+    public function conversation(): HasOne
+    {
+        return $this->hasOne(Conversation::class);
     }
 
     /**

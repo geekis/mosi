@@ -44,7 +44,7 @@ new #[Title('News')] class extends Component {
                         </flux:text>
                     </div>
                 </div>
-                <div class="prose prose-sm mt-3 max-w-none whitespace-pre-line dark:prose-invert">{!! $post->body !!}</div>
+                <div class="prose prose-sm mt-3 max-w-none whitespace-pre-line dark:prose-invert">{{ $post->body }}</div>
             </flux:card>
         @empty
             <flux:callout icon="newspaper">{{ __('No news yet.') }}</flux:callout>

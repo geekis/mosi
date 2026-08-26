@@ -50,10 +50,10 @@ return [
     'reaction' => [
         'like' => 'Like',
         'love' => 'Love',
-        'celebrate' => 'Celebrate',
-        'insightful' => 'Insightful',
-        'funny' => 'Funny',
-        'support' => 'Support',
+        'care' => 'Care',
+        'haha' => 'Haha',
+        'wow' => 'Wow',
+        'sad' => 'Sad',
     ],
 
 ];

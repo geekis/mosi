@@ -23,10 +23,10 @@ it('changes a reaction instead of stacking', function () {
     $post = Post::factory()->create();
 
     app(React::class)($user, $post, ReactionType::Like);
-    app(React::class)($user, $post, ReactionType::Celebrate);
+    app(React::class)($user, $post, ReactionType::Haha);
 
     expect($post->reactions()->count())->toBe(1)
-        ->and($post->reactions()->first()->type)->toBe(ReactionType::Celebrate);
+        ->and($post->reactions()->first()->type)->toBe(ReactionType::Haha);
 });
 
 it('removes a reaction', function () {

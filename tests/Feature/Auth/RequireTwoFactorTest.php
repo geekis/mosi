@@ -27,6 +27,13 @@ it('lets a privileged user with 2FA enabled through', function () {
     $this->actingAs($user)->get(route('dashboard'))->assertOk();
 });
 
+it('does not force 2FA on a privileged user in the local environment', function () {
+    app()['env'] = 'local';
+    $user = withRole(User::factory()->create(), 'super-admin');
+
+    $this->actingAs($user)->get(route('dashboard'))->assertOk();
+});
+
 it('does not force 2FA on a regular employee', function () {
     $user = withRole(User::factory()->create(), 'employee');
 

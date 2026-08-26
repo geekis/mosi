@@ -87,7 +87,7 @@ new #[Title('Search')] class extends Component {
                         <flux:text size="sm" class="text-zinc-500 dark:text-zinc-400">
                             {{ $post->author?->display_name }}@if ($post->group) · {{ $post->group->name }}@endif
                         </flux:text>
-                        <div class="prose prose-sm mt-1 max-w-none dark:prose-invert">{!! $post->body !!}</div>
+                        <div class="prose prose-sm mt-1 max-w-none whitespace-pre-line dark:prose-invert">{{ $post->body }}</div>
                     </div>
                 @endforeach
             </div>

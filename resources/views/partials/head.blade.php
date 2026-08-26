@@ -16,4 +16,3 @@
 <link rel="stylesheet" href="https://fonts.bunny.net/css?family=inter:400,500,600,700&display=swap">
 
 @vite(['resources/css/app.css', 'resources/js/app.js'])
-@fluxAppearance

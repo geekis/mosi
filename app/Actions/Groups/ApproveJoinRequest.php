@@ -21,6 +21,9 @@ final class ApproveJoinRequest
             $request->user_id => ['role' => GroupRole::Member->value],
         ]);
 
+        // If the group chat already exists, add the newly approved member.
+        $group->conversation()->first()?->participants()->syncWithoutDetaching([$request->user_id]);
+
         $request->delete();
     }
 }

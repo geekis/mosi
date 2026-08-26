@@ -21,6 +21,13 @@ class RequireTwoFactorForPrivilegedRoles
 
     public function handle(Request $request, Closure $next): Response
     {
+        // Local/dev convenience: skip the mandatory-2FA gate so super-admins and comms
+        // staff can use the app without enrolling. Production and the testing environment
+        // keep 2FA mandatory (.ai/rules/auth.md), so the feature tests still exercise it.
+        if (app()->environment('local', 'dev')) {
+            return $next($request);
+        }
+
         // Let the routes needed to enrol through first — the security settings page,
         // Fortify's 2FA/password-confirm endpoints (under /user), Livewire updates and
         // logout. This also avoids the role query on every Livewire poll.

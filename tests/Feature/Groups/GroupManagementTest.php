@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Actions\Groups\UpdateGroupAvatar;
 use App\Actions\Groups\UpdateGroupBanner;
 use App\Enums\GroupRole;
 use App\Models\Group;
@@ -143,4 +144,58 @@ test('a group banner is stored in the banner collection', function () {
     app(UpdateGroupBanner::class)($group, UploadedFile::fake()->image('banner.jpg', 1200, 400));
 
     expect($group->fresh()->getFirstMedia('banner'))->not->toBeNull();
+});
+
+test('a group profile image is stored in the avatar collection', function () {
+    Storage::fake(config('media-library.disk_name'));
+    $group = Group::factory()->create();
+
+    app(UpdateGroupAvatar::class)($group, UploadedFile::fake()->image('logo.png', 256, 256));
+
+    expect($group->fresh()->getFirstMedia('avatar'))->not->toBeNull()
+        ->and($group->fresh()->avatarUrl())->not->toBeNull();
+});
+
+test('an owner can set the group profile image', function () {
+    Storage::fake(config('media-library.disk_name'));
+    $group = Group::factory()->create();
+    $owner = ownerOf($group);
+
+    Livewire::actingAs($owner)
+        ->test('pages::groups.show', ['group' => $group])
+        ->set('avatarFile', UploadedFile::fake()->image('logo.png', 256, 256))
+        ->call('saveAvatar')
+        ->assertHasNoErrors();
+
+    expect($group->fresh()->getFirstMedia('avatar'))->not->toBeNull();
+});
+
+test('a plain member cannot set the group profile image', function () {
+    Storage::fake(config('media-library.disk_name'));
+    $group = Group::factory()->create();
+    $member = User::factory()->create();
+    $group->members()->attach($member->id, ['role' => GroupRole::Member->value]);
+
+    Livewire::actingAs($member)
+        ->test('pages::groups.show', ['group' => $group])
+        ->set('avatarFile', UploadedFile::fake()->image('logo.png', 256, 256))
+        ->call('saveAvatar')
+        ->assertForbidden();
+
+    expect($group->fresh()->getFirstMedia('avatar'))->toBeNull();
+});
+
+test('the groups index shows the profile and banner images when available', function () {
+    Storage::fake(config('media-library.disk_name'));
+    $viewer = User::factory()->create();
+    $group = Group::factory()->create();
+    app(UpdateGroupAvatar::class)($group, UploadedFile::fake()->image('logo.png', 256, 256));
+    app(UpdateGroupBanner::class)($group, UploadedFile::fake()->image('banner.jpg', 1200, 400));
+
+    // The upload Actions rename files to avatar.<ext> / banner.<ext>.
+    Livewire::actingAs($viewer)
+        ->test('pages::groups')
+        ->assertOk()
+        ->assertSeeHtml('avatar.png')
+        ->assertSeeHtml('banner.jpg');
 });

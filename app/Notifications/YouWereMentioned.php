@@ -2,6 +2,7 @@
 
 namespace App\Notifications;
 
+use App\Models\Message;
 use App\Models\User;
 use Illuminate\Bus\Queueable;
 use Illuminate\Database\Eloquent\Model;
@@ -42,7 +43,7 @@ class YouWereMentioned extends Notification
         return (new MailMessage)
             ->subject(__('notifications.mention.subject'))
             ->line(__('notifications.mention.body', ['name' => $this->author->display_name]))
-            ->action(__('notifications.mention.action'), route('dashboard'));
+            ->action(__('notifications.mention.action'), $this->url());
     }
 
     /**
@@ -53,10 +54,23 @@ class YouWereMentioned extends Notification
         return [
             'key' => 'mention',
             'params' => ['name' => $this->author->display_name],
-            'url' => route('dashboard'),
+            'url' => $this->url(),
             'actor_id' => $this->author->id,
             'mentionable_type' => $this->mentionable->getMorphClass(),
             'mentionable_id' => $this->mentionable->getKey(),
         ];
+    }
+
+    /**
+     * Where the notification points: a chat mention opens the conversation, everything
+     * else (post, comment) lands on the dashboard where its feed item lives.
+     */
+    private function url(): string
+    {
+        if ($this->mentionable instanceof Message) {
+            return route('chat', ['conversation' => $this->mentionable->conversation_id]);
+        }
+
+        return route('dashboard');
     }
 }

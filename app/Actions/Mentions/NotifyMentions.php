@@ -8,26 +8,36 @@ use App\Models\Mention;
 use App\Models\User;
 use App\Notifications\YouWereMentioned;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Collection;
 
 /**
- * Parse @mentions out of a body and notify each mentioned user — but only those who can
- * actually see the content, so a mention never leaks a secret group. The composer embeds
- * mentions as data-mention="{userId}" (the feed/composer UI lands in a later phase).
+ * Parse @mentions out of a plain-text body and notify each mentioned user — but only
+ * those who can actually see the content, so a mention never leaks a secret group.
+ *
+ * A mention is written as the user's handle: their display name with the spaces removed,
+ * e.g. "Egill Heinesen" is mentioned as "@EgillHeinesen". The composer's autocomplete
+ * inserts exactly that, and matching is case-insensitive so a hand-typed handle still
+ * resolves.
  */
 final class NotifyMentions
 {
-    public function __invoke(Model $mentionable, User $author, string $body): void
+    /**
+     * @param  Collection<int, User>|null  $audience  The only people who may be mentioned.
+     *                                                Defaults to every active colleague; chat
+     *                                                passes the conversation's participants so a
+     *                                                message can only mention people in the chat.
+     */
+    public function __invoke(Model $mentionable, User $author, string $body, ?Collection $audience = null): void
     {
-        $ids = $this->extractUserIds($body);
+        $handles = $this->extractHandles($body);
 
-        if ($ids === []) {
+        if ($handles === []) {
             return;
         }
 
-        $mentioned = User::query()
-            ->whereIn('id', $ids)
-            ->whereKeyNot($author->id)
-            ->get();
+        $mentioned = ($audience ?? User::query()->active()->get())
+            ->filter(fn (User $user): bool => in_array(mb_strtolower(self::handleFor($user)), $handles, true))
+            ->reject(fn (User $user): bool => $user->is($author));
 
         foreach ($mentioned as $user) {
             if (! $user->can('view', $mentionable)) {
@@ -45,12 +55,24 @@ final class NotifyMentions
     }
 
     /**
-     * @return list<int>
+     * The handle for a user: their display name with all whitespace removed.
      */
-    private function extractUserIds(string $body): array
+    public static function handleFor(User $user): string
     {
-        preg_match_all('/data-mention=["\'](\d+)["\']/', $body, $matches);
+        return preg_replace('/\s+/u', '', (string) $user->display_name) ?? '';
+    }
 
-        return array_values(array_unique(array_map('intval', $matches[1])));
+    /**
+     * Every distinct @handle token in the body, lower-cased for case-insensitive matching.
+     * A handle is letters, numbers, and the marks a name might carry after spaces are
+     * stripped — Unicode aware, so Icelandic þ/ð/æ/ö are kept.
+     *
+     * @return list<string>
+     */
+    private function extractHandles(string $body): array
+    {
+        preg_match_all('/@([\p{L}\p{N}._-]+)/u', $body, $matches);
+
+        return array_values(array_unique(array_map('mb_strtolower', $matches[1])));
     }
 }

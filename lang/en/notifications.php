@@ -20,6 +20,10 @@ return [
         'body' => ':name started following you.',
     ],
 
+    'group_invitation' => [
+        'body' => ':name invited you to the group :group.',
+    ],
+
     'digest' => [
         'subject' => 'Your Mosi digest',
         'greeting' => 'Hi :name,',

@@ -29,20 +29,29 @@ test('the feed shows a post from a group the user belongs to', function () {
         ->assertSee($post->author->display_name);
 });
 
-test('publishing a post creates a sanitised post and clears the composer', function () {
+test('publishing a post stores the text verbatim and clears the composer', function () {
     $user = User::factory()->create();
 
     Livewire::actingAs($user)
         ->test('pages::feed')
-        ->set('composer', '<p>Hæ <strong>öll</strong></p><script>alert(1)</script>')
+        ->set('composer', "Hæ öll\n<script>alert(1)</script>")
         ->call('publish')
         ->assertSet('composer', '');
 
     $post = Post::query()->where('user_id', $user->id)->firstOrFail();
 
-    expect($post->body)
-        ->toContain('<strong>öll</strong>')
-        ->not->toContain('script');
+    // Plain text: stored exactly as typed, no HTML interpretation.
+    expect($post->body)->toBe("Hæ öll\n<script>alert(1)</script>");
+});
+
+test('a post body is escaped when rendered, never executed as HTML', function () {
+    $user = User::factory()->create();
+    Post::factory()->create(['user_id' => $user->id, 'body' => '<script>alert(1)</script>']);
+
+    Livewire::actingAs($user)
+        ->test('pages::feed')
+        ->assertDontSee('<script>alert(1)</script>', false) // not present as raw markup
+        ->assertSee('<script>alert(1)</script>');           // present, but HTML-escaped
 });
 
 test('publishing is a no-op for empty content', function () {
