@@ -56,4 +56,10 @@ return [
         'sad' => 'Sad',
     ],
 
+    // The private reason behind an away day. Colleagues only ever see the generic "Away".
+    'absence' => [
+        'orlof' => 'Annual leave',
+        'veikindi' => 'Sick leave',
+    ],
+
 ];

@@ -49,6 +49,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::livewire('dashboard', 'pages::feed')->name('dashboard');
     Route::livewire('directory', 'pages::directory')->name('directory');
     Route::livewire('people/{user:external_id}', 'pages::people.show')->name('people.show');
+    Route::livewire('whereabouts', 'pages::whereabouts')->name('whereabouts');
+    Route::livewire('whereabouts/others', 'pages::whereabouts-others')->name('whereabouts.others');
 
     Route::livewire('groups', 'pages::groups')->name('groups');
     Route::livewire('groups/{group:slug}', 'pages::groups.show')->name('groups.show');

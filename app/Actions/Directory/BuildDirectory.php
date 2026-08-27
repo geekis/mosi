@@ -27,6 +27,9 @@ final class BuildDirectory
         return User::query()
             ->active()
             ->with('media')
+            // Today's whereabouts for the card badge, eager-loaded so the grid stays a
+            // single query (.ai/rules/database.md). Read back via User::whereaboutsOn().
+            ->with(['whereabouts' => fn ($query) => $query->whereDate('date', today())->with('workLocation')])
             ->when($search !== '', function ($query) use ($search): void {
                 $query->where(function ($inner) use ($search): void {
                     $inner->where('display_name', 'like', "%{$search}%")

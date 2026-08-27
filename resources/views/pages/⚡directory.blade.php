@@ -83,6 +83,8 @@ new #[Title('Directory')] class extends Component {
                         @if ($person->organization_name)
                             <flux:text size="sm" class="truncate text-zinc-500 dark:text-zinc-400">{{ $person->organization_name }}</flux:text>
                         @endif
+                        {{-- Today's whereabouts, if registered. Never reveals an absence reason here. --}}
+                        <x-whereabouts-badge :entry="$person->whereaboutsOn(now())" class="mt-1" />
                     </div>
                 </flux:card>
             </a>

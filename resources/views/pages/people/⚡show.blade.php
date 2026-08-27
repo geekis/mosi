@@ -43,7 +43,7 @@ new #[Title('Mosi')] class extends Component {
     }
 
     /**
-     * @return array{isSelf: bool, isFollowing: bool, groups: \Illuminate\Support\Collection<int, \App\Models\Group>, posts: \Illuminate\Support\Collection<int, Post>}
+     * @return array{isSelf: bool, isFollowing: bool, whereaboutsToday: ?\App\Models\Whereabouts, groups: \Illuminate\Support\Collection<int, \App\Models\Group>, posts: \Illuminate\Support\Collection<int, Post>}
      */
     public function with(): array
     {
@@ -52,6 +52,8 @@ new #[Title('Mosi')] class extends Component {
         return [
             'isSelf' => $viewer->is($this->user),
             'isFollowing' => $viewer->isFollowing($this->user),
+            // Today's whereabouts; the real absence reason is only revealed on your own profile.
+            'whereaboutsToday' => $this->user->whereaboutsOn(now()),
             // Secret groups the viewer cannot see never appear on someone else's profile.
             'groups' => $this->user->groups()->visibleTo($viewer)->orderBy('id')->get(),
             'posts' => Post::query()
@@ -142,6 +144,12 @@ new #[Title('Mosi')] class extends Component {
                 <div class="flex items-center gap-2 text-sm">
                     <flux:icon icon="user" variant="mini" class="text-zinc-400" />
                     <a href="{{ route('people.show', $user->supervisor) }}" class="truncate hover:underline" wire:navigate>{{ $user->supervisor->display_name }}</a>
+                </div>
+            @endif
+            @if ($whereaboutsToday)
+                <div class="flex items-center gap-2 text-sm">
+                    <flux:text size="sm" class="text-zinc-500 dark:text-zinc-400">{{ __('Location today') }}:</flux:text>
+                    <x-whereabouts-badge :entry="$whereaboutsToday" :reveal="$isSelf" />
                 </div>
             @endif
 

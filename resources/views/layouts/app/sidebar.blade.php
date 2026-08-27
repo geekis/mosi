@@ -20,6 +20,15 @@
                 <flux:sidebar.item icon="users" :href="route('directory')" :current="request()->routeIs('directory')" wire:navigate>
                     {{ __('Directory') }}
                 </flux:sidebar.item>
+                <flux:sidebar.group expandable icon="map-pin" :heading="__('Whereabouts')"
+                    :expanded="request()->routeIs('whereabouts*')">
+                    <flux:sidebar.item :href="route('whereabouts')" :current="request()->routeIs('whereabouts')" wire:navigate>
+                        {{ __('Me') }}
+                    </flux:sidebar.item>
+                    <flux:sidebar.item :href="route('whereabouts.others')" :current="request()->routeIs('whereabouts.others')" wire:navigate>
+                        {{ __('Other staff') }}
+                    </flux:sidebar.item>
+                </flux:sidebar.group>
                 <flux:sidebar.item icon="user-group" :href="route('groups')" :current="request()->routeIs('groups', 'groups.show')" wire:navigate>
                     {{ __('Groups') }}
                 </flux:sidebar.item>

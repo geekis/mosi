@@ -54,4 +54,10 @@ return [
         'sad' => 'Sorg',
     ],
 
+    // Ástæða fjarveru, aðeins sýnileg viðkomandi sjálfum — aðrir sjá einungis „Fjarverandi“.
+    'absence' => [
+        'orlof' => 'Orlof',
+        'veikindi' => 'Veikindi',
+    ],
+
 ];

@@ -6,6 +6,7 @@ namespace App\Models;
 use App\Enums\AssignmentStatus;
 use App\Enums\AuthMethod;
 use App\Enums\PersonType;
+use Carbon\CarbonInterface;
 use Database\Factories\UserFactory;
 use Filament\Models\Contracts\FilamentUser;
 use Filament\Models\Contracts\HasAvatar;
@@ -249,6 +250,30 @@ class User extends Authenticatable implements FilamentUser, HasAvatar, HasMedia,
     public function groups(): BelongsToMany
     {
         return $this->belongsToMany(Group::class)->withPivot('role')->withTimestamps();
+    }
+
+    /**
+     * This user's whereabouts registrations (one per day at most).
+     *
+     * @return HasMany<Whereabouts, $this>
+     */
+    public function whereabouts(): HasMany
+    {
+        return $this->hasMany(Whereabouts::class);
+    }
+
+    /**
+     * The whereabouts registration for a given day, if any. Reads from an already-loaded
+     * `whereabouts` relation when present (so a directory list can eager-load the day
+     * without an N+1), otherwise queries for it.
+     */
+    public function whereaboutsOn(CarbonInterface $date): ?Whereabouts
+    {
+        if ($this->relationLoaded('whereabouts')) {
+            return $this->whereabouts->first(fn (Whereabouts $w): bool => $w->date->isSameDay($date));
+        }
+
+        return $this->whereabouts()->whereDate('date', $date)->with('workLocation')->first();
     }
 
     /**

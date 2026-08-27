@@ -1,13 +1,13 @@
 {
     "$schema": "https://developer.microsoft.com/en-us/json-schemas/teams/v1.19/MicrosoftTeams.schema.json",
     "manifestVersion": "1.19",
-    "version": "1.0.1",
+    "version": "1.0.3",
     "id": "a3f1c2d4-5b6e-4f7a-8c9d-0e1f2a3b4c5d",
     "developer": {
         "name": "Náttúruverndarstofnun",
-        "websiteUrl": "https://mosi.test",
-        "privacyUrl": "https://mosi.test/privacy",
-        "termsOfUseUrl": "https://mosi.test/terms"
+        "websiteUrl": "https://mosi.geek.is",
+        "privacyUrl": "https://mosi.geek.is/privacy",
+        "termsOfUseUrl": "https://mosi.geek.is/terms"
     },
     "name": {
         "short": "Mosi",
@@ -26,15 +26,15 @@
         {
             "entityId": "mosi",
             "name": "Mosi",
-            "contentUrl": "https://mosi.test/teams/auth?context=teams",
-            "websiteUrl": "https://mosi.test/dashboard",
+            "contentUrl": "https://mosi.geek.is/teams/auth?context=teams",
+            "websiteUrl": "https://mosi.geek.is/dashboard",
             "scopes": ["personal"]
         }
     ],
     "permissions": ["identity"],
-    "validDomains": ["mosi.test"],
+    "validDomains": ["mosi.geek.is"],
     "webApplicationInfo": {
         "id": "4ff55392-8af0-410d-b9e3-5793c9aee080",
-        "resource": "api://mosi.test/4ff55392-8af0-410d-b9e3-5793c9aee080"
+        "resource": "api://mosi.geek.is/4ff55392-8af0-410d-b9e3-5793c9aee080"
     }
 }
