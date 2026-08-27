@@ -41,7 +41,7 @@ new #[Title('Search')] class extends Component {
                 @foreach ($results['people'] as $person)
                     <a wire:key="s-person-{{ $person->id }}" href="{{ $person->external_id ? route('people.show', $person) : '#' }}" wire:navigate
                        class="flex items-center gap-3 rounded-lg border border-zinc-200 p-3 hover:bg-zinc-50 dark:border-zinc-700 dark:hover:bg-zinc-800">
-                        <flux:avatar :name="$person->display_name" :initials="$person->initials()" :src="$person->avatarUrl()" size="sm" />
+                        <x-avatar :user="$person" size="sm" />
                         <div class="min-w-0">
                             <flux:text class="truncate font-medium">{{ $person->display_name }}</flux:text>
                             @if ($person->job_title)<flux:text size="sm" class="truncate text-zinc-500 dark:text-zinc-400">{{ $person->job_title }}</flux:text>@endif

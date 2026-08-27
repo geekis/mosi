@@ -108,7 +108,7 @@ new #[Title('Event')] class extends Component {
         <div class="mt-3 flex flex-wrap gap-3">
             @forelse ($attendees as $person)
                 <div wire:key="attendee-{{ $person->id }}" class="flex items-center gap-2">
-                    <flux:avatar :name="$person->display_name" :initials="$person->initials()" :src="$person->avatarUrl()" size="xs" />
+                    <x-avatar :user="$person" size="xs" />
                     <flux:text size="sm">{{ $person->display_name }}</flux:text>
                 </div>
             @empty

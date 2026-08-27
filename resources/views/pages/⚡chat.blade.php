@@ -245,9 +245,11 @@ new #[Title('Chat')] class extends Component {
                             'flex w-full items-center gap-3 rounded-lg px-3 py-2 text-start hover:bg-zinc-100 dark:hover:bg-zinc-800',
                             'bg-zinc-100 dark:bg-zinc-800' => $active?->id === $conversation->id,
                         ])>
-                    <flux:avatar :name="$conversation->titleFor($me)" :src="$listOther?->avatarUrl()"
-                        :icon="$conversation->type->value === 'group' ? 'user-group' : null" size="sm"
-                        :badge="$listOther?->isOnline() ?? false" badge:color="green" badge:circle badge:position="bottom right" />
+                    @if ($conversation->type->value === 'group')
+                        <flux:avatar :name="$conversation->titleFor($me)" icon="user-group" size="sm" />
+                    @else
+                        <x-avatar :user="$listOther" :name="$conversation->titleFor($me)" size="sm" />
+                    @endif
                     <div class="min-w-0 flex-1">
                         <flux:text class="truncate font-medium">{{ $conversation->titleFor($me) }}</flux:text>
                     </div>
@@ -291,7 +293,7 @@ new #[Title('Chat')] class extends Component {
                         @php($files = $message->getMedia('attachments'))
                         <div wire:key="msg-{{ $message->id }}" class="flex gap-2 {{ $mine ? 'justify-end' : 'justify-start' }}">
                             @unless ($mine)
-                                <flux:avatar :name="$message->author?->display_name" :src="$message->author?->avatarUrl()" size="xs" class="mt-4 shrink-0" />
+                                <x-avatar :user="$message->author" size="xs" class="mt-4" />
                             @endunless
 
                             <div class="flex max-w-[75%] flex-col gap-1 {{ $mine ? 'items-end' : 'items-start' }}">
@@ -398,8 +400,7 @@ new #[Title('Chat')] class extends Component {
                         <div class="max-h-96 space-y-1 overflow-y-auto">
                             @foreach ($active->participants as $participant)
                                 <div wire:key="member-{{ $participant->id }}" class="flex items-center gap-3 rounded-lg px-2 py-2 hover:bg-zinc-100 dark:hover:bg-zinc-800">
-                                    <flux:avatar :name="$participant->display_name" :src="$participant->avatarUrl()" size="sm"
-                                        :badge="$participant->isOnline()" badge:color="green" badge:circle badge:position="bottom right" />
+                                    <x-avatar :user="$participant" size="sm" />
                                     <div class="min-w-0 flex-1">
                                         @if ($participant->external_id)
                                             <a href="{{ route('people.show', $participant) }}" wire:navigate class="hover:underline">

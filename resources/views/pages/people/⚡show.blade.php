@@ -78,7 +78,7 @@ new #[Title('Mosi')] class extends Component {
 
         <div class="px-6 pb-6">
             <div class="-mt-12 flex items-end justify-between">
-                <flux:avatar :name="$user->display_name" :initials="$user->initials()" :src="$user->avatarUrl()" size="xl" class="ring-4 ring-white dark:ring-zinc-800" />
+                <x-avatar :user="$user" size="xl" class="ring-4 ring-white dark:ring-zinc-800 rounded-full" />
 
                 <div class="mb-1 flex items-center gap-2">
                     @if ($isSelf)
@@ -175,5 +175,9 @@ new #[Title('Mosi')] class extends Component {
                 <flux:callout icon="document-text">{{ __('No posts to show.') }}</flux:callout>
             @endforelse
         </div>
+    </div>
+
+    <div class="mt-4">
+        <livewire:pages::people.calendar :user="$user" wire:key="calendar-{{ $user->id }}" />
     </div>
 </div>

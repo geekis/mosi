@@ -74,8 +74,7 @@ new #[Title('Directory')] class extends Component {
         @forelse ($people as $person)
             <a wire:key="person-{{ $person->id }}" href="{{ $person->external_id ? route('people.show', $person) : '#' }}" wire:navigate>
                 <flux:card size="sm" class="flex items-center gap-3 ">
-                    <flux:avatar :name="$person->display_name" :initials="$person->initials()" :src="$person->avatarUrl()" size="lg"
-                        :badge="$person->isOnline()" badge:color="green" badge:circle badge:position="bottom right" />
+                    <x-avatar :user="$person" size="lg" />
                     <div class="min-w-0">
                         <flux:heading size="sm" class="truncate">{{ $person->display_name }}</flux:heading>
                         @if ($person->job_title)

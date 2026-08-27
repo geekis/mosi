@@ -471,7 +471,7 @@ new #[Title('Mosi')] class extends Component {
                 <div class="max-h-72 space-y-1 overflow-y-auto">
                     @forelse ($inviteCandidates as $candidate)
                         <div wire:key="candidate-{{ $candidate->id }}" class="flex items-center gap-3 rounded-lg px-2 py-2 hover:bg-zinc-100 dark:hover:bg-zinc-800">
-                            <flux:avatar :name="$candidate->display_name" :src="$candidate->avatarUrl()" size="sm" />
+                            <x-avatar :user="$candidate" size="sm" />
                             <div class="min-w-0 flex-1">
                                 <flux:text class="truncate font-medium">{{ $candidate->display_name }}</flux:text>
                                 @if ($candidate->job_title)
@@ -607,7 +607,7 @@ new #[Title('Mosi')] class extends Component {
                         @foreach ($randomMembers as $member)
                             <a wire:key="side-member-{{ $member->id }}" href="{{ route('people.show', $member) }}" wire:navigate
                                 class="hover:opacity-80" title="{{ $member->display_name }}">
-                                <flux:avatar :name="$member->display_name" :initials="$member->initials()" :src="$member->avatarUrl()" size="sm" />
+                                <x-avatar :user="$member" size="sm" />
                             </a>
                         @endforeach
                     </div>
@@ -627,7 +627,7 @@ new #[Title('Mosi')] class extends Component {
                     <flux:heading size="sm">{{ __('Join requests') }}</flux:heading>
                     @foreach ($pendingRequests as $request)
                         <div wire:key="request-{{ $request->id }}" class="flex items-center gap-2">
-                            <flux:avatar :name="$request->user?->display_name" :initials="$request->user?->initials()" :src="$request->user?->avatarUrl()" size="xs" />
+                            <x-avatar :user="$request->user" size="xs" />
                             <span class="min-w-0 flex-1 truncate text-sm">{{ $request->user?->display_name }}</span>
                             <flux:button size="xs" variant="primary" icon="check" wire:click="approveRequest({{ $request->id }})" />
                             <flux:button size="xs" variant="ghost" icon="x-mark" wire:click="declineRequest({{ $request->id }})" />
@@ -642,7 +642,7 @@ new #[Title('Mosi')] class extends Component {
                     @foreach ($members as $member)
                         <div wire:key="member-{{ $member->id }}" class="flex items-center gap-3 py-2">
                             <a href="{{ route('people.show', $member) }}" wire:navigate class="shrink-0 hover:opacity-80">
-                                <flux:avatar :name="$member->display_name" :initials="$member->initials()" :src="$member->avatarUrl()" size="sm" />
+                                <x-avatar :user="$member" size="sm" />
                             </a>
                             <div class="min-w-0 flex-1">
                                 <a href="{{ route('people.show', $member) }}" wire:navigate class="block truncate text-sm font-medium hover:underline">

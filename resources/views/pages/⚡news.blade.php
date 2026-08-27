@@ -35,7 +35,7 @@ new #[Title('News')] class extends Component {
         @forelse ($posts as $post)
             <flux:card wire:key="news-{{ $post->id }}" class="ring-1 ring-primary-500/40">
                 <div class="flex items-center gap-3">
-                    <flux:avatar :name="$post->author?->display_name" :src="$post->author?->avatarUrl()" size="sm" />
+                    <x-avatar :user="$post->author" size="sm" />
                     <div class="min-w-0">
                         <flux:heading class="truncate">{{ $post->author?->display_name }}</flux:heading>
                         <flux:text size="sm" class="text-zinc-500 dark:text-zinc-400">

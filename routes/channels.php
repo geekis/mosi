@@ -22,3 +22,12 @@ Broadcast::channel('conversation.{conversation}', function (User $user, Conversa
 Broadcast::channel('group.{groupId}', function (User $user, int $groupId): bool {
     return $user->groups()->whereKey($groupId)->exists();
 });
+
+/*
+ * Presence is org-wide: everyone sees everyone's status dot, so a single tenant channel
+ * carries the change pings. Any active user may listen; a deactivated account may not
+ * (.ai/rules/realtime.md). The payload never names a user beyond their id + state.
+ */
+Broadcast::channel('presence', function (User $user): bool {
+    return $user->is_active;
+});

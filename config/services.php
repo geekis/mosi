@@ -48,6 +48,17 @@ return [
         // (.ai/rules/auth.md). Overridable per environment so a test tenant can use a
         // different domain than production's `nattura.is`.
         'entra_domain' => env('AZURE_ENTRA_DOMAIN', 'nattura.is'),
+
+        // Microsoft Graph — live presence and calendars, read app-only with the same
+        // app registration via the client-credentials flow. Disabled by default: it
+        // stays dark until the tenant admin grants the `Presence.Read.All` and
+        // `Calendars.Read` *application* permissions and consent, at which point set
+        // MS_GRAPH_ENABLED=true in Forge. While disabled, presence falls back to the
+        // in-app `last_active_at` heartbeat and the calendar panel is hidden.
+        'graph' => [
+            'enabled' => (bool) env('MS_GRAPH_ENABLED', false),
+            'base_url' => env('MS_GRAPH_BASE_URL', 'https://graph.microsoft.com/v1.0'),
+        ],
     ],
 
     // NVS staff API — the sole source of accounts (see .ai/rules/staff-api.md).

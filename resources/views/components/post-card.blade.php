@@ -37,7 +37,7 @@
 --}}
 <flux:card wire:key="post-{{ $post->id }}" @class(['ring-1 ring-primary-500/40' => $post->is_official])>
     <div class="flex items-center gap-3">
-        <flux:avatar :name="$post->author?->display_name" :src="$post->author?->avatarUrl()" size="sm" />
+        <x-avatar :user="$post->author" size="sm" />
 
         <div class="min-w-0">
             @if ($post->author?->external_id)
@@ -171,7 +171,7 @@
         <div x-show="showComments" x-cloak class="mt-3 space-y-3">
             @foreach ($comments as $comment)
                 <div wire:key="comment-{{ $comment->id }}" class="flex gap-2">
-                    <flux:avatar :name="$comment->author?->display_name" :src="$comment->author?->avatarUrl()" size="xs" class="mt-0.5 shrink-0" />
+                    <x-avatar :user="$comment->author" size="xs" class="mt-0.5" />
                     <div class="min-w-0 flex-1">
                         <div class="rounded-2xl bg-zinc-100 px-3 py-2 dark:bg-zinc-800">
                             @if ($comment->author?->external_id)
