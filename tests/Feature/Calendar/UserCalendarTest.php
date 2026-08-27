@@ -64,6 +64,25 @@ test('it maps calendarView events and caches the window', function () {
     Http::assertSentCount(2);
 });
 
+test('it caches serialisation-safe strings and rehydrates Carbon on read', function () {
+    fakeCalendar([standupEvent()]);
+    $user = User::factory()->create(['entra_oid' => 'oid-1']);
+    $from = CarbonImmutable::parse('2026-08-27');
+    $to = $from->addDay();
+
+    $events = app(FetchUserCalendar::class)($user, $from, $to);
+
+    // Callers receive Carbon instances…
+    expect($events[0]['start'])->toBeInstanceOf(CarbonImmutable::class);
+
+    // …but the cache stores plain ISO strings, so Redis never has to unserialize a
+    // Carbon object (which fails with "incomplete object").
+    $cacheKey = sprintf('calendar:%d:%s:%s', $user->id, $from->toDateString(), $to->toDateString());
+    $cached = Cache::get($cacheKey);
+    expect($cached[0]['start'])->toBeString()
+        ->and($cached[0]['end'])->toBeString();
+});
+
 test('it returns nothing and calls no endpoint for a user without a mailbox', function () {
     $user = User::factory()->create(['entra_oid' => null]);
     Http::fake();

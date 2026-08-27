@@ -36,7 +36,7 @@ final class FetchUserCalendar
 
         $cacheKey = sprintf('calendar:%d:%s:%s', $user->id, $from->toDateString(), $to->toDateString());
 
-        return Cache::remember($cacheKey, self::CACHE_TTL_SECONDS, function () use ($user, $from, $to): array {
+        $cached = Cache::remember($cacheKey, self::CACHE_TTL_SECONDS, function () use ($user, $from, $to): array {
             // A Graph failure (e.g. the app is not yet authorised for this mailbox — a 403
             // ErrorAccessDenied) must never take down the profile page: log it and fall back
             // to an empty agenda. The empty result is cached briefly so a persistent
@@ -62,11 +62,20 @@ final class FetchUserCalendar
 
             return array_values(array_map($this->transform(...), $events));
         });
+
+        // Rehydrate the cached ISO strings into Carbon instances here, outside the cache.
+        // Caching Carbon objects directly can fail to unserialize ("incomplete object").
+        return array_map(function (array $event): array {
+            $event['start'] = CarbonImmutable::parse($event['start']);
+            $event['end'] = CarbonImmutable::parse($event['end']);
+
+            return $event;
+        }, $cached);
     }
 
     /**
      * @param  array<string, mixed>  $event
-     * @return array{subject: ?string, start: CarbonImmutable, end: CarbonImmutable, is_all_day: bool, show_as: string, location: ?string, organizer: ?string, attendees: list<string>}
+     * @return array{subject: ?string, start: string, end: string, is_all_day: bool, show_as: string, location: ?string, organizer: ?string, attendees: list<string>}
      */
     private function transform(array $event): array
     {
@@ -74,8 +83,8 @@ final class FetchUserCalendar
 
         return [
             'subject' => is_string($subject) && $subject !== '' ? $subject : null,
-            'start' => $this->parseDateTime($event['start'] ?? null),
-            'end' => $this->parseDateTime($event['end'] ?? null),
+            'start' => $this->parseDateTime($event['start'] ?? null)->toIso8601String(),
+            'end' => $this->parseDateTime($event['end'] ?? null)->toIso8601String(),
             'is_all_day' => (bool) ($event['isAllDay'] ?? false),
             'show_as' => is_string($event['showAs'] ?? null) ? $event['showAs'] : 'busy',
             'location' => $this->displayName($event['location'] ?? null),
