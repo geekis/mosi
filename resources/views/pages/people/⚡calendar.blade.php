@@ -42,7 +42,7 @@ new class extends Component {
     }
 
     /**
-     * @return array{hasCalendar: bool, rangeStart: CarbonImmutable, rangeEnd: CarbonImmutable, eventsByDay: Collection<string, Collection<int, array<string, mixed>>>}
+     * @return array{hasCalendar: bool, isSelf: bool, rangeStart: CarbonImmutable, rangeEnd: CarbonImmutable, eventsByDay: Collection<string, Collection<int, array<string, mixed>>>}
      */
     public function with(): array
     {
@@ -55,6 +55,9 @@ new class extends Component {
 
         return [
             'hasCalendar' => $this->user->entra_oid !== null && (bool) config('services.azure.graph.enabled'),
+            // Only the owner sees the details of their own private events; to everyone else a
+            // private event shows just its time and a "Private" label.
+            'isSelf' => auth()->id() === $this->user->id,
             'rangeStart' => $start,
             'rangeEnd' => $end->subDay(),
             'eventsByDay' => $eventsByDay,
@@ -89,6 +92,7 @@ new class extends Component {
                 </flux:heading>
                 <div class="space-y-1.5">
                     @foreach ($events as $index => $event)
+                        @php($private = ! $isSelf && ($event['sensitivity'] ?? 'normal') !== 'normal')
                         <div wire:key="cal-event-{{ $day }}-{{ $index }}"
                             @class([
                                 'rounded-lg border-l-2 bg-zinc-50 px-3 py-2 dark:bg-zinc-800/50',
@@ -100,7 +104,14 @@ new class extends Component {
                                 'border-zinc-400' => ! in_array($event['show_as'], ['free', 'tentative', 'busy', 'oof', 'workingElsewhere'], true),
                             ])>
                             <div class="flex items-baseline justify-between gap-2">
-                                <span class="truncate text-sm font-medium">{{ $event['subject'] ?? __('(No subject)') }}</span>
+                                @if ($private)
+                                    <span class="flex items-center gap-1 truncate text-sm font-medium italic text-zinc-500 dark:text-zinc-400">
+                                        <flux:icon icon="lock-closed" variant="micro" class="size-3 shrink-0" />
+                                        {{ __('Private') }}
+                                    </span>
+                                @else
+                                    <span class="truncate text-sm font-medium">{{ $event['subject'] ?? __('(No subject)') }}</span>
+                                @endif
                                 <span class="shrink-0 text-xs text-zinc-500 dark:text-zinc-400">
                                     @if ($event['is_all_day'])
                                         {{ __('All day') }}
@@ -109,13 +120,13 @@ new class extends Component {
                                     @endif
                                 </span>
                             </div>
-                            @if ($event['location'])
+                            @if (! $private && $event['location'])
                                 <div class="mt-0.5 flex items-center gap-1 text-xs text-zinc-500 dark:text-zinc-400">
                                     <flux:icon icon="map-pin" variant="outline" class="size-3 shrink-0" />
                                     <span class="truncate">{{ $event['location'] }}</span>
                                 </div>
                             @endif
-                            @if (! empty($event['attendees']))
+                            @if (! $private && ! empty($event['attendees']))
                                 <div class="mt-0.5 truncate text-xs text-zinc-500 dark:text-zinc-400">
                                     {{ implode(', ', array_slice($event['attendees'], 0, 5)) }}{{ count($event['attendees']) > 5 ? '…' : '' }}
                                 </div>

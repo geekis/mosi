@@ -83,6 +83,34 @@ test('it caches serialisation-safe strings and rehydrates Carbon on read', funct
         ->and($cached[0]['end'])->toBeString();
 });
 
+test('it captures the event sensitivity, defaulting to normal', function () {
+    fakeCalendar([standupEvent(), array_merge(standupEvent(), ['sensitivity' => 'private'])]);
+    $user = User::factory()->create(['entra_oid' => 'oid-1']);
+
+    $events = app(FetchUserCalendar::class)($user, CarbonImmutable::parse('2026-08-27'), CarbonImmutable::parse('2026-08-28'));
+
+    expect($events[0]['sensitivity'])->toBe('normal')
+        ->and($events[1]['sensitivity'])->toBe('private');
+});
+
+test('a private event is masked for a colleague but shown to the owner', function () {
+    $day = now()->toDateString();
+    fakeCalendar([array_merge(standupEvent($day), ['subject' => 'Secret 1:1', 'sensitivity' => 'private'])]);
+    $owner = User::factory()->create(['entra_oid' => 'oid-1']);
+    $colleague = User::factory()->create();
+
+    // A colleague sees only the time and a "Private" label — no title, location, or attendees.
+    Livewire::actingAs($colleague)->test('pages::people.calendar', ['user' => $owner])
+        ->assertSee(__('Private'))
+        ->assertDontSee('Secret 1:1')
+        ->assertDontSee('Room 3');
+
+    // The owner sees the full detail of their own private event.
+    Livewire::actingAs($owner)->test('pages::people.calendar', ['user' => $owner])
+        ->assertSee('Secret 1:1')
+        ->assertSee('Room 3');
+});
+
 test('it returns nothing and calls no endpoint for a user without a mailbox', function () {
     $user = User::factory()->create(['entra_oid' => null]);
     Http::fake();

@@ -26,7 +26,7 @@ final class FetchUserCalendar
     public function __construct(private readonly GraphClient $graph) {}
 
     /**
-     * @return list<array{subject: ?string, start: CarbonImmutable, end: CarbonImmutable, is_all_day: bool, show_as: string, location: ?string, organizer: ?string, attendees: list<string>}>
+     * @return list<array{subject: ?string, start: CarbonImmutable, end: CarbonImmutable, is_all_day: bool, show_as: string, sensitivity: string, location: ?string, organizer: ?string, attendees: list<string>}>
      */
     public function __invoke(User $user, CarbonInterface $from, CarbonInterface $to): array
     {
@@ -45,7 +45,7 @@ final class FetchUserCalendar
                 $response = $this->graph->get("users/{$user->entra_oid}/calendarView", [
                     'startDateTime' => $from->toIso8601String(),
                     'endDateTime' => $to->toIso8601String(),
-                    '$select' => 'subject,start,end,location,isAllDay,showAs,organizer,attendees',
+                    '$select' => 'subject,start,end,location,isAllDay,showAs,sensitivity,organizer,attendees',
                     '$orderby' => 'start/dateTime',
                     '$top' => 100,
                 ]);
@@ -75,7 +75,7 @@ final class FetchUserCalendar
 
     /**
      * @param  array<string, mixed>  $event
-     * @return array{subject: ?string, start: string, end: string, is_all_day: bool, show_as: string, location: ?string, organizer: ?string, attendees: list<string>}
+     * @return array{subject: ?string, start: string, end: string, is_all_day: bool, show_as: string, sensitivity: string, location: ?string, organizer: ?string, attendees: list<string>}
      */
     private function transform(array $event): array
     {
@@ -87,6 +87,7 @@ final class FetchUserCalendar
             'end' => $this->parseDateTime($event['end'] ?? null)->toIso8601String(),
             'is_all_day' => (bool) ($event['isAllDay'] ?? false),
             'show_as' => is_string($event['showAs'] ?? null) ? $event['showAs'] : 'busy',
+            'sensitivity' => is_string($event['sensitivity'] ?? null) ? $event['sensitivity'] : 'normal',
             'location' => $this->displayName($event['location'] ?? null),
             'organizer' => $this->personName($event['organizer'] ?? null),
             'attendees' => $this->attendeeNames($event['attendees'] ?? null),
