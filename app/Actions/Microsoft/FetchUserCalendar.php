@@ -9,6 +9,8 @@ use App\Support\Microsoft\GraphClient;
 use Carbon\CarbonImmutable;
 use Carbon\CarbonInterface;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Log;
+use Throwable;
 
 /**
  * Reads a user's Outlook calendar for a date window via `GET /users/{oid}/calendarView`,
@@ -35,13 +37,26 @@ final class FetchUserCalendar
         $cacheKey = sprintf('calendar:%d:%s:%s', $user->id, $from->toDateString(), $to->toDateString());
 
         return Cache::remember($cacheKey, self::CACHE_TTL_SECONDS, function () use ($user, $from, $to): array {
-            $response = $this->graph->get("users/{$user->entra_oid}/calendarView", [
-                'startDateTime' => $from->toIso8601String(),
-                'endDateTime' => $to->toIso8601String(),
-                '$select' => 'subject,start,end,location,isAllDay,showAs,organizer,attendees',
-                '$orderby' => 'start/dateTime',
-                '$top' => 100,
-            ]);
+            // A Graph failure (e.g. the app is not yet authorised for this mailbox — a 403
+            // ErrorAccessDenied) must never take down the profile page: log it and fall back
+            // to an empty agenda. The empty result is cached briefly so a persistent
+            // misconfiguration does not re-hit Graph on every render.
+            try {
+                $response = $this->graph->get("users/{$user->entra_oid}/calendarView", [
+                    'startDateTime' => $from->toIso8601String(),
+                    'endDateTime' => $to->toIso8601String(),
+                    '$select' => 'subject,start,end,location,isAllDay,showAs,organizer,attendees',
+                    '$orderby' => 'start/dateTime',
+                    '$top' => 100,
+                ]);
+            } catch (Throwable $e) {
+                Log::warning('Microsoft Graph calendar read failed.', [
+                    'user_id' => $user->id,
+                    'message' => $e->getMessage(),
+                ]);
+
+                return [];
+            }
 
             $events = is_array($response) ? ($response['value'] ?? []) : [];
 

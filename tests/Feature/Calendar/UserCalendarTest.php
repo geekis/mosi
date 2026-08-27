@@ -91,6 +91,29 @@ test('the calendar island shows a colleague events with full detail', function (
         ->assertSee('Room 3');
 });
 
+test('a Graph error yields an empty calendar instead of throwing', function () {
+    Http::fake([
+        'login.microsoftonline.com/*' => Http::response(['access_token' => 't', 'expires_in' => 3600]),
+        'graph.microsoft.com/*' => Http::response(['error' => ['code' => 'ErrorAccessDenied']], 403),
+    ]);
+    $user = User::factory()->create(['entra_oid' => 'oid-1']);
+
+    expect(app(FetchUserCalendar::class)($user, now(), now()->addDay()))->toBe([]);
+});
+
+test('the calendar island survives a Graph 403 and shows the empty state', function () {
+    Http::fake([
+        'login.microsoftonline.com/*' => Http::response(['access_token' => 't', 'expires_in' => 3600]),
+        'graph.microsoft.com/*' => Http::response(['error' => ['code' => 'ErrorAccessDenied']], 403),
+    ]);
+    $viewer = User::factory()->create();
+    $target = User::factory()->create(['entra_oid' => 'oid-1']);
+
+    Livewire::actingAs($viewer)->test('pages::people.calendar', ['user' => $target])
+        ->assertOk()
+        ->assertSee(__('No events this week.'));
+});
+
 test('the calendar island shows an empty state for a user without a mailbox', function () {
     $viewer = User::factory()->create();
     $target = User::factory()->create(['entra_oid' => null]);

@@ -13,6 +13,8 @@ use Illuminate\Console\Attributes\Description;
 use Illuminate\Console\Attributes\Signature;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Log;
+use Throwable;
 
 /**
  * Polls Microsoft Graph for the Teams presence of every active Entra user, caches the
@@ -61,7 +63,15 @@ class SyncPresenceCommand extends Command
             $users->pluck('entra_oid')->all(),
         )));
 
-        $statuses = ($this->presences)($entraOids);
+        // A Graph failure (e.g. Presence.Read.All not yet consented) should be logged, not
+        // thrown every minute from the scheduler.
+        try {
+            $statuses = ($this->presences)($entraOids);
+        } catch (Throwable $e) {
+            Log::warning('Microsoft Graph presence sync failed.', ['message' => $e->getMessage()]);
+
+            return self::SUCCESS;
+        }
 
         $changed = 0;
 
