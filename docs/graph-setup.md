@@ -63,13 +63,13 @@ Connect-ExchangeOnline -UserPrincipalName you@eigind.is
 # 2. Point Exchange at the app's Entra service principal
 #    -AppId = client id ; -ObjectId = the Enterprise App Object ID from Entra
 New-ServicePrincipal -AppId 4ff55392-8af0-410d-b9e3-5793c9aee080 `
-  -ObjectId <ENTERPRISE-APP-OBJECT-ID> -DisplayName "Mosi Graph"
+  -ObjectId 84921f18-89ab-4faf-8c69-41024ecfa5ff -DisplayName "Mosi Graph"
 
 # 3. Create a management scope covering the staff mailboxes.
 #    Option A — by a mail-enabled security group (only DIRECT members are in scope):
-Get-Group -Identity "Mosi Staff" | Select-Object -ExpandProperty DistinguishedName   # copy the DN
-New-ManagementScope -Name "Mosi Staff Mailboxes" `
-  -RecipientRestrictionFilter "MemberOfGroup -eq '<GROUP-DISTINGUISHED-NAME>'"
+Get-Group -Identity "Eigind ehf" | Select-Object -ExpandProperty DistinguishedName   # copy the DN
+New-ManagementScope -Name "Eigind Staff Mailboxes" `
+  -RecipientRestrictionFilter "MemberOfGroup -eq 'ad62d332-f4ae-4a82-a0bd-eecbf49280c0'"
 
 #    Option B — by a custom attribute / department instead:
 # New-ManagementScope -Name "Mosi Staff Mailboxes" -RecipientRestrictionFilter "CustomAttribute1 -eq 'Mosi'"
