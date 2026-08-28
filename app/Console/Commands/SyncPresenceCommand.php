@@ -74,6 +74,7 @@ class SyncPresenceCommand extends Command
         }
 
         $changed = 0;
+        $failedBroadcast = false;
 
         foreach ($statuses as $oid => $status) {
             $user = $byOid->get($oid);
@@ -82,9 +83,26 @@ class SyncPresenceCommand extends Command
                 continue;
             }
 
-            if ($this->store($user->id, $status)) {
+            // Cache is updated first so a page load reflects the new status even if the live
+            // broadcast can't be delivered.
+            if (! $this->store($user->id, $status)) {
+                continue;
+            }
+
+            $changed++;
+
+            // A broadcast failure (Reverb down, or the publish credentials/host are wrong)
+            // must not fail the whole sync — the cache is already updated, so presence still
+            // works on refresh; only the live push is lost. Log once per run, not per user.
+            if ($failedBroadcast) {
+                continue;
+            }
+
+            try {
                 UserPresenceChanged::dispatch($user->id, $status->value);
-                $changed++;
+            } catch (Throwable $e) {
+                $failedBroadcast = true;
+                Log::warning('Presence broadcast failed; live update skipped this run.', ['message' => $e->getMessage()]);
             }
         }
 

@@ -6,6 +6,7 @@ use App\Actions\Presence\ResolvePresence;
 use App\Events\UserPresenceChanged;
 use App\Models\User;
 use Illuminate\Contracts\Broadcasting\Broadcaster;
+use Illuminate\Support\Facades\Broadcast;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Http;
@@ -52,6 +53,22 @@ test('it does not rebroadcast a status that has not changed', function () {
     $this->artisan('app:sync-presence')->assertSuccessful();
 
     Event::assertNotDispatched(UserPresenceChanged::class);
+});
+
+test('a broadcast failure is logged but does not fail the sync, and the cache still updates', function () {
+    fakeGraphPresence('Busy');
+    $user = User::factory()->create(['entra_oid' => 'oid-1', 'is_active' => true]);
+
+    // A broadcaster whose publish throws, simulating Reverb being unreachable or misconfigured.
+    $broadcaster = Mockery::mock(Broadcaster::class);
+    $broadcaster->shouldReceive('broadcast')->andThrow(new RuntimeException('publish failed'));
+    Broadcast::extend('throwing', fn () => $broadcaster);
+    config()->set('broadcasting.default', 'throwing');
+
+    $this->artisan('app:sync-presence')->assertSuccessful();
+
+    // The status was cached before the (failed) broadcast, so presence still works on refresh.
+    expect(Cache::get(ResolvePresence::CACHE_PREFIX.$user->id))->toBe('busy');
 });
 
 test('it skips inactive and non-entra users', function () {
