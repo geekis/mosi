@@ -45,7 +45,20 @@ birth (`010299` = 1 Feb 1999).
 - Never in an API response, URL, query string, log line, exception message, Filament
   table, or export.
 - Excluded from `$fillable`, listed in `$hidden`.
-- Any birthday feature must be opt-in and must not expose the year.
+
+### Birthday — confirmed (product decision, Aug 2026)
+
+Staff birthdays are shown org-wide (the feed's "Afmæli framundan" celebrations widget).
+Only **month and day** are ever derived, stored, or displayed — **never the year**, so
+no age is exposed.
+
+- `birth_month` / `birth_day` (tinyint, nullable) are derived from the kennitala in the
+  `User::kennitala()` mutator, so the sync populates them for free and they stay in
+  lockstep with the encrypted value. See `User::birthdayFromKennitala()`.
+- The kennitala itself is **never** decrypted to render a birthday — the widget reads
+  the month/day columns. A company kennitala (day + 40) has no birthday and stays null.
+- This supersedes the earlier "birthdays must be opt-in" note. If per-person opt-out is
+  wanted later, add a boolean and filter the celebrations query on it.
 
 ## Sync rules
 

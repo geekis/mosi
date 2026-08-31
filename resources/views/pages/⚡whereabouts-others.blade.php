@@ -100,64 +100,61 @@ new #[Title('Whereabouts')] class extends Component {
 }; ?>
 
 <div class="mx-auto w-full max-w-4xl">
-    <flux:heading size="xl">{{ __('Other staff') }}</flux:heading>
+    <x-ui.heading size="xl">{{ __('Other staff') }}</x-ui.heading>
 
     {{-- Day selector --}}
     <div class="mt-4 flex items-center justify-between gap-2">
-        <flux:heading size="lg" class="capitalize">{{ $selected->isoFormat('dddd D.MM.YYYY') }}</flux:heading>
+        <x-ui.heading size="lg" class="capitalize">{{ $selected->isoFormat('dddd D.MM.YYYY') }}</x-ui.heading>
         <div class="flex items-center gap-1">
-            <flux:button size="sm" variant="ghost" icon="chevron-left"
+            <x-ui.button size="sm" variant="ghost" icon="chevron-left"
                 wire:click="shiftDay(-1)" :aria-label="__('Previous day')" />
-            <flux:button size="sm" variant="ghost" wire:click="goToToday" :disabled="$isToday">
+            <x-ui.button size="sm" variant="ghost" wire:click="goToToday" :disabled="$isToday">
                 {{ __('Today') }}
-            </flux:button>
-            <flux:button size="sm" variant="ghost" icon="chevron-right"
+            </x-ui.button>
+            <x-ui.button size="sm" variant="ghost" icon="chevron-right"
                 wire:click="shiftDay(1)" :aria-label="__('Next day')" />
         </div>
     </div>
 
     {{-- Filters --}}
     <div class="mt-4 flex flex-col gap-3 sm:flex-row">
-        <flux:select wire:model.live="location" :placeholder="__('All locations')" class="sm:max-w-xs">
-            <flux:select.option value="">{{ __('All locations') }}</flux:select.option>
+        <x-ui.select wire:model.live="location" :placeholder="__('All locations')" class="sm:max-w-xs">
+            <x-ui.select.option value="">{{ __('All locations') }}</x-ui.select.option>
             @foreach ($locations as $location)
-                <flux:select.option :value="$location->id">{{ $location->name }}</flux:select.option>
+                <x-ui.select.option :value="$location->id">{{ $location->name }}</x-ui.select.option>
             @endforeach
-        </flux:select>
+        </x-ui.select>
 
-        <flux:select wire:model.live="division" :placeholder="__('All divisions')" class="sm:max-w-xs">
-            <flux:select.option value="">{{ __('All divisions') }}</flux:select.option>
+        <x-ui.select wire:model.live="division" :placeholder="__('All divisions')" class="sm:max-w-xs">
+            <x-ui.select.option value="">{{ __('All divisions') }}</x-ui.select.option>
             @foreach ($divisions as $name)
-                <flux:select.option :value="$name">{{ $name }}</flux:select.option>
+                <x-ui.select.option :value="$name">{{ $name }}</x-ui.select.option>
             @endforeach
-        </flux:select>
+        </x-ui.select>
     </div>
 
     {{-- Board --}}
     <div class="mt-6 grid grid-cols-1 gap-3 sm:grid-cols-2">
         @forelse ($board as $entry)
-            <flux:card size="sm" wire:key="board-{{ $entry->id }}" class="flex items-center gap-3">
-                <flux:avatar :name="$entry->user->display_name" :initials="$entry->user->initials()"
-                    :src="$entry->user->avatarUrl()" size="sm" />
+            <x-ui.card size="sm" wire:key="board-{{ $entry->id }}" class="flex items-center gap-3">
+                <x-avatar :user="$entry->user" size="sm" />
                 <div class="min-w-0 flex-1">
                     @if ($entry->user->external_id)
-                        <a href="{{ route('people.show', $entry->user) }}" wire:navigate class="hover:underline">
-                            <flux:text class="truncate font-medium">{{ $entry->user->display_name }}</flux:text>
-                        </a>
+                        <a href="{{ route('people.show', $entry->user) }}" wire:navigate class="block truncate text-sm font-medium hover:underline">{{ $entry->user->display_name }}</a>
                     @else
-                        <flux:text class="truncate font-medium">{{ $entry->user->display_name }}</flux:text>
+                        <span class="block truncate text-sm font-medium">{{ $entry->user->display_name }}</span>
                     @endif
                     @if ($entry->user->organization_name)
-                        <flux:text size="sm" class="truncate text-zinc-500 dark:text-zinc-400">{{ $entry->user->organization_name }}</flux:text>
+                        <x-ui.text size="sm" class="truncate">{{ $entry->user->organization_name }}</x-ui.text>
                     @endif
                     {{-- These are always other people, so an absence reason is never revealed. --}}
                     <x-whereabouts-badge :entry="$entry" class="mt-0.5" />
                 </div>
-            </flux:card>
+            </x-ui.card>
         @empty
-            <flux:callout icon="map-pin" class="sm:col-span-2">
+            <x-ui.alert icon="map-pin" class="sm:col-span-2">
                 {{ __('No one has registered for this day yet.') }}
-            </flux:callout>
+            </x-ui.alert>
         @endforelse
     </div>
 </div>

@@ -93,6 +93,34 @@ test('a user can follow and unfollow from a profile', function () {
     expect($viewer->fresh()->isFollowing($profile))->toBeFalse();
 });
 
+test('a profile shows post and follower counts that update when you follow', function () {
+    $viewer = User::factory()->create();
+    $profile = User::factory()->create();
+    Post::factory()->count(2)->create(['user_id' => $profile->id]);
+
+    Livewire::actingAs($viewer)
+        ->test('pages::people.show', ['user' => $profile])
+        ->assertViewHas('postsCount', 2)
+        ->assertViewHas('followersCount', 0)
+        ->call('follow')
+        ->assertViewHas('followersCount', 1);
+});
+
+test('the "follows you" badge shows only when the person follows the viewer', function () {
+    $viewer = User::factory()->create();
+    $profile = User::factory()->create();
+
+    Livewire::actingAs($viewer)
+        ->test('pages::people.show', ['user' => $profile])
+        ->assertDontSee('Fylgir þér');
+
+    $profile->following()->attach($viewer->id);
+
+    Livewire::actingAs($viewer)
+        ->test('pages::people.show', ['user' => $profile])
+        ->assertSee('Fylgir þér');
+});
+
 test('the follow action is a no-op on your own profile', function () {
     $me = User::factory()->create();
 

@@ -34,11 +34,6 @@ jobs:
         with:
           node-version: '22'
 
-      # Flux Pro is a private Composer package; composer install 401s without credentials.
-      # Add FLUX_USERNAME and FLUX_LICENSE_KEY as repository secrets (Settings → Secrets).
-      - name: Authenticate Flux Pro
-        run: composer config http-basic.composer.fluxui.dev "${{ secrets.FLUX_USERNAME }}" "${{ secrets.FLUX_LICENSE_KEY }}"
-
       - name: Install PHP dependencies
         run: composer install --no-interaction --prefer-dist --no-progress
 

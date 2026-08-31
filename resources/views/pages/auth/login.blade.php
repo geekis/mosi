@@ -15,7 +15,7 @@
             <form method="POST" action="{{ route('login.identify') }}" class="flex flex-col gap-6">
                 @csrf
 
-                <flux:input
+                <x-ui.input
                     name="email"
                     :label="__('Email address')"
                     :value="old('email')"
@@ -26,9 +26,9 @@
                     placeholder="email@example.com"
                 />
 
-                <flux:button variant="primary" type="submit" class="w-full" data-test="continue-button">
+                <x-ui.button variant="primary" type="submit" class="w-full" data-test="continue-button">
                     {{ __('Continue') }}
-                </flux:button>
+                </x-ui.button>
             </form>
         @else
             {{-- Step two: password for a non-Microsoft account. --}}
@@ -39,12 +39,12 @@
 
                 <div class="flex items-center justify-between text-sm">
                     <span class="text-zinc-500 dark:text-zinc-400">{{ old('email') }}</span>
-                    <flux:link :href="route('login')" wire:navigate>{{ __('Use a different email') }}</flux:link>
+                    <x-ui.link :href="route('login')" navigate>{{ __('Use a different email') }}</x-ui.link>
                 </div>
 
                 <!-- Password -->
                 <div class="relative">
-                    <flux:input
+                    <x-ui.input
                         name="password"
                         :label="__('Password')"
                         type="password"
@@ -56,18 +56,18 @@
                     />
 
                     @if (Route::has('password.request'))
-                        <flux:link class="absolute top-0 text-sm end-0" :href="route('password.request')" wire:navigate>
+                        <x-ui.link class="absolute top-0 text-sm end-0" :href="route('password.request')" navigate>
                             {{ __('Forgot your password?') }}
-                        </flux:link>
+                        </x-ui.link>
                     @endif
                 </div>
 
                 <!-- Remember Me -->
-                <flux:checkbox name="remember" :label="__('Remember me')" :checked="old('remember')" />
+                <x-ui.checkbox name="remember" :label="__('Remember me')" :checked="old('remember')" />
 
-                <flux:button variant="primary" type="submit" class="w-full" data-test="login-button">
+                <x-ui.button variant="primary" type="submit" class="w-full" data-test="login-button">
                     {{ __('Log in') }}
-                </flux:button>
+                </x-ui.button>
             </form>
         @endunless
     </div>

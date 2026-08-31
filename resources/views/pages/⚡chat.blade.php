@@ -7,7 +7,6 @@ use App\Actions\Mentions\NotifyMentions;
 use App\Models\Conversation;
 use App\Models\Message;
 use App\Models\User;
-use Flux\Flux;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Title;
@@ -95,7 +94,7 @@ new #[Title('Chat')] class extends Component {
 
         $conversation = $startDirectConversation($me, $user);
 
-        Flux::modal('members')->close();
+        $this->dispatch('modal-close', name: 'members');
         $this->select($conversation->id);
     }
 
@@ -234,50 +233,50 @@ new #[Title('Chat')] class extends Component {
     }"
     x-on:keydown.escape.window="close()">
     {{-- Conversation list --}}
-    <div class="hidden w-72 shrink-0 p-4 overflow-y-auto sm:block rounded-2xl bg-white">
-        <flux:heading size="lg" class="mb-3">{{ __('Chat') }}</flux:heading>
+    <div class="hidden w-72 shrink-0 overflow-y-auto rounded-2xl border border-sand-200/80 bg-white p-4 shadow-soft sm:block dark:border-zinc-700 dark:bg-zinc-900">
+        <x-ui.heading size="lg" class="mb-3">{{ __('Chat') }}</x-ui.heading>
         <div class="space-y-1">
             @forelse ($conversations as $conversation)
                 @php($unread = $conversation->participants->firstWhere('id', $me->id)?->pivot->unread_count ?? 0)
                 @php($listOther = $conversation->type->value === 'direct' ? $conversation->otherParticipant($me) : null)
                 <button type="button" wire:key="conv-{{ $conversation->id }}" wire:click="select({{ $conversation->id }})"
                         @class([
-                            'flex w-full items-center gap-3 rounded-lg px-3 py-2 text-start hover:bg-zinc-100 dark:hover:bg-zinc-800',
-                            'bg-zinc-100 dark:bg-zinc-800' => $active?->id === $conversation->id,
+                            'flex w-full items-center gap-3 rounded-xl px-3 py-2 text-start hover:bg-sand-100 dark:hover:bg-zinc-800',
+                            'bg-sand-100 dark:bg-zinc-800' => $active?->id === $conversation->id,
                         ])>
                     @if ($conversation->type->value === 'group')
-                        <flux:avatar :name="$conversation->titleFor($me)" icon="user-group" size="sm" />
+                        <x-avatar :name="$conversation->titleFor($me)" icon="user-group" :presence="false" size="sm" />
                     @else
                         <x-avatar :user="$listOther" :name="$conversation->titleFor($me)" size="sm" />
                     @endif
                     <div class="min-w-0 flex-1">
-                        <flux:text class="truncate font-medium">{{ $conversation->titleFor($me) }}</flux:text>
+                        <span class="block truncate text-sm font-medium text-ink-900 dark:text-white">{{ $conversation->titleFor($me) }}</span>
                     </div>
                     @if ($unread > 0)
-                        <flux:badge size="sm" color="red">{{ $unread }}</flux:badge>
+                        <x-ui.badge size="sm" color="red">{{ $unread }}</x-ui.badge>
                     @endif
                 </button>
             @empty
-                <flux:text size="sm" class="text-zinc-500 dark:text-zinc-400">{{ __('No conversations yet.') }}</flux:text>
+                <x-ui.text size="sm">{{ __('No conversations yet.') }}</x-ui.text>
             @endforelse
         </div>
     </div>
 
     {{-- Thread --}}
-    <div class="flex min-w-0 flex-1 flex-col rounded-xl bg-white border border-zinc-200 dark:border-zinc-700">
+    <div class="flex min-w-0 flex-1 flex-col rounded-2xl border border-sand-200/80 bg-white shadow-soft dark:border-zinc-700 dark:bg-zinc-900">
         @if ($active)
             @php($otherParticipant = $active->type->value === 'direct' ? $active->otherParticipant($me) : null)
-            <div class="flex items-center justify-between gap-3 border-b border-zinc-200 px-4 py-3 dark:border-zinc-700">
+            <div class="flex items-center justify-between gap-3 border-b border-sand-200/80 px-4 py-3 dark:border-zinc-700">
                 <div class="min-w-0">
-                    <flux:heading size="sm" class="truncate">{{ $active->titleFor($me) }}</flux:heading>
+                    <x-ui.heading size="sm" class="truncate">{{ $active->titleFor($me) }}</x-ui.heading>
                     @if ($otherParticipant)
                         <x-user-presence :user="$otherParticipant" class="mt-0.5" />
                     @endif
                 </div>
                 @if ($active->type->value === 'group')
-                    <flux:modal.trigger name="members">
-                        <flux:button size="sm" variant="ghost" icon="users">{{ __('Members') }}</flux:button>
-                    </flux:modal.trigger>
+                    <x-ui.modal.trigger name="members">
+                        <x-ui.button size="sm" variant="ghost" icon="users">{{ __('Members') }}</x-ui.button>
+                    </x-ui.modal.trigger>
                 @endif
             </div>
 
@@ -298,7 +297,7 @@ new #[Title('Chat')] class extends Component {
 
                             <div class="flex max-w-[75%] flex-col gap-1 {{ $mine ? 'items-end' : 'items-start' }}">
                                 @unless ($mine)
-                                    <span class="mb-0.5 px-1 text-[11px] font-medium text-zinc-500 dark:text-zinc-400">{{ $message->author?->display_name }}</span>
+                                    <span class="mb-0.5 px-1 text-[11px] font-medium text-mist-500 dark:text-zinc-400">{{ $message->author?->display_name }}</span>
                                 @endunless
 
                                 @foreach ($images as $image)
@@ -315,7 +314,7 @@ new #[Title('Chat')] class extends Component {
                                         class="group relative cursor-zoom-in overflow-hidden rounded-2xl">
                                         <video src="{{ $video->getUrl() }}#t=0.1" preload="metadata" class="max-h-64 max-w-full object-cover" muted playsinline></video>
                                         <span class="pointer-events-none absolute inset-0 flex items-center justify-center bg-black/25 transition group-hover:bg-black/35">
-                                            <flux:icon icon="play-circle" class="size-12 text-white/90" />
+                                            <x-ui.icon name="play-circle" class="size-12 text-white/90" />
                                         </span>
                                     </button>
                                 @endforeach
@@ -323,8 +322,8 @@ new #[Title('Chat')] class extends Component {
                                 @if (trim($message->body) !== '' || $files->isNotEmpty())
                                     <div @class([
                                         'rounded-2xl px-3 py-2',
-                                        'bg-primary-600 text-white' => $mine,
-                                        'bg-zinc-100 dark:bg-zinc-800' => ! $mine,
+                                        'bg-brand-600 text-white' => $mine,
+                                        'bg-sand-100 dark:bg-zinc-800' => ! $mine,
                                     ])>
                                         @if (trim($message->body) !== '')
                                             <x-post-body :body="$message->body" :mentions="$mentionMap" variant="plain" class="break-words text-sm" />
@@ -336,7 +335,7 @@ new #[Title('Chat')] class extends Component {
                                                     'mt-1 flex items-center gap-2 text-sm underline underline-offset-2',
                                                     'text-white' => $mine,
                                                 ])>
-                                                <flux:icon icon="paper-clip" variant="micro" />
+                                                <x-ui.icon name="paper-clip" variant="micro" />
                                                 <span class="truncate">{{ $file->name }}</span>
                                             </a>
                                         @endforeach
@@ -344,7 +343,7 @@ new #[Title('Chat')] class extends Component {
                                 @endif
 
                                 @if ($message->id === $lastMineId && $seenBy->isNotEmpty())
-                                    <span class="px-1 text-[11px] text-zinc-400 dark:text-zinc-500">
+                                    <span class="px-1 text-[11px] text-mist-400 dark:text-zinc-500">
                                         @if ($active->type->value === 'group')
                                             {{ __('Seen by :count', ['count' => $seenBy->count()]) }}
                                         @else
@@ -358,20 +357,20 @@ new #[Title('Chat')] class extends Component {
                 </div>
             </div>
 
-            <form wire:submit="send" class="border-t border-zinc-200 p-3 dark:border-zinc-700">
+            <form wire:submit="send" class="border-t border-sand-200/80 p-3 dark:border-zinc-700">
                 @if ($attachments)
                     <div class="mb-2 flex flex-wrap gap-2">
                         @foreach ($attachments as $index => $file)
-                            <div wire:key="pending-{{ $index }}" class="flex items-center gap-2 rounded-lg bg-zinc-100 py-1 pe-1 ps-2 text-xs dark:bg-zinc-800">
+                            <div wire:key="pending-{{ $index }}" class="flex items-center gap-2 rounded-lg bg-sand-100 py-1 pe-1 ps-2 text-xs dark:bg-zinc-800">
                                 @if ($file->isPreviewable() && str_starts_with($file->getMimeType(), 'image/'))
                                     <img src="{{ $file->temporaryUrl() }}" alt="" class="h-8 w-8 rounded object-cover" />
                                 @elseif (str_starts_with((string) $file->getMimeType(), 'video/'))
-                                    <flux:icon icon="film" variant="micro" class="text-zinc-400" />
+                                    <x-ui.icon name="film" variant="micro" class="text-mist-400" />
                                 @else
-                                    <flux:icon icon="paper-clip" variant="micro" class="text-zinc-400" />
+                                    <x-ui.icon name="paper-clip" variant="micro" class="text-mist-400" />
                                 @endif
                                 <span class="max-w-[10rem] truncate">{{ $file->getClientOriginalName() }}</span>
-                                <flux:button type="button" size="xs" variant="ghost" icon="x-mark"
+                                <x-ui.button type="button" size="xs" variant="ghost" icon="x-mark"
                                     wire:click="removeAttachment({{ $index }})" :aria-label="__('Remove')" />
                             </div>
                         @endforeach
@@ -380,54 +379,52 @@ new #[Title('Chat')] class extends Component {
 
                 <div class="flex items-center gap-2">
                     <input type="file" multiple wire:model="attachments" x-ref="files" class="hidden" />
-                    <flux:button type="button" variant="ghost" icon="paper-clip" :aria-label="__('Attach files')"
+                    <x-ui.button type="button" variant="ghost" icon="paper-clip" :aria-label="__('Attach files')"
                         x-on:click="$refs.files.click()" />
                     <div x-data="mentionBox(@js(array_values($mentionables)))" class="relative flex-1">
-                        <flux:input wire:model="body" :placeholder="__('Write a message…')" class="w-full" autocomplete="off" />
+                        <x-ui.input wire:model="body" :placeholder="__('Write a message…')" autocomplete="off" />
                         <x-mention-suggestions placement="top" />
                     </div>
-                    <flux:button type="submit" variant="primary" icon="paper-airplane" :aria-label="__('Send')" />
+                    <x-ui.button type="submit" variant="primary" icon="paper-airplane" :aria-label="__('Send')" />
                 </div>
 
-                <flux:error name="attachments" />
-                <flux:error name="attachments.*" />
+                <x-ui.error name="attachments" />
+                <x-ui.error name="attachments.*" />
             </form>
 
             @if ($active->type->value === 'group')
-                <flux:modal name="members" class="w-full max-w-md">
+                <x-ui.modal name="members" class="max-w-md">
                     <div class="space-y-4">
-                        <flux:heading size="lg">{{ __('Members') }}</flux:heading>
+                        <x-ui.heading size="lg">{{ __('Members') }}</x-ui.heading>
                         <div class="max-h-96 space-y-1 overflow-y-auto">
                             @foreach ($active->participants as $participant)
-                                <div wire:key="member-{{ $participant->id }}" class="flex items-center gap-3 rounded-lg px-2 py-2 hover:bg-zinc-100 dark:hover:bg-zinc-800">
+                                <div wire:key="member-{{ $participant->id }}" class="flex items-center gap-3 rounded-xl px-2 py-2 hover:bg-sand-100 dark:hover:bg-zinc-800">
                                     <x-avatar :user="$participant" size="sm" />
                                     <div class="min-w-0 flex-1">
                                         @if ($participant->external_id)
-                                            <a href="{{ route('people.show', $participant) }}" wire:navigate class="hover:underline">
-                                                <flux:text class="truncate font-medium">{{ $participant->display_name }}</flux:text>
-                                            </a>
+                                            <a href="{{ route('people.show', $participant) }}" wire:navigate class="block truncate text-sm font-medium hover:underline">{{ $participant->display_name }}</a>
                                         @else
-                                            <flux:text class="truncate font-medium">{{ $participant->display_name }}</flux:text>
+                                            <span class="block truncate text-sm font-medium">{{ $participant->display_name }}</span>
                                         @endif
                                         @if ($participant->job_title)
-                                            <flux:text size="sm" class="truncate text-zinc-500 dark:text-zinc-400">{{ $participant->job_title }}</flux:text>
+                                            <x-ui.text size="sm" class="truncate">{{ $participant->job_title }}</x-ui.text>
                                         @endif
                                     </div>
                                     @if ($participant->id === $me->id)
-                                        <flux:badge size="sm">{{ __('You') }}</flux:badge>
+                                        <x-ui.badge size="sm">{{ __('You') }}</x-ui.badge>
                                     @else
-                                        <flux:button size="sm" variant="ghost" icon="chat-bubble-oval-left"
-                                            wire:click="startChatWith({{ $participant->id }})">{{ __('Message') }}</flux:button>
+                                        <x-ui.button size="sm" variant="ghost" icon="chat-bubble-oval-left"
+                                            wire:click="startChatWith({{ $participant->id }})">{{ __('Message') }}</x-ui.button>
                                     @endif
                                 </div>
                             @endforeach
                         </div>
                     </div>
-                </flux:modal>
+                </x-ui.modal>
             @endif
         @else
             <div class="flex flex-1 items-center justify-center">
-                <flux:text class="text-zinc-500 dark:text-zinc-400">{{ __('Select a conversation to start chatting.') }}</flux:text>
+                <x-ui.text>{{ __('Select a conversation to start chatting.') }}</x-ui.text>
             </div>
         @endif
     </div>
@@ -438,12 +435,12 @@ new #[Title('Chat')] class extends Component {
             <div class="flex items-center justify-end gap-2 p-4">
                 <a :href="viewer.url" :download="viewer.name" x-on:click.stop
                     class="inline-flex items-center gap-2 rounded-lg bg-white/10 px-3 py-2 text-sm text-white hover:bg-white/20">
-                    <flux:icon icon="arrow-down-tray" variant="micro" />
+                    <x-ui.icon name="arrow-down-tray" variant="micro" />
                     {{ __('Download') }}
                 </a>
                 <button type="button" x-on:click="close()" :aria-label="@js(__('Close'))"
                     class="inline-flex items-center rounded-lg bg-white/10 p-2 text-white hover:bg-white/20">
-                    <flux:icon icon="x-mark" variant="micro" />
+                    <x-ui.icon name="x-mark" variant="micro" />
                 </button>
             </div>
             <div class="flex min-h-0 flex-1 items-center justify-center p-4 pt-0">

@@ -4,7 +4,6 @@ use App\Actions\Groups\DeleteGroupMedia;
 use App\Actions\Groups\UploadGroupFile;
 use App\Models\Group;
 use App\Models\User;
-use Flux\Flux;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
@@ -30,8 +29,8 @@ new class extends Component {
 
         $this->reset('file');
         $this->group->load('media');
-        Flux::modal('upload-file')->close();
-        Flux::toast(variant: 'success', text: __('File uploaded.'));
+        $this->dispatch('modal-close', name: 'upload-file');
+        $this->dispatch('toast', variant: 'success', text: __('File uploaded.'));
     }
 
     public function delete(int $mediaId, DeleteGroupMedia $deleteGroupMedia): void
@@ -49,7 +48,7 @@ new class extends Component {
         }
 
         $this->group->load('media');
-        Flux::toast(variant: 'success', text: __('File deleted.'));
+        $this->dispatch('toast', variant: 'success', text: __('File deleted.'));
     }
 
     /**
@@ -75,51 +74,50 @@ new class extends Component {
 
 <div class="space-y-4">
     <div class="flex items-center justify-between">
-        <flux:heading size="lg">{{ __('Files') }}</flux:heading>
-        <flux:modal.trigger name="upload-file">
-            <flux:button size="sm" variant="primary" icon="plus">{{ __('Upload file') }}</flux:button>
-        </flux:modal.trigger>
+        <x-ui.heading size="lg">{{ __('Files') }}</x-ui.heading>
+        <x-ui.modal.trigger name="upload-file">
+            <x-ui.button size="sm" variant="primary" icon="plus">{{ __('Upload file') }}</x-ui.button>
+        </x-ui.modal.trigger>
     </div>
 
     @forelse ($files as $file)
         @php($uploaderId = (int) $file->getCustomProperty('uploaded_by'))
-        <flux:card wire:key="file-{{ $file->id }}" class="flex items-center gap-3">
-            <flux:icon name="document-text" class="size-8 shrink-0 text-zinc-400" />
+        <x-ui.card wire:key="file-{{ $file->id }}" class="flex items-center gap-3">
+            <x-ui.icon name="document-text" class="size-8 shrink-0 text-mist-400" />
             <div class="min-w-0 flex-1">
                 <a href="{{ route('groups.attachments', [$group, $file]) }}"
-                    class="truncate font-medium hover:underline" target="_blank" rel="noopener">
+                    class="block truncate font-medium hover:underline" target="_blank" rel="noopener">
                     {{ $file->file_name }}
                 </a>
-                <flux:text size="sm" class="text-zinc-500 dark:text-zinc-400">
+                <x-ui.text size="sm">
                     {{ $file->human_readable_size }}
                     @if ($uploaders[$uploaderId] ?? null)
                         · {{ __('Uploaded by :name', ['name' => $uploaders[$uploaderId]->display_name]) }}
                     @endif
                     · {{ $file->created_at?->translatedFormat('j. M Y') }}
-                </flux:text>
+                </x-ui.text>
             </div>
-            <flux:button size="sm" variant="ghost" icon="arrow-down-tray"
-                :href="route('groups.attachments', [$group, $file])" target="_blank" />
+            <x-ui.button size="sm" variant="ghost" icon="arrow-down-tray"
+                :href="route('groups.attachments', [$group, $file])" :navigate="false" target="_blank" />
             @if ($canManage || $uploaderId === auth()->id())
-                <flux:button size="sm" variant="ghost" icon="trash"
+                <x-ui.button size="sm" variant="ghost" icon="trash"
                     wire:click="delete({{ $file->id }})"
                     wire:confirm="{{ __('Delete this file?') }}" />
             @endif
-        </flux:card>
+        </x-ui.card>
     @empty
-        <flux:callout icon="document-text">{{ __('No files yet.') }}</flux:callout>
+        <x-ui.alert icon="document-text">{{ __('No files yet.') }}</x-ui.alert>
     @endforelse
 
     {{-- Upload modal --}}
-    <flux:modal name="upload-file" class="w-full max-w-lg">
+    <x-ui.modal name="upload-file" class="max-w-lg">
         <form wire:submit="upload" class="space-y-4">
-            <flux:heading size="lg">{{ __('Upload file') }}</flux:heading>
-            <flux:input type="file" wire:model="file" :label="__('File')"
+            <x-ui.heading size="lg">{{ __('Upload file') }}</x-ui.heading>
+            <x-ui.input type="file" wire:model="file" :label="__('File')"
                 accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.csv,.txt" />
-            <flux:error name="file" />
             <div class="flex justify-end">
-                <flux:button type="submit" variant="primary" icon="arrow-up-tray">{{ __('Upload') }}</flux:button>
+                <x-ui.button type="submit" variant="primary" icon="arrow-up-tray">{{ __('Upload') }}</x-ui.button>
             </div>
         </form>
-    </flux:modal>
+    </x-ui.modal>
 </div>

@@ -6,6 +6,7 @@ namespace App\Models;
 use App\Enums\AssignmentStatus;
 use App\Enums\AuthMethod;
 use App\Enums\PersonType;
+use Carbon\CarbonImmutable;
 use Carbon\CarbonInterface;
 use Database\Factories\UserFactory;
 use Filament\Models\Contracts\FilamentUser;
@@ -41,6 +42,8 @@ use Spatie\Permission\Traits\HasRoles;
  * @property string|null $given_name
  * @property string|null $kennitala Decrypted on read; never serialised.
  * @property string|null $kennitala_hash
+ * @property int|null $birth_month Derived from the kennitala; month/day only, never the year.
+ * @property int|null $birth_day
  * @property string|null $email
  * @property string|null $phone
  * @property string|null $employee_number
@@ -101,6 +104,8 @@ class User extends Authenticatable implements FilamentUser, HasAvatar, HasMedia,
             'assignment_starts_at' => 'date',
             'assignment_ends_at' => 'date',
             'assignment_percent' => 'integer',
+            'birth_month' => 'integer',
+            'birth_day' => 'integer',
             'notification_preferences' => 'array',
             'last_active_at' => 'datetime',
         ];
@@ -151,7 +156,8 @@ class User extends Authenticatable implements FilamentUser, HasAvatar, HasMedia,
     /**
      * Kennitala is encrypted at rest and paired with a SHA-256 hash for lookups. Both
      * derive from the digits only, so a value with or without the hyphen matches. This
-     * is a mutator rather than the `encrypted` cast so the hash stays in lockstep.
+     * is a mutator rather than the `encrypted` cast so the hash — and the derived
+     * birth_month/birth_day — stay in lockstep with it.
      *
      * @return Attribute<string|null, string|null>
      */
@@ -161,7 +167,7 @@ class User extends Authenticatable implements FilamentUser, HasAvatar, HasMedia,
             get: fn (?string $value): ?string => $value === null ? null : Crypt::decryptString($value),
             set: function (?string $value): array {
                 if ($value === null || $value === '') {
-                    return ['kennitala' => null, 'kennitala_hash' => null];
+                    return ['kennitala' => null, 'kennitala_hash' => null, 'birth_month' => null, 'birth_day' => null];
                 }
 
                 $digits = self::normaliseKennitala($value);
@@ -169,9 +175,59 @@ class User extends Authenticatable implements FilamentUser, HasAvatar, HasMedia,
                 return [
                     'kennitala' => Crypt::encryptString($digits),
                     'kennitala_hash' => self::hashKennitala($digits),
+                    ...self::birthdayFromKennitala($digits) ?? ['birth_month' => null, 'birth_day' => null],
                 ];
             },
         );
+    }
+
+    /**
+     * Extract the birth month and day (never the year) from a kennitala. The first four
+     * digits are DDMM; a company kennitala adds 40 to the day, so those — and any value
+     * that does not resolve to a real month/day — return null.
+     *
+     * @return array{birth_month: int, birth_day: int}|null
+     */
+    public static function birthdayFromKennitala(?string $kennitala): ?array
+    {
+        $digits = self::normaliseKennitala((string) $kennitala);
+
+        if (strlen($digits) < 4) {
+            return null;
+        }
+
+        $day = (int) substr($digits, 0, 2);
+        $month = (int) substr($digits, 2, 2);
+
+        if ($day < 1 || $day > 31 || $month < 1 || $month > 12) {
+            return null;
+        }
+
+        return ['birth_month' => $month, 'birth_day' => $day];
+    }
+
+    /**
+     * Whether today is this person's birthday.
+     */
+    public function birthdayIsToday(): bool
+    {
+        return $this->birth_month === now()->month && $this->birth_day === now()->day;
+    }
+
+    /**
+     * The next occurrence of this person's birthday (today if it falls today), or null
+     * when no birthday is known. Year-agnostic: it is always this year or next.
+     */
+    public function nextBirthday(): ?CarbonImmutable
+    {
+        if ($this->birth_month === null || $this->birth_day === null) {
+            return null;
+        }
+
+        $today = CarbonImmutable::today();
+        $next = CarbonImmutable::createFromDate($today->year, $this->birth_month, $this->birth_day)->startOfDay();
+
+        return $next->lt($today) ? $next->addYear() : $next;
     }
 
     /**

@@ -65,54 +65,54 @@ new class extends Component {
     }
 }; ?>
 
-<flux:card class="space-y-4">
+<x-ui.card class="space-y-4">
     <div class="flex items-center justify-between gap-2">
-        <flux:heading size="sm">{{ __('Calendar') }}</flux:heading>
+        <x-ui.heading size="sm">{{ __('Calendar') }}</x-ui.heading>
         @if ($hasCalendar)
             <div class="flex items-center gap-1">
-                <flux:button size="xs" variant="ghost" icon="chevron-left" wire:click="previousWeek" :aria-label="__('Previous week')" />
-                <flux:button size="xs" variant="ghost" wire:click="thisWeek">{{ __('This week') }}</flux:button>
-                <flux:button size="xs" variant="ghost" icon="chevron-right" wire:click="nextWeek" :aria-label="__('Next week')" />
+                <x-ui.button size="xs" variant="ghost" icon="chevron-left" wire:click="previousWeek" :aria-label="__('Previous week')" />
+                <x-ui.button size="xs" variant="ghost" wire:click="thisWeek">{{ __('This week') }}</x-ui.button>
+                <x-ui.button size="xs" variant="ghost" icon="chevron-right" wire:click="nextWeek" :aria-label="__('Next week')" />
             </div>
         @endif
     </div>
 
     @if (! $hasCalendar)
-        <flux:callout icon="calendar-days">{{ __('No calendar available for this person.') }}</flux:callout>
+        <x-ui.alert icon="calendar-days">{{ __('No calendar available for this person.') }}</x-ui.alert>
     @else
-        <flux:text size="sm" class="text-zinc-500 dark:text-zinc-400">
+        <x-ui.text size="sm">
             {{ $rangeStart->translatedFormat('j. M') }} – {{ $rangeEnd->translatedFormat('j. M Y') }}
-        </flux:text>
+        </x-ui.text>
 
         @forelse ($eventsByDay as $day => $events)
             @php($date = \Carbon\CarbonImmutable::parse($day))
             <div wire:key="cal-day-{{ $day }}">
-                <flux:heading size="xs" class="mb-1 text-zinc-500 dark:text-zinc-400">
+                <x-ui.heading size="xs" class="mb-1 text-mist-500 dark:text-zinc-400">
                     {{ $date->translatedFormat('l j. M') }}
-                </flux:heading>
+                </x-ui.heading>
                 <div class="space-y-1.5">
                     @foreach ($events as $index => $event)
                         @php($private = ! $isSelf && ($event['sensitivity'] ?? 'normal') !== 'normal')
                         <div wire:key="cal-event-{{ $day }}-{{ $index }}"
                             @class([
-                                'rounded-lg border-l-2 bg-zinc-50 px-3 py-2 dark:bg-zinc-800/50',
+                                'rounded-lg border-l-2 bg-sand-50 px-3 py-2 dark:bg-zinc-800/50',
                                 'border-green-500' => $event['show_as'] === 'free',
                                 'border-amber-500' => $event['show_as'] === 'tentative',
                                 'border-red-500' => $event['show_as'] === 'busy',
                                 'border-purple-500' => $event['show_as'] === 'oof',
                                 'border-blue-500' => $event['show_as'] === 'workingElsewhere',
-                                'border-zinc-400' => ! in_array($event['show_as'], ['free', 'tentative', 'busy', 'oof', 'workingElsewhere'], true),
+                                'border-mist-400' => ! in_array($event['show_as'], ['free', 'tentative', 'busy', 'oof', 'workingElsewhere'], true),
                             ])>
                             <div class="flex items-baseline justify-between gap-2">
                                 @if ($private)
-                                    <span class="flex items-center gap-1 truncate text-sm font-medium italic text-zinc-500 dark:text-zinc-400">
-                                        <flux:icon icon="lock-closed" variant="micro" class="size-3 shrink-0" />
+                                    <span class="flex items-center gap-1 truncate text-sm font-medium italic text-mist-500 dark:text-zinc-400">
+                                        <x-ui.icon name="lock-closed" variant="micro" class="size-3 shrink-0" />
                                         {{ __('Private') }}
                                     </span>
                                 @else
                                     <span class="truncate text-sm font-medium">{{ $event['subject'] ?? __('(No subject)') }}</span>
                                 @endif
-                                <span class="shrink-0 text-xs text-zinc-500 dark:text-zinc-400">
+                                <span class="shrink-0 text-xs text-mist-500 dark:text-zinc-400">
                                     @if ($event['is_all_day'])
                                         {{ __('All day') }}
                                     @else
@@ -121,13 +121,13 @@ new class extends Component {
                                 </span>
                             </div>
                             @if (! $private && $event['location'])
-                                <div class="mt-0.5 flex items-center gap-1 text-xs text-zinc-500 dark:text-zinc-400">
-                                    <flux:icon icon="map-pin" variant="outline" class="size-3 shrink-0" />
+                                <div class="mt-0.5 flex items-center gap-1 text-xs text-mist-500 dark:text-zinc-400">
+                                    <x-ui.icon name="map-pin" variant="outline" class="size-3 shrink-0" />
                                     <span class="truncate">{{ $event['location'] }}</span>
                                 </div>
                             @endif
                             @if (! $private && ! empty($event['attendees']))
-                                <div class="mt-0.5 truncate text-xs text-zinc-500 dark:text-zinc-400">
+                                <div class="mt-0.5 truncate text-xs text-mist-500 dark:text-zinc-400">
                                     {{ implode(', ', array_slice($event['attendees'], 0, 5)) }}{{ count($event['attendees']) > 5 ? '…' : '' }}
                                 </div>
                             @endif
@@ -136,7 +136,7 @@ new class extends Component {
                 </div>
             </div>
         @empty
-            <flux:callout icon="calendar-days">{{ __('No events this week.') }}</flux:callout>
+            <x-ui.alert icon="calendar-days">{{ __('No events this week.') }}</x-ui.alert>
         @endforelse
     @endif
-</flux:card>
+</x-ui.card>

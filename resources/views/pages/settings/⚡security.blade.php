@@ -1,7 +1,6 @@
 <?php
 
 use App\Concerns\PasswordValidationRules;
-use Flux\Flux;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\ValidationException;
 use Laravel\Fortify\Actions\DisableTwoFactorAuthentication;
@@ -38,8 +37,6 @@ new #[Title('Security settings')] class extends Component {
 
     #[Locked]
     public array $passkeys = [];
-
-    public bool $showDeleteModal = false;
 
     #[Locked]
     public ?int $deletingPasskeyId = null;
@@ -97,7 +94,7 @@ new #[Title('Security settings')] class extends Component {
 
         $this->reset('current_password', 'password', 'password_confirmation');
 
-        Flux::toast(variant: 'success', text: __('Password updated.'));
+        $this->dispatch('toast', variant: 'success', text: __('Password updated.'));
     }
 
     /* @chisel-passkeys */
@@ -129,7 +126,8 @@ new #[Title('Security settings')] class extends Component {
 
         $this->deletingPasskeyId = $passkey->id;
         $this->deletingPasskeyName = $passkey->name;
-        $this->showDeleteModal = true;
+
+        $this->dispatch('modal-show', name: 'delete-passkey-modal');
     }
 
     /**
@@ -154,9 +152,10 @@ new #[Title('Security settings')] class extends Component {
      */
     public function closeDeleteModal(): void
     {
-        $this->showDeleteModal = false;
         $this->deletingPasskeyId = null;
         $this->deletingPasskeyName = '';
+
+        $this->dispatch('modal-close', name: 'delete-passkey-modal');
     }
     /* @end-chisel-passkeys */
 
@@ -185,11 +184,11 @@ new #[Title('Security settings')] class extends Component {
 <section class="w-full">
     @include('partials.settings-heading')
 
-    <flux:heading class="sr-only">{{ __('Security settings') }}</flux:heading>
+    <x-ui.heading class="sr-only">{{ __('Security settings') }}</x-ui.heading>
 
     <x-pages::settings.layout :heading="__('Update password')" :subheading="__('Ensure your account is using a long, random password to stay secure')">
         <form method="POST" wire:submit="updatePassword" class="mt-6 space-y-6">
-            <flux:input
+            <x-ui.input
                 wire:model="current_password"
                 :label="__('Current password')"
                 type="password"
@@ -197,7 +196,7 @@ new #[Title('Security settings')] class extends Component {
                 autocomplete="current-password"
                 viewable
             />
-            <flux:input
+            <x-ui.input
                 wire:model="password"
                 :label="__('New password')"
                 type="password"
@@ -206,7 +205,7 @@ new #[Title('Security settings')] class extends Component {
                 passwordrules="{{ \Illuminate\Validation\Rules\Password::defaults()->toPasswordRulesString() }}"
                 viewable
             />
-            <flux:input
+            <x-ui.input
                 wire:model="password_confirmation"
                 :label="__('Confirm password')"
                 type="password"
@@ -217,50 +216,50 @@ new #[Title('Security settings')] class extends Component {
             />
 
             <div class="flex items-center gap-4">
-                <flux:button variant="primary" type="submit" data-test="update-password-button">
+                <x-ui.button variant="primary" type="submit" data-test="update-password-button">
                     {{ __('Save') }}
-                </flux:button>
+                </x-ui.button>
             </div>
         </form>
 
         {{-- @chisel-2fa --}}
         @if ($canManageTwoFactor)
             <section class="mt-12">
-                <flux:heading>{{ __('Two-factor authentication') }}</flux:heading>
-                <flux:subheading>{{ __('Manage your two-factor authentication settings') }}</flux:subheading>
+                <x-ui.heading>{{ __('Two-factor authentication') }}</x-ui.heading>
+                <x-ui.subheading>{{ __('Manage your two-factor authentication settings') }}</x-ui.subheading>
 
                 <div class="flex flex-col w-full mx-auto space-y-6 text-sm" wire:cloak>
                     @if ($twoFactorEnabled)
                         <div class="space-y-4">
-                            <flux:text>
+                            <x-ui.text>
                                 {{ __('You will be prompted for a secure, random pin during login, which you can retrieve from the TOTP-supported application on your phone.') }}
-                            </flux:text>
+                            </x-ui.text>
 
                             <div class="flex justify-start">
-                                <flux:button
+                                <x-ui.button
                                     variant="danger"
                                     wire:click="disable"
                                 >
                                     {{ __('Disable 2FA') }}
-                                </flux:button>
+                                </x-ui.button>
                             </div>
 
                             <livewire:pages::settings.two-factor.recovery-codes :$requiresConfirmation />
                         </div>
                     @else
                         <div class="space-y-4">
-                            <flux:text variant="subtle">
+                            <x-ui.text>
                                 {{ __('When you enable two-factor authentication, you will be prompted for a secure pin during login. This pin can be retrieved from a TOTP-supported application on your phone.') }}
-                            </flux:text>
+                            </x-ui.text>
 
-                            <flux:modal.trigger name="two-factor-setup-modal">
-                                <flux:button
+                            <x-ui.modal.trigger name="two-factor-setup-modal">
+                                <x-ui.button
                                     variant="primary"
                                     wire:click="$dispatch('start-two-factor-setup')"
                                 >
                                     {{ __('Enable 2FA') }}
-                                </flux:button>
-                            </flux:modal.trigger>
+                                </x-ui.button>
+                            </x-ui.modal.trigger>
 
                             <livewire:pages::settings.two-factor-setup-modal :requires-confirmation="$requiresConfirmation" />
                         </div>
@@ -273,25 +272,25 @@ new #[Title('Security settings')] class extends Component {
         {{-- @chisel-passkeys --}}
         @if ($canManagePasskeys)
             <section class="mt-12">
-                <flux:heading>{{ __('Passkeys') }}</flux:heading>
-                <flux:subheading>{{ __('Manage your passkeys for passwordless sign-in') }}</flux:subheading>
+                <x-ui.heading>{{ __('Passkeys') }}</x-ui.heading>
+                <x-ui.subheading>{{ __('Manage your passkeys for passwordless sign-in') }}</x-ui.subheading>
 
                 <div class="mt-6 flex flex-col w-full mx-auto space-y-6 text-sm" wire:cloak>
-                    <div class="border rounded-lg border-zinc-200 dark:border-zinc-700 overflow-hidden">
+                    <div class="overflow-hidden rounded-2xl border border-sand-200/80">
                         @forelse ($passkeys as $passkey)
-                            <div class="flex items-center justify-between p-4 {{ ! $loop->last ? 'border-b border-zinc-200 dark:border-zinc-700' : '' }}">
+                            <div class="flex items-center justify-between p-4 {{ ! $loop->last ? 'border-b border-sand-200/80' : '' }}">
                                 <div class="flex items-center gap-4">
-                                    <div class="flex size-10 shrink-0 items-center justify-center rounded-xl bg-zinc-100 dark:bg-zinc-800">
-                                        <flux:icon.key class="size-5 text-zinc-500 dark:text-zinc-400" />
+                                    <div class="flex size-10 shrink-0 items-center justify-center rounded-xl bg-sand-100 text-mist-500">
+                                        <x-ui.icon name="key" class="size-5" />
                                     </div>
                                     <div class="space-y-1">
                                         <div class="flex items-center gap-2.5">
                                             <p class="font-medium tracking-tight">{{ $passkey['name'] }}</p>
                                             @if ($passkey['authenticator'])
-                                                <flux:badge size="sm">{{ $passkey['authenticator'] }}</flux:badge>
+                                                <x-ui.badge size="sm">{{ $passkey['authenticator'] }}</x-ui.badge>
                                             @endif
                                         </div>
-                                        <p class="text-zinc-500 dark:text-zinc-400 text-xs">
+                                        <p class="text-mist-500 text-xs">
                                             {{ __('Added :time', ['time' => $passkey['created_at_diff']]) }}
                                             @if ($passkey['last_used_at_diff'])
                                                 <span class="opacity-50 mx-1">/</span>
@@ -301,22 +300,22 @@ new #[Title('Security settings')] class extends Component {
                                     </div>
                                 </div>
 
-                                <flux:button
+                                <x-ui.button
                                     variant="ghost"
                                     size="sm"
                                     icon="trash"
-                                    icon:variant="outline"
                                     wire:click="confirmDelete({{ $passkey['id'] }})"
-                                    class="text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/50"
+                                    :aria-label="__('Remove passkey')"
+                                    class="text-coral-500 hover:bg-coral-50 hover:text-coral-600"
                                 />
                             </div>
                         @empty
                             <div class="p-8 text-center">
-                                <div class="mx-auto mb-4 flex size-14 items-center justify-center rounded-2xl bg-zinc-100 dark:bg-zinc-800">
-                                    <flux:icon.key class="size-7 text-zinc-400 dark:text-zinc-500" />
+                                <div class="mx-auto mb-4 flex size-14 items-center justify-center rounded-2xl bg-sand-100 text-mist-400">
+                                    <x-ui.icon name="key" class="size-7" />
                                 </div>
                                 <p class="font-medium">{{ __('No passkeys yet') }}</p>
-                                <flux:text class="mt-1">{{ __('Add a passkey to sign in without a password') }}</flux:text>
+                                <x-ui.text class="mt-1">{{ __('Add a passkey to sign in without a password') }}</x-ui.text>
                             </div>
                         @endforelse
                     </div>
@@ -329,35 +328,30 @@ new #[Title('Security settings')] class extends Component {
     </x-pages::settings.layout>
 
     {{-- @chisel-passkeys --}}
-    <flux:modal
-        name="delete-passkey-modal"
-        class="max-w-md md:min-w-md"
-        @close="closeDeleteModal"
-        wire:model="showDeleteModal"
-    >
+    <x-ui.modal name="delete-passkey-modal" class="max-w-md">
         <div class="space-y-6">
             <div class="space-y-2">
-                <flux:heading size="lg">{{ __('Remove passkey') }}</flux:heading>
-                <flux:text>
+                <x-ui.heading size="lg">{{ __('Remove passkey') }}</x-ui.heading>
+                <x-ui.text>
                     {{ __('Are you sure you want to remove the passkey ":name"? You will no longer be able to use it to sign in.', ['name' => $deletingPasskeyName]) }}
-                </flux:text>
+                </x-ui.text>
             </div>
 
             <div class="flex gap-3 justify-end">
-                <flux:button
-                    variant="outline"
+                <x-ui.button
+                    variant="secondary"
                     wire:click="closeDeleteModal"
                 >
                     {{ __('Cancel') }}
-                </flux:button>
-                <flux:button
+                </x-ui.button>
+                <x-ui.button
                     variant="danger"
                     wire:click="deletePasskey"
                 >
                     {{ __('Remove passkey') }}
-                </flux:button>
+                </x-ui.button>
             </div>
         </div>
-    </flux:modal>
+    </x-ui.modal>
     {{-- @end-chisel-passkeys --}}
 </section>

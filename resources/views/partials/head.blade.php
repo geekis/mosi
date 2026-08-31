@@ -29,10 +29,8 @@
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
 
+{{-- Basel (organisation font) is self-hosted via @font-face in app.css; Instrument Sans
+     (fallback) is bundled by the Vite Bunny Fonts plugin. No runtime Google/Bunny request. --}}
 @fonts
-
-{{-- Inter, self-servable via Bunny Fonts (GDPR-friendly, no Google tracking). --}}
-<link rel="preconnect" href="https://fonts.bunny.net">
-<link rel="stylesheet" href="https://fonts.bunny.net/css?family=inter:400,500,600,700&display=swap">
 
 @vite(['resources/css/app.css', 'resources/js/app.js'])

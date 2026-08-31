@@ -153,39 +153,39 @@ new #[Title('Whereabouts')] class extends Component {
 }; ?>
 
 <div class="mx-auto w-full max-w-4xl">
-    <flux:heading size="xl">{{ __('Whereabouts') }}</flux:heading>
+    <x-ui.heading size="xl">{{ __('Whereabouts') }}</x-ui.heading>
 
-    <flux:card class="mt-4">
+    <x-ui.card class="mt-4">
         <div class="flex flex-wrap items-center justify-between gap-2">
-            <flux:heading size="lg">{{ __('My week') }}</flux:heading>
+            <x-ui.heading size="lg">{{ __('My week') }}</x-ui.heading>
             <div class="flex items-center gap-1">
-                <flux:button size="sm" variant="ghost" icon="chevron-left"
+                <x-ui.button size="sm" variant="ghost" icon="chevron-left"
                     wire:click="shiftWeek(-1)" :aria-label="__('Previous week')" />
-                <flux:text size="sm" class="min-w-32 text-center text-zinc-500 dark:text-zinc-400">
+                <x-ui.text size="sm" class="min-w-32 text-center">
                     {{ $weekStart->isoFormat('D.MM.') }}–{{ $weekEnd->isoFormat('D.MM.YYYY') }}
-                </flux:text>
-                <flux:button size="sm" variant="ghost" icon="chevron-right"
+                </x-ui.text>
+                <x-ui.button size="sm" variant="ghost" icon="chevron-right"
                     wire:click="shiftWeek(1)" :aria-label="__('Next week')" />
-                <flux:button size="sm" variant="ghost" wire:click="goToToday" :disabled="$isThisWeek">
+                <x-ui.button size="sm" variant="ghost" wire:click="goToToday" :disabled="$isThisWeek">
                     {{ __('Today') }}
-                </flux:button>
+                </x-ui.button>
             </div>
         </div>
 
-        <flux:text size="sm" class="mt-1 text-zinc-500 dark:text-zinc-400">
+        <x-ui.text size="sm" class="mt-1">
             {{ __('Register where you are working each day. Colleagues see your location — an absence shows only as „Fjarverandi“.') }}
-        </flux:text>
+        </x-ui.text>
 
         <div class="mt-4 space-y-2">
             @foreach ($days as $day)
                 <div wire:key="day-{{ $day['date'] }}"
                     @class([
                         'flex flex-col gap-2 rounded-lg border p-3 sm:flex-row sm:items-center sm:justify-between',
-                        'border-zinc-200 dark:border-zinc-700' => ! $day['isToday'],
-                        'border-primary-300 bg-primary-50/50 dark:border-primary-700 dark:bg-primary-900/10' => $day['isToday'],
+                        'border-sand-200 dark:border-zinc-700' => ! $day['isToday'],
+                        'border-brand-300 bg-brand-50/50 dark:border-brand-700 dark:bg-brand-900/10' => $day['isToday'],
                     ])>
                     <div class="min-w-0">
-                        <flux:text class="font-medium capitalize">{{ $day['carbon']->isoFormat('dddd D.MM.') }}</flux:text>
+                        <x-ui.text class="font-medium capitalize text-ink-800 dark:text-zinc-200">{{ $day['carbon']->isoFormat('dddd D.MM.') }}</x-ui.text>
                         <div class="mt-0.5">
                             {{-- My own week, so reveal the real absence reason to me. --}}
                             <x-whereabouts-badge :entry="$day['entry']" reveal />
@@ -193,30 +193,30 @@ new #[Title('Whereabouts')] class extends Component {
                     </div>
 
                     <div class="flex flex-wrap items-center gap-1">
-                        <flux:select size="sm" class="w-44"
-                            x-on:change="$wire.setLocation(@js($day['date']), $event.target.value)">
-                            <flux:select.option value="">{{ __('Select a location') }}</flux:select.option>
+                        <x-ui.select class="w-44"
+                            x-on:change="$wire.setLocation('{{ $day['date'] }}', $event.target.value)">
+                            <x-ui.select.option value="">{{ __('Select a location') }}</x-ui.select.option>
                             @foreach ($locations as $location)
-                                <flux:select.option :value="$location->id"
+                                <x-ui.select.option :value="$location->id"
                                     :selected="$day['entry'] && ! $day['entry']->isAbsence() && $day['entry']->work_location_id === $location->id">
                                     {{ $location->name }}
-                                </flux:select.option>
+                                </x-ui.select.option>
                             @endforeach
-                        </flux:select>
+                        </x-ui.select>
 
                         @foreach ($absences as $absence)
-                            <flux:button size="xs"
+                            <x-ui.button size="xs"
                                 :variant="$day['entry']?->absence === $absence ? 'filled' : 'ghost'"
                                 wire:click="setAbsence('{{ $day['date'] }}', '{{ $absence->value }}')">
                                 {{ $absence->label() }}
-                            </flux:button>
+                            </x-ui.button>
                         @endforeach
 
-                        <flux:button size="xs" variant="ghost" icon="x-mark"
+                        <x-ui.button size="xs" variant="ghost" icon="x-mark"
                             wire:click="clearDay('{{ $day['date'] }}')" :aria-label="__('Clear')" />
                     </div>
                 </div>
             @endforeach
         </div>
-    </flux:card>
+    </x-ui.card>
 </div>

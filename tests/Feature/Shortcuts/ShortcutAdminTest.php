@@ -32,7 +32,7 @@ test('a comms user can list shortcuts but an employee cannot', function () {
     $employee = User::factory()->create(['locale' => 'en']);
 
     // A row with a picked icon exercises the table's icon column, which must resolve
-    // the Blade Icons heroicon set rather than the bare Flux name.
+    // the Blade Icons heroicon set rather than the bare stored name.
     Shortcut::factory()->create(['icon' => 'clock']);
 
     $this->actingAs($comms)->get('/admin/shortcuts')->assertOk();

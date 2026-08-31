@@ -21,7 +21,7 @@ class ShortcutsTable
                 IconColumn::make('icon')
                     ->label(__('Icon'))
                     // Blade Icons (used by Filament) needs the heroicon set prefix,
-                    // unlike Flux which accepts the bare name in the front-end menu.
+                    // unlike the front-end menu's x-ui.icon which accepts the bare name.
                     ->icon(fn (Shortcut $record): string => 'heroicon-o-'.$record->iconName()),
                 TextColumn::make('label')
                     ->label(__('Label'))

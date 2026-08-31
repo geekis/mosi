@@ -22,7 +22,6 @@ use App\Models\GroupInvitation;
 use App\Models\GroupJoinRequest;
 use App\Models\Post;
 use App\Models\User;
-use Flux\Flux;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Title;
 use Livewire\Attributes\Url;
@@ -70,7 +69,7 @@ new #[Title('Mosi')] class extends Component {
     {
         if ($this->group->visibility === GroupVisibility::Open) {
             $join(Auth::user(), $this->group);
-            Flux::toast(text: __('You joined :group.', ['group' => $this->group->name]), variant: 'success');
+            $this->dispatch('toast', text: __('You joined :group.', ['group' => $this->group->name]), variant: 'success');
         }
     }
 
@@ -78,7 +77,7 @@ new #[Title('Mosi')] class extends Component {
     {
         if ($this->group->visibility === GroupVisibility::Closed) {
             $requestToJoin(Auth::user(), $this->group);
-            Flux::toast(text: __('Your request to join has been sent.'), variant: 'success');
+            $this->dispatch('toast', text: __('Your request to join has been sent.'), variant: 'success');
         }
     }
 
@@ -87,7 +86,7 @@ new #[Title('Mosi')] class extends Component {
         // Department groups mirror the org chart; you cannot opt out of your own department.
         if ($this->group->type !== GroupType::Department) {
             $leave(Auth::user(), $this->group);
-            Flux::toast(text: __('You left :group.', ['group' => $this->group->name]), variant: 'success');
+            $this->dispatch('toast', text: __('You left :group.', ['group' => $this->group->name]), variant: 'success');
         }
     }
 
@@ -134,7 +133,7 @@ new #[Title('Mosi')] class extends Component {
         $this->description_is = (string) $this->group->getTranslation('description', 'is', false);
         $this->description_en = (string) $this->group->getTranslation('description', 'en', false);
 
-        Flux::modal('edit-group')->show();
+        $this->dispatch('modal-show', name: 'edit-group');
     }
 
     public function saveGroup(UpdateGroup $updateGroup): void
@@ -153,8 +152,8 @@ new #[Title('Mosi')] class extends Component {
             'description' => ['is' => $validated['description_is'] ?? '', 'en' => $validated['description_en'] ?? ''],
         ]);
 
-        Flux::modal('edit-group')->close();
-        Flux::toast(text: __('Group updated.'), variant: 'success');
+        $this->dispatch('modal-close', name: 'edit-group');
+        $this->dispatch('toast', text: __('Group updated.'), variant: 'success');
     }
 
     public function saveBanner(UpdateGroupBanner $updateGroupBanner): void
@@ -167,8 +166,8 @@ new #[Title('Mosi')] class extends Component {
 
         $this->bannerFile = null;
         $this->group->load('media');
-        Flux::modal('edit-group')->close();
-        Flux::toast(text: __('Banner updated.'), variant: 'success');
+        $this->dispatch('modal-close', name: 'edit-group');
+        $this->dispatch('toast', text: __('Banner updated.'), variant: 'success');
     }
 
     public function saveAvatar(UpdateGroupAvatar $updateGroupAvatar): void
@@ -181,8 +180,8 @@ new #[Title('Mosi')] class extends Component {
 
         $this->avatarFile = null;
         $this->group->load('media');
-        Flux::modal('edit-group')->close();
-        Flux::toast(text: __('Profile image updated.'), variant: 'success');
+        $this->dispatch('modal-close', name: 'edit-group');
+        $this->dispatch('toast', text: __('Profile image updated.'), variant: 'success');
     }
 
     /**
@@ -201,7 +200,7 @@ new #[Title('Mosi')] class extends Component {
 
         $inviteToGroup(Auth::user(), $this->group, $target);
 
-        Flux::toast(text: __('Invitation sent to :name.', ['name' => $target->display_name]), variant: 'success');
+        $this->dispatch('toast', text: __('Invitation sent to :name.', ['name' => $target->display_name]), variant: 'success');
     }
 
     public function approveRequest(int $requestId, ApproveJoinRequest $approve): void
@@ -215,7 +214,7 @@ new #[Title('Mosi')] class extends Component {
 
         if ($request !== null) {
             $approve($request);
-            Flux::toast(text: __('Request approved.'), variant: 'success');
+            $this->dispatch('toast', text: __('Request approved.'), variant: 'success');
         }
     }
 
@@ -230,7 +229,7 @@ new #[Title('Mosi')] class extends Component {
 
         if ($request !== null) {
             $decline($request);
-            Flux::toast(text: __('Request declined.'), variant: 'success');
+            $this->dispatch('toast', text: __('Request declined.'), variant: 'success');
         }
     }
 
@@ -250,8 +249,8 @@ new #[Title('Mosi')] class extends Component {
         $this->attachMediaTo($post);
 
         $this->resetComposer();
-        Flux::modal('composer')->close();
-        Flux::toast(text: __('Your post is published.'), variant: 'success');
+        $this->dispatch('modal-close', name: 'composer');
+        $this->dispatch('toast', text: __('Your post is published.'), variant: 'success');
     }
 
     /**
@@ -342,7 +341,7 @@ new #[Title('Mosi')] class extends Component {
     }"
     x-on:keydown.escape.window="close()">
     {{-- Group header --}}
-    <flux:card class="overflow-hidden p-0">
+    <x-ui.card class="overflow-hidden p-0">
         <x-group-banner :group="$group" height="h-32" />
 
         <div class="px-6 pb-6 pt-5">
@@ -353,15 +352,15 @@ new #[Title('Mosi')] class extends Component {
                             <img src="{{ $group->avatarUrl() }}" alt="" class="size-14 shrink-0 rounded-xl object-cover" />
                         @endif
                         <div class="min-w-0">
-                            <flux:heading size="xl">{{ $group->name }}</flux:heading>
+                            <x-ui.heading size="xl">{{ $group->name }}</x-ui.heading>
                             <div class="mt-2 flex flex-wrap items-center gap-2">
-                                <flux:badge size="sm" icon="user-group">{{ $group->type->label() }}</flux:badge>
-                                <flux:badge size="sm" color="{{ $group->visibility === App\Enums\GroupVisibility::Open ? 'green' : ($group->visibility === App\Enums\GroupVisibility::Secret ? 'zinc' : 'amber') }}">
+                                <x-ui.badge size="sm"><x-ui.icon name="user-group" variant="micro" class="size-3" /> {{ $group->type->label() }}</x-ui.badge>
+                                <x-ui.badge size="sm" color="{{ $group->visibility === App\Enums\GroupVisibility::Open ? 'green' : ($group->visibility === App\Enums\GroupVisibility::Secret ? 'zinc' : 'gold') }}">
                                     {{ $group->visibility->label() }}
-                                </flux:badge>
-                                <flux:text size="sm" class="text-zinc-500 dark:text-zinc-400">
+                                </x-ui.badge>
+                                <x-ui.text size="sm">
                                     {{ __(':count members', ['count' => $memberCount]) }}
-                                </flux:text>
+                                </x-ui.text>
                             </div>
                         </div>
                     </div>
@@ -369,70 +368,70 @@ new #[Title('Mosi')] class extends Component {
 
                 <div class="flex items-center gap-2">
                     @if ($isMember)
-                        <flux:button size="sm" variant="ghost" icon="chat-bubble-left-right" wire:click="openChat">
+                        <x-ui.button size="sm" variant="ghost" icon="chat-bubble-left-right" wire:click="openChat">
                             {{ __('Group chat') }}
-                        </flux:button>
+                        </x-ui.button>
                     @endif
 
                     @if ($canInvite)
-                        <flux:modal.trigger name="invite-members">
-                            <flux:button size="sm" variant="ghost" icon="user-plus">{{ __('Invite') }}</flux:button>
-                        </flux:modal.trigger>
+                        <x-ui.modal.trigger name="invite-members">
+                            <x-ui.button size="sm" variant="ghost" icon="user-plus">{{ __('Invite') }}</x-ui.button>
+                        </x-ui.modal.trigger>
                     @endif
 
                     @if ($canManage)
-                        <flux:button size="sm" variant="ghost" icon="pencil-square" wire:click="openEdit">
+                        <x-ui.button size="sm" variant="ghost" icon="pencil-square" wire:click="openEdit">
                             {{ __('Edit group') }}
-                        </flux:button>
+                        </x-ui.button>
                     @endif
 
                     @if ($isMember)
                         @if ($group->type !== App\Enums\GroupType::Department)
-                            <flux:button size="sm" variant="ghost" icon="arrow-right-start-on-rectangle" wire:click="leave">
+                            <x-ui.button size="sm" variant="ghost" icon="arrow-right-start-on-rectangle" wire:click="leave">
                                 {{ __('Leave group') }}
-                            </flux:button>
+                            </x-ui.button>
                         @endif
                     @elseif ($group->visibility === App\Enums\GroupVisibility::Open)
-                        <flux:button size="sm" variant="primary" icon="user-plus" wire:click="join">
+                        <x-ui.button size="sm" variant="primary" icon="user-plus" wire:click="join">
                             {{ __('Join group') }}
-                        </flux:button>
+                        </x-ui.button>
                     @elseif ($group->visibility === App\Enums\GroupVisibility::Closed)
                         @if ($hasPendingRequest)
-                            <flux:button size="sm" variant="ghost" icon="clock" disabled>
+                            <x-ui.button size="sm" variant="ghost" icon="clock" disabled>
                                 {{ __('Request pending') }}
-                            </flux:button>
+                            </x-ui.button>
                         @else
-                            <flux:button size="sm" variant="primary" icon="user-plus" wire:click="requestToJoin">
+                            <x-ui.button size="sm" variant="primary" icon="user-plus" wire:click="requestToJoin">
                                 {{ __('Request to join') }}
-                            </flux:button>
+                            </x-ui.button>
                         @endif
                     @endif
                 </div>
             </div>
 
             @if ($group->description)
-                <flux:text class="mt-4 whitespace-pre-line">{{ $group->description }}</flux:text>
+                <x-ui.text class="mt-4 whitespace-pre-line">{{ $group->description }}</x-ui.text>
             @endif
         </div>
-    </flux:card>
+    </x-ui.card>
 
     {{-- Edit modal (owners, moderators, comms, super-admins) --}}
     @if ($canManage)
-        <flux:modal name="edit-group" class="w-full max-w-lg">
+        <x-ui.modal name="edit-group" class="max-w-lg">
             <div class="space-y-5">
-                <flux:heading size="lg">{{ __('Edit group') }}</flux:heading>
+                <x-ui.heading size="lg">{{ __('Edit group') }}</x-ui.heading>
 
                 <div class="space-y-4">
-                    <flux:input wire:model="name_is" :label="__('Name (Icelandic)')" />
-                    <flux:input wire:model="name_en" :label="__('Name (English)')" />
-                    <flux:textarea wire:model="description_is" :label="__('Description (Icelandic)')" rows="3" />
-                    <flux:textarea wire:model="description_en" :label="__('Description (English)')" rows="3" />
+                    <x-ui.input wire:model="name_is" :label="__('Name (Icelandic)')" />
+                    <x-ui.input wire:model="name_en" :label="__('Name (English)')" />
+                    <x-ui.textarea wire:model="description_is" :label="__('Description (Icelandic)')" rows="3" />
+                    <x-ui.textarea wire:model="description_en" :label="__('Description (English)')" rows="3" />
                     <div class="flex justify-end">
-                        <flux:button variant="primary" wire:click="saveGroup" data-test="save-group">{{ __('Save') }}</flux:button>
+                        <x-ui.button variant="primary" wire:click="saveGroup" data-test="save-group">{{ __('Save') }}</x-ui.button>
                     </div>
                 </div>
 
-                <flux:separator variant="subtle" />
+                <x-ui.separator variant="subtle" />
 
                 <div class="space-y-2">
                     <div class="flex items-center gap-3">
@@ -440,66 +439,64 @@ new #[Title('Mosi')] class extends Component {
                             <img src="{{ $group->avatarUrl() }}" alt="" class="size-12 shrink-0 rounded-lg object-cover" />
                         @endif
                         <div class="min-w-0 flex-1">
-                            <flux:input type="file" wire:model="avatarFile" :label="__('Profile image')" accept="image/*" />
-                            <flux:error name="avatarFile" />
+                            <x-ui.input type="file" wire:model="avatarFile" :label="__('Profile image')" accept="image/*" />
                         </div>
                     </div>
                     @if ($avatarFile)
-                        <flux:button size="sm" variant="primary" wire:click="saveAvatar" data-test="save-group-avatar">{{ __('Save profile image') }}</flux:button>
+                        <x-ui.button size="sm" variant="primary" wire:click="saveAvatar" data-test="save-group-avatar">{{ __('Save profile image') }}</x-ui.button>
                     @endif
                 </div>
 
-                <flux:separator variant="subtle" />
+                <x-ui.separator variant="subtle" />
 
                 <div class="space-y-2">
-                    <flux:input type="file" wire:model="bannerFile" :label="__('Banner image')" accept="image/*" />
-                    <flux:error name="bannerFile" />
+                    <x-ui.input type="file" wire:model="bannerFile" :label="__('Banner image')" accept="image/*" />
                     @if ($bannerFile)
-                        <flux:button size="sm" variant="primary" wire:click="saveBanner" data-test="save-group-banner">{{ __('Save banner') }}</flux:button>
+                        <x-ui.button size="sm" variant="primary" wire:click="saveBanner" data-test="save-group-banner">{{ __('Save banner') }}</x-ui.button>
                     @endif
                 </div>
             </div>
-        </flux:modal>
+        </x-ui.modal>
     @endif
 
     @if ($canInvite)
         {{-- Invite colleagues: search by name, minus members and pending invitations. --}}
-        <flux:modal name="invite-members" class="w-full max-w-md">
+        <x-ui.modal name="invite-members" class="max-w-md">
             <div class="space-y-4">
-                <flux:heading size="lg">{{ __('Invite') }}</flux:heading>
-                <flux:input wire:model.live.debounce.300ms="inviteSearch" icon="magnifying-glass" :placeholder="__('Search people…')" autocomplete="off" />
+                <x-ui.heading size="lg">{{ __('Invite') }}</x-ui.heading>
+                <x-ui.input wire:model.live.debounce.300ms="inviteSearch" icon="magnifying-glass" :placeholder="__('Search people…')" autocomplete="off" />
                 <div class="max-h-72 space-y-1 overflow-y-auto">
                     @forelse ($inviteCandidates as $candidate)
-                        <div wire:key="candidate-{{ $candidate->id }}" class="flex items-center gap-3 rounded-lg px-2 py-2 hover:bg-zinc-100 dark:hover:bg-zinc-800">
+                        <div wire:key="candidate-{{ $candidate->id }}" class="flex items-center gap-3 rounded-xl px-2 py-2 hover:bg-sand-100 dark:hover:bg-zinc-800">
                             <x-avatar :user="$candidate" size="sm" />
                             <div class="min-w-0 flex-1">
-                                <flux:text class="truncate font-medium">{{ $candidate->display_name }}</flux:text>
+                                <span class="block truncate text-sm font-medium">{{ $candidate->display_name }}</span>
                                 @if ($candidate->job_title)
-                                    <flux:text size="sm" class="truncate text-zinc-500 dark:text-zinc-400">{{ $candidate->job_title }}</flux:text>
+                                    <x-ui.text size="sm" class="truncate">{{ $candidate->job_title }}</x-ui.text>
                                 @endif
                             </div>
-                            <flux:button size="sm" variant="primary" icon="user-plus" wire:click="invite({{ $candidate->id }})">
+                            <x-ui.button size="sm" variant="primary" icon="user-plus" wire:click="invite({{ $candidate->id }})">
                                 {{ __('Invite') }}
-                            </flux:button>
+                            </x-ui.button>
                         </div>
                     @empty
                         @if (trim($inviteSearch) !== '')
-                            <flux:text size="sm" class="text-zinc-500 dark:text-zinc-400">{{ __('No one matches your search.') }}</flux:text>
+                            <x-ui.text size="sm">{{ __('No one matches your search.') }}</x-ui.text>
                         @endif
                     @endforelse
                 </div>
             </div>
-        </flux:modal>
+        </x-ui.modal>
     @endif
 
     {{-- Tabs at the bottom of the group header --}}
-    <flux:tabs wire:model.live="tab" variant="segmented" class="mt-4">
-        <flux:tab name="feed" icon="rss">{{ __('Feed') }}</flux:tab>
-        <flux:tab name="events" icon="calendar-days">{{ __('Events') }}</flux:tab>
-        <flux:tab name="media" icon="photo">{{ __('Media') }}</flux:tab>
-        <flux:tab name="files" icon="document-text">{{ __('Files') }}</flux:tab>
-        <flux:tab name="members" icon="user-group">{{ __('Members') }}</flux:tab>
-    </flux:tabs>
+    <x-ui.tabs :selected="$tab" property="tab" class="mt-4">
+        <x-ui.tab name="feed" icon="rss">{{ __('Feed') }}</x-ui.tab>
+        <x-ui.tab name="events" icon="calendar-days">{{ __('Events') }}</x-ui.tab>
+        <x-ui.tab name="media" icon="photo">{{ __('Media') }}</x-ui.tab>
+        <x-ui.tab name="files" icon="document-text">{{ __('Files') }}</x-ui.tab>
+        <x-ui.tab name="members" icon="user-group">{{ __('Members') }}</x-ui.tab>
+    </x-ui.tabs>
 
     {{-- Events / Media / Files are members-only. The child components only mount for
          members; the policy and streaming route are the real security boundary. --}}
@@ -514,7 +511,7 @@ new #[Title('Mosi')] class extends Component {
                     <livewire:pages::groups.files-tab :group="$group" wire:key="files-{{ $group->id }}" />
                 @endif
             @else
-                <flux:callout icon="lock-closed">{{ __('Members only — join to view.') }}</flux:callout>
+                <x-ui.alert icon="lock-closed">{{ __('Members only — join to view.') }}</x-ui.alert>
             @endif
         </div>
     @endif
@@ -532,7 +529,7 @@ new #[Title('Mosi')] class extends Component {
             @forelse ($posts as $post)
                 <x-post-card :post="$post" :show-group="false" :mentionables="$mentionables" :mention-map="$mentionMap" wire:key="post-{{ $post->id }}" />
             @empty
-                <flux:callout icon="rss">{{ __('No posts in this group yet.') }}</flux:callout>
+                <x-ui.alert icon="rss">{{ __('No posts in this group yet.') }}</x-ui.alert>
             @endforelse
 
             @if ($posts->hasPages())
@@ -544,49 +541,49 @@ new #[Title('Mosi')] class extends Component {
             <div class="space-y-4 md:col-span-1">
                 @if ($isMember)
                     {{-- Upcoming events for this group --}}
-                    <flux:card class="space-y-3">
+                    <x-ui.card class="space-y-3">
                         <div class="flex items-center justify-between">
-                            <flux:heading size="sm">{{ __('Upcoming events') }}</flux:heading>
-                            <flux:button size="xs" variant="ghost" wire:click="$set('tab', 'events')">{{ __('See all') }}</flux:button>
+                            <x-ui.heading size="sm">{{ __('Upcoming events') }}</x-ui.heading>
+                            <x-ui.button size="xs" variant="ghost" wire:click="$set('tab', 'events')">{{ __('See all') }}</x-ui.button>
                         </div>
                         @forelse ($sidebarEvents as $event)
                             <a wire:key="side-event-{{ $event->id }}" href="{{ route('events.show', $event) }}" wire:navigate
-                                class="block rounded-lg p-1 hover:bg-zinc-100 dark:hover:bg-zinc-700">
+                                class="block rounded-lg p-1 hover:bg-sand-100 dark:hover:bg-zinc-700">
                                 <div class="truncate text-sm font-medium">{{ $event->title }}</div>
-                                <flux:text size="sm" class="text-zinc-500 dark:text-zinc-400">
+                                <x-ui.text size="sm">
                                     {{ $event->starts_at->translatedFormat('j. M Y, H:i') }}
-                                </flux:text>
+                                </x-ui.text>
                             </a>
                         @empty
-                            <flux:text size="sm" class="text-zinc-500 dark:text-zinc-400">{{ __('No upcoming events yet.') }}</flux:text>
+                            <x-ui.text size="sm">{{ __('No upcoming events yet.') }}</x-ui.text>
                         @endforelse
-                    </flux:card>
+                    </x-ui.card>
 
                     {{-- Latest files --}}
-                    <flux:card class="space-y-3">
+                    <x-ui.card class="space-y-3">
                         <div class="flex items-center justify-between">
-                            <flux:heading size="sm">{{ __('Files') }}</flux:heading>
-                            <flux:button size="xs" variant="ghost" wire:click="$set('tab', 'files')">{{ __('See all') }}</flux:button>
+                            <x-ui.heading size="sm">{{ __('Files') }}</x-ui.heading>
+                            <x-ui.button size="xs" variant="ghost" wire:click="$set('tab', 'files')">{{ __('See all') }}</x-ui.button>
                         </div>
                         @forelse ($sidebarFiles as $file)
                             <a wire:key="side-file-{{ $file->id }}" href="{{ route('groups.attachments', [$group, $file]) }}" target="_blank" rel="noopener"
-                                class="flex items-center gap-2 rounded-lg p-1 hover:bg-zinc-100 dark:hover:bg-zinc-700">
-                                <flux:icon name="document-text" class="size-5 shrink-0 text-zinc-400" />
+                                class="flex items-center gap-2 rounded-lg p-1 hover:bg-sand-100 dark:hover:bg-zinc-700">
+                                <x-ui.icon name="document-text" class="size-5 shrink-0 text-mist-400" />
                                 <span class="min-w-0 truncate text-sm">{{ $file->file_name }}</span>
                             </a>
                         @empty
-                            <flux:text size="sm" class="text-zinc-500 dark:text-zinc-400">{{ __('No files yet.') }}</flux:text>
+                            <x-ui.text size="sm">{{ __('No files yet.') }}</x-ui.text>
                         @endforelse
-                    </flux:card>
+                    </x-ui.card>
 
                     {{-- Latest images --}}
-                    <flux:card class="space-y-3">
+                    <x-ui.card class="space-y-3">
                         <div class="flex items-center justify-between">
-                            <flux:heading size="sm">{{ __('Media') }}</flux:heading>
-                            <flux:button size="xs" variant="ghost" wire:click="$set('tab', 'media')">{{ __('See all') }}</flux:button>
+                            <x-ui.heading size="sm">{{ __('Media') }}</x-ui.heading>
+                            <x-ui.button size="xs" variant="ghost" wire:click="$set('tab', 'media')">{{ __('See all') }}</x-ui.button>
                         </div>
                         @if ($sidebarImages->isEmpty())
-                            <flux:text size="sm" class="text-zinc-500 dark:text-zinc-400">{{ __('No media yet.') }}</flux:text>
+                            <x-ui.text size="sm">{{ __('No media yet.') }}</x-ui.text>
                         @else
                             <div class="grid grid-cols-3 gap-2">
                                 @foreach ($sidebarImages as $image)
@@ -597,12 +594,12 @@ new #[Title('Mosi')] class extends Component {
                                 @endforeach
                             </div>
                         @endif
-                    </flux:card>
+                    </x-ui.card>
                 @endif
 
                 {{-- Members preview: 10 random members + count, "More" opens the Members tab --}}
-                <flux:card class="space-y-3">
-                    <flux:heading size="sm">{{ __(':count members', ['count' => $memberCount]) }}</flux:heading>
+                <x-ui.card class="space-y-3">
+                    <x-ui.heading size="sm">{{ __(':count members', ['count' => $memberCount]) }}</x-ui.heading>
                     <div class="grid grid-cols-5 gap-2">
                         @foreach ($randomMembers as $member)
                             <a wire:key="side-member-{{ $member->id }}" href="{{ route('people.show', $member) }}" wire:navigate
@@ -611,10 +608,10 @@ new #[Title('Mosi')] class extends Component {
                             </a>
                         @endforeach
                     </div>
-                    <flux:button size="sm" variant="ghost" icon-trailing="arrow-right" wire:click="$set('tab', 'members')" class="w-full">
+                    <x-ui.button size="sm" variant="ghost" icon-trailing="arrow-right" wire:click="$set('tab', 'members')" class="w-full">
                         {{ __('More') }}
-                    </flux:button>
-                </flux:card>
+                    </x-ui.button>
+                </x-ui.card>
             </div>
         </div>
     @endif
@@ -623,22 +620,22 @@ new #[Title('Mosi')] class extends Component {
     @if ($tab === 'members')
         <div class="mt-4 space-y-4">
             @if ($canManage && $pendingRequests->isNotEmpty())
-                <flux:card class="space-y-3">
-                    <flux:heading size="sm">{{ __('Join requests') }}</flux:heading>
+                <x-ui.card class="space-y-3">
+                    <x-ui.heading size="sm">{{ __('Join requests') }}</x-ui.heading>
                     @foreach ($pendingRequests as $request)
                         <div wire:key="request-{{ $request->id }}" class="flex items-center gap-2">
                             <x-avatar :user="$request->user" size="xs" />
                             <span class="min-w-0 flex-1 truncate text-sm">{{ $request->user?->display_name }}</span>
-                            <flux:button size="xs" variant="primary" icon="check" wire:click="approveRequest({{ $request->id }})" />
-                            <flux:button size="xs" variant="ghost" icon="x-mark" wire:click="declineRequest({{ $request->id }})" />
+                            <x-ui.button size="xs" variant="primary" icon="check" wire:click="approveRequest({{ $request->id }})" :aria-label="__('Accept')" />
+                            <x-ui.button size="xs" variant="ghost" icon="x-mark" wire:click="declineRequest({{ $request->id }})" :aria-label="__('Decline')" />
                         </div>
                     @endforeach
-                </flux:card>
+                </x-ui.card>
             @endif
 
-            <flux:card class="space-y-3">
-                <flux:heading size="sm">{{ __(':count members', ['count' => $memberCount]) }}</flux:heading>
-                <div class="divide-y divide-zinc-100 dark:divide-zinc-700">
+            <x-ui.card class="space-y-3">
+                <x-ui.heading size="sm">{{ __(':count members', ['count' => $memberCount]) }}</x-ui.heading>
+                <div class="divide-y divide-sand-100 dark:divide-zinc-700">
                     @foreach ($members as $member)
                         <div wire:key="member-{{ $member->id }}" class="flex items-center gap-3 py-2">
                             <a href="{{ route('people.show', $member) }}" wire:navigate class="shrink-0 hover:opacity-80">
@@ -649,24 +646,24 @@ new #[Title('Mosi')] class extends Component {
                                     {{ $member->display_name }}
                                 </a>
                                 @if ($member->job_title)
-                                    <flux:text size="sm" class="block truncate text-zinc-500 dark:text-zinc-400">{{ $member->job_title }}</flux:text>
+                                    <x-ui.text size="sm" class="block truncate">{{ $member->job_title }}</x-ui.text>
                                 @endif
                                 <x-user-presence :user="$member" class="mt-0.5" />
                             </div>
                             @unless ($me->is($member))
-                                <flux:button size="sm" variant="ghost" icon="chat-bubble-left-right" wire:click="message({{ $member->id }})">
+                                <x-ui.button size="sm" variant="ghost" icon="chat-bubble-left-right" wire:click="message({{ $member->id }})">
                                     {{ __('Message') }}
-                                </flux:button>
+                                </x-ui.button>
                             @endunless
                         </div>
                     @endforeach
                 </div>
                 @if ($memberCount > $members->count())
-                    <flux:text size="sm" class="text-zinc-500 dark:text-zinc-400">
+                    <x-ui.text size="sm">
                         {{ __('+:count more', ['count' => $memberCount - $members->count()]) }}
-                    </flux:text>
+                    </x-ui.text>
                 @endif
-            </flux:card>
+            </x-ui.card>
         </div>
     @endif
 

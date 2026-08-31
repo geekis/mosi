@@ -1,29 +1,47 @@
-# Frontend — Flux & Livewire 4
+# Frontend — UI components & Livewire 4
 
 **Globs:** `resources/views/**`, `resources/css/**`, `resources/js/**`
 
 This file overrides Boost's generic Livewire guidance, which is v3-era.
 
-## Flux Pro first
+## The `x-ui` component system
 
-**Never hand-build a component Flux Pro already provides.** Check the Flux docs before
-writing any UI primitive.
+Mosi has **no** Flux dependency. The UI primitives are our own Blade components under
+`resources/views/components/ui/`, used as `<x-ui.button>`, `<x-ui.input>`,
+`<x-ui.modal>`, etc. Before hand-building any primitive, **check `resources/views/components/ui/`
+for an existing one and reuse it** — only add a new variant the app actually needs.
 
 | Need | Use |
 |---|---|
-| Post composer / rich text | `flux:editor` — **do not add Tiptap** |
-| Global search palette | `flux:command` |
-| 2FA code entry | `flux:otp-input` |
-| Profile card / avatar | `flux:profile`, `flux:avatar` |
-| Shell chrome | `flux:navbar`, `flux:sidebar`, `flux:dropdown` |
-| Admin tables | `flux:table` + Livewire pagination |
-| Events | `flux:calendar`, `flux:date-picker` |
-| Feedback | `flux:toast`, `flux:modal`, `flux:skeleton` |
+| Buttons / links | `x-ui.button` (variants primary/secondary/filled/ghost/danger; `href` → `<a>`) |
+| Form controls | `x-ui.input`, `x-ui.textarea`, `x-ui.select` + `x-ui.select.option`, `x-ui.checkbox`, `x-ui.radio`, `x-ui.switch`, `x-ui.field`, `x-ui.label`, `x-ui.error` |
+| 2FA code entry | `x-ui.otp` |
+| Icons | `x-ui.icon` (Heroicons via `blade-ui-kit/blade-heroicons`; `name="loading"` spins) |
+| Avatar | `x-avatar` (bespoke, not a `ui` primitive) |
+| Shell chrome | `x-ui.navlist` / `x-ui.navlist.item`, `x-ui.navbar`, `x-ui.dropdown`, `x-ui.menu` |
+| Cards / typography | `x-ui.card`, `x-ui.heading`, `x-ui.text`, `x-ui.subheading`, `x-ui.badge`, `x-ui.separator` |
+| Feedback | `x-ui.toasts` (dispatch `toast`), `x-ui.modal`, `x-ui.alert` (callout/empty-state) |
 
-Customise by publishing the Blade file (`php artisan flux:publish`), not by wrapping
-Flux in another abstraction layer.
+**Modals** are name-addressed: open with `<x-ui.modal.trigger name="…">` or, from PHP,
+`$this->dispatch('modal-show', name: '…')` / `'modal-close'`. **Toasts** fire with
+`$this->dispatch('toast', variant: '…', text: '…')`. The backing Alpine components
+(`uiModal`, `uiToasts`, `railTooltip`) live in `resources/js/app.js`. The design tokens
+(brand/sand/gold/coral/taupe/mist/ink ramps, `font-display`, `shadow-soft`) are in
+`resources/css/app.css`.
 
-Flux conflicts with `livewire/blaze` below `1.0.0-beta.2`. Keep Blaze current.
+When editing a `ui` component, keep it Livewire-safe: preserve `wire:model`/`wire:click`,
+forward the attribute bag with `$attributes->merge()`/`->class()`, and never strip a
+form control's `name` attribute (it is re-emitted for both the POST field and error binding).
+
+## Traps
+
+**`@js()` only compiles inside a native element's attribute, never inside a Blade
+component tag's attribute.** `<button x-on:click="fn(@js($x))">` works; the same on
+`<x-ui.select x-on:change="fn(@js($x))">` leaks the literal text `@js(...)` into the
+HTML (the component tag compiler treats an unbound attribute value as a raw string).
+For a value that is already safe (e.g. a `Y-m-d` date), just wrap it in single quotes:
+`x-on:change="fn('{{ $day['date'] }}', …)"`. There is a regression test guarding this
+on the whereabouts page.
 
 ## Livewire 4 patterns
 
@@ -38,7 +56,7 @@ each right-rail widget.
 
 **Lazy islands** (`<wire:island lazy>`) — the feed must paint immediately. Upcoming
 events, quick links and other right-rail widgets stream in afterwards behind a
-`flux:skeleton` placeholder.
+skeleton placeholder.
 
 **Slots** (`wire:slot`) — this *is* the right-rail widget system. Use native slots; do
 not invent a custom widget registry.
@@ -79,6 +97,7 @@ chat at 375px before considering them done.
 
 ## Accessibility
 
-WCAG 2.2 AA — an Icelandic public-sector obligation, not a nice-to-have. Flux
-components are accessible by default; don't break them with custom markup. Check
-keyboard navigation and visible focus states in both `is` and `en`.
+WCAG 2.2 AA — an Icelandic public-sector obligation, not a nice-to-have. The `x-ui`
+components carry their own focus, ARIA and keyboard handling (modals trap focus and
+close on Esc, etc.); preserve it when you edit them and don't break it with custom
+markup. Check keyboard navigation and visible focus states in both `is` and `en`.

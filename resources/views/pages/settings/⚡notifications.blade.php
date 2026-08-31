@@ -1,6 +1,5 @@
 <?php
 
-use Flux\Flux;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Title;
 use Livewire\Component;
@@ -31,7 +30,7 @@ new #[Title('Notification settings')] class extends Component {
             ],
         ]);
 
-        Flux::toast(variant: 'success', text: __('Preferences saved.'));
+        $this->dispatch('toast', variant: 'success', text: __('Preferences saved.'));
     }
 }; ?>
 
@@ -40,11 +39,11 @@ new #[Title('Notification settings')] class extends Component {
 
     <x-pages::settings.layout :heading="__('Notifications')" :subheading="__('Choose what you want to be notified about')">
         <form wire:submit="save" class="my-6 space-y-6">
-            <flux:switch wire:model="mention" :label="__('When someone mentions me')" />
-            <flux:switch wire:model="comment" :label="__('When someone comments on my post')" />
-            <flux:switch wire:model="new_follower" :label="__('When someone follows me')" />
+            <x-ui.switch wire:model="mention" :label="__('When someone mentions me')" />
+            <x-ui.switch wire:model="comment" :label="__('When someone comments on my post')" />
+            <x-ui.switch wire:model="new_follower" :label="__('When someone follows me')" />
 
-            <flux:button type="submit" variant="primary" data-test="save-notifications-button">{{ __('Save') }}</flux:button>
+            <x-ui.button type="submit" variant="primary" data-test="save-notifications-button">{{ __('Save') }}</x-ui.button>
         </form>
     </x-pages::settings.layout>
 </section>

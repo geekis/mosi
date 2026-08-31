@@ -6,17 +6,17 @@
     this renders a titled card with a shimmering skeleton body so the shell layout
     is complete and honest about what is coming.
 --}}
-<flux:card {{ $attributes->merge(['class' => 'space-y-3']) }}>
-    <div class="flex items-center gap-2 text-zinc-500 dark:text-zinc-400">
+<x-ui.card {{ $attributes->merge(['class' => 'space-y-3']) }}>
+    <div class="flex items-center gap-2">
         @if ($icon)
-            <flux:icon :icon="$icon" variant="mini" />
+            <x-ui.icon :name="$icon" variant="mini" class="text-brand-500 dark:text-brand-400" />
         @endif
-        <flux:heading size="sm">{{ $heading }}</flux:heading>
+        <x-ui.heading size="sm">{{ $heading }}</x-ui.heading>
     </div>
 
     <div class="space-y-2" aria-hidden="true">
-        <div class="h-3 w-3/4 animate-pulse rounded bg-zinc-200 dark:bg-zinc-700"></div>
-        <div class="h-3 w-1/2 animate-pulse rounded bg-zinc-200 dark:bg-zinc-700"></div>
-        <div class="h-3 w-2/3 animate-pulse rounded bg-zinc-200 dark:bg-zinc-700"></div>
+        <div class="h-3 w-3/4 animate-pulse rounded bg-sand-200 dark:bg-zinc-700"></div>
+        <div class="h-3 w-1/2 animate-pulse rounded bg-sand-200 dark:bg-zinc-700"></div>
+        <div class="h-3 w-2/3 animate-pulse rounded bg-sand-200 dark:bg-zinc-700"></div>
     </div>
-</flux:card>
+</x-ui.card>

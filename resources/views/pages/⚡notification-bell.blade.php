@@ -28,43 +28,45 @@ new class extends Component {
     }
 }; ?>
 
-<flux:dropdown position="bottom" align="end">
-    <button type="button" class="relative inline-flex h-9 w-9 items-center justify-center rounded-md hover:bg-zinc-100 dark:hover:bg-zinc-700" aria-label="{{ __('Notifications') }}">
-        <flux:icon icon="bell" class="size-5 text-zinc-600 dark:text-zinc-300" />
-        @if ($unreadCount > 0)
-            <span class="absolute -end-0.5 -top-0.5 inline-flex min-w-4 items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-semibold text-white">{{ $unreadCount > 9 ? '9+' : $unreadCount }}</span>
-        @endif
-    </button>
-
-    <flux:menu class="w-80">
-        <div class="flex items-center justify-between px-2 py-1">
-            <flux:heading size="sm">{{ __('Notifications') }}</flux:heading>
+<x-ui.dropdown position="bottom" align="end">
+    <x-slot:trigger>
+        <button type="button" class="relative inline-flex h-9 w-9 items-center justify-center rounded-lg text-mist-600 hover:bg-sand-200 dark:text-zinc-300 dark:hover:bg-zinc-700" aria-label="{{ __('Notifications') }}">
+            <x-ui.icon name="bell" variant="mini" class="size-5" />
             @if ($unreadCount > 0)
-                <flux:link class="cursor-pointer text-xs" wire:click="markAllRead">{{ __('Mark all read') }}</flux:link>
+                <span class="absolute -end-0.5 -top-0.5 inline-flex min-w-4 items-center justify-center rounded-full bg-coral-500 px-1 text-[10px] font-semibold text-white">{{ $unreadCount > 9 ? '9+' : $unreadCount }}</span>
+            @endif
+        </button>
+    </x-slot:trigger>
+
+    <x-ui.menu class="w-80">
+        <div class="flex items-center justify-between px-2 py-1">
+            <x-ui.heading size="sm">{{ __('Notifications') }}</x-ui.heading>
+            @if ($unreadCount > 0)
+                <button type="button" wire:click="markAllRead" class="text-xs font-medium text-brand-600 hover:text-brand-700">{{ __('Mark all read') }}</button>
             @endif
         </div>
 
-        <flux:menu.separator />
+        <x-ui.menu.separator />
 
         @forelse ($items as $item)
             <a href="{{ $item->data['url'] ?? route('dashboard') }}" wire:navigate wire:click="markRead('{{ $item->id }}')" wire:key="notif-{{ $item->id }}"
-               class="flex items-start gap-2 px-2 py-2 hover:bg-zinc-50 dark:hover:bg-zinc-800 {{ $item->read_at ? 'opacity-60' : '' }}">
+               class="flex items-start gap-2 rounded-xl px-2 py-2 hover:bg-sand-100 dark:hover:bg-white/5 {{ $item->read_at ? 'opacity-60' : '' }}">
                 @unless ($item->read_at)
-                    <span class="mt-1.5 size-2 shrink-0 rounded-full bg-primary-500"></span>
+                    <span class="mt-1.5 size-2 shrink-0 rounded-full bg-brand-500"></span>
                 @endunless
                 <div class="min-w-0">
-                    <flux:text size="sm">{{ __('notifications.'.($item->data['key'] ?? 'mention').'.body', $item->data['params'] ?? []) }}</flux:text>
-                    <flux:text size="xs" class="text-zinc-400">{{ $item->created_at?->diffForHumans() }}</flux:text>
+                    <x-ui.text size="sm" class="text-ink-700 dark:text-zinc-300">{{ __('notifications.'.($item->data['key'] ?? 'mention').'.body', $item->data['params'] ?? []) }}</x-ui.text>
+                    <x-ui.text size="xs" class="text-mist-400">{{ $item->created_at?->diffForHumans() }}</x-ui.text>
                 </div>
             </a>
         @empty
             <div class="px-2 py-6 text-center">
-                <flux:text size="sm" class="text-zinc-500 dark:text-zinc-400">{{ __('No notifications yet.') }}</flux:text>
+                <x-ui.text size="sm">{{ __('No notifications yet.') }}</x-ui.text>
             </div>
         @endforelse
 
-        <flux:menu.separator />
+        <x-ui.menu.separator />
 
-        <flux:menu.item :href="route('notifications')" icon="inbox" wire:navigate>{{ __('See all notifications') }}</flux:menu.item>
-    </flux:menu>
-</flux:dropdown>
+        <x-ui.menu.item :href="route('notifications')" icon="inbox">{{ __('See all notifications') }}</x-ui.menu.item>
+    </x-ui.menu>
+</x-ui.dropdown>

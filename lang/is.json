@@ -12,6 +12,8 @@
     "Email address": "Netfang",
     "Email": "Netfang",
     "Password": "Lykilorð",
+    "Show password": "Sýna lykilorð",
+    "Hide password": "Fela lykilorð",
     "Confirm password": "Staðfestu lykilorð",
     "Forgot your password?": "Gleymdirðu lykilorðinu?",
     "Forgot password": "Gleymt lykilorð",
@@ -67,7 +69,9 @@
     "Share something with your colleagues…": "Deildu einhverju með samstarfsfólki þínu…",
     "Your post is published.": "Færslan þín hefur verið birt.",
     "Your feed is quiet. Join a group or follow colleagues to see their posts here.": "Streymið þitt er rólegt. Skráðu þig í hóp eða fylgstu með samstarfsfólki til að sjá færslur hér.",
-    "Birthdays today": "Afmæli í dag",
+    "Upcoming birthdays": "Afmæli framundan",
+    "Birthday today! 🎉": "Afmæli í dag! 🎉",
+    "No upcoming birthdays.": "Engin afmæli framundan.",
     "Upcoming events": "Viðburðir framundan",
     "New colleagues": "Nýir samstarfsmenn",
     "Edit profile": "Breyta prófíl",
@@ -268,7 +272,11 @@
     "(No subject)": "(Ekkert efni)",
     "Private": "Einkamál",
     "Me": "Ég",
+    "Follows you": "Fylgir þér",
     "Other staff": "Aðrir starfsmenn",
     "All locations": "Allar staðsetningar",
-    "All divisions": "Öll svið"
+    "All divisions": "Öll svið",
+    "Collapse sidebar": "Minnka valmynd",
+    "Expand sidebar": "Stækka valmynd",
+    "Open navigation": "Opna valmynd"
 }

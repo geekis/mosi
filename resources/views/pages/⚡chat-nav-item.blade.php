@@ -40,14 +40,12 @@ new class extends Component {
     }
 }; ?>
 
-<flux:sidebar.item
+<x-ui.navlist.item
     icon="chat-bubble-left-right"
     :href="route('chat')"
     :current="request()->routeIs('chat')"
     :badge="$unread > 0 ? ($unread > 99 ? '99+' : (string) $unread) : null"
-    badge-color="red"
     wire:poll.30s="refreshUnread"
-    wire:navigate
 >
     {{ __('Chat') }}
-</flux:sidebar.item>
+</x-ui.navlist.item>

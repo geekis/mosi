@@ -104,3 +104,113 @@ document.addEventListener('alpine:init', () => {
         },
     }));
 });
+
+// Name-addressed modal used by <x-ui.modal>. Opened/closed by <x-ui.modal.trigger> and by
+// Livewire via $this->dispatch('modal-show'|'modal-close', name: '…'). Handles body-scroll
+// lock, initial focus and a self-contained Tab focus trap (no Alpine Focus plugin needed).
+document.addEventListener('alpine:init', () => {
+    const FOCUSABLE = 'a[href],button:not([disabled]),input:not([disabled]),select:not([disabled]),textarea:not([disabled]),[tabindex]:not([tabindex="-1"])';
+
+    window.Alpine.data('uiModal', (name, show = false) => ({
+        name,
+        open: false,
+
+        init() {
+            this.open = !!show;
+            if (this.open) this.lock(true);
+            this.$watch('open', (value) => {
+                this.lock(value);
+                if (value) this.$nextTick(() => this.focusFirst());
+            });
+        },
+
+        lock(on) {
+            document.body.style.overflow = on ? 'hidden' : '';
+        },
+
+        onShow(event) {
+            if (event.detail?.name === this.name) this.open = true;
+        },
+
+        onClose(event) {
+            if (!event.detail?.name || event.detail.name === this.name) this.open = false;
+        },
+
+        close() {
+            this.open = false;
+        },
+
+        focusable() {
+            return Array.from(this.$refs.dialog?.querySelectorAll(FOCUSABLE) ?? [])
+                .filter((el) => el.offsetParent !== null);
+        },
+
+        focusFirst() {
+            const els = this.focusable();
+            (els[0] ?? this.$refs.dialog)?.focus();
+        },
+
+        trap(event) {
+            if (event.key !== 'Tab') return;
+            const els = this.focusable();
+            if (!els.length) return;
+            const first = els[0];
+            const last = els[els.length - 1];
+            if (event.shiftKey && document.activeElement === first) {
+                event.preventDefault();
+                last.focus();
+            } else if (!event.shiftKey && document.activeElement === last) {
+                event.preventDefault();
+                first.focus();
+            }
+        },
+    }));
+
+    // Transient toast stack used by <x-ui.toasts>, fed by Livewire via
+    // $this->dispatch('toast', text: '…', variant: 'success'|'danger'|…).
+    window.Alpine.data('uiToasts', () => ({
+        items: [],
+        seq: 0,
+
+        push(detail) {
+            const id = ++this.seq;
+            this.items.push({
+                id,
+                text: detail?.text ?? '',
+                variant: detail?.variant ?? 'success',
+            });
+            setTimeout(() => {
+                this.items = this.items.filter((t) => t.id !== id);
+            }, 4000);
+        },
+    }));
+
+    // Tooltip for a collapsed-sidebar nav item: shows the label beside the icon rail on
+    // hover, but only when the rail is actually collapsed on a desktop viewport. The label
+    // element itself is teleported to <body> so the sidebar's overflow never clips it.
+    window.Alpine.data('railTooltip', () => ({
+        label: '',
+        open: false,
+        x: 0,
+        y: 0,
+
+        init() {
+            this.label = this.$el.getAttribute('data-tooltip') || '';
+        },
+
+        enter() {
+            const inCollapsedRail = this.$el.closest('[data-sidebar]') && this.$el.closest('[data-collapsed="true"]');
+            if (! this.label || ! inCollapsedRail || ! window.matchMedia('(min-width: 1024px)').matches) {
+                return;
+            }
+            const rect = this.$el.getBoundingClientRect();
+            this.x = rect.right + 12;
+            this.y = rect.top + rect.height / 2;
+            this.open = true;
+        },
+
+        leave() {
+            this.open = false;
+        },
+    }));
+});

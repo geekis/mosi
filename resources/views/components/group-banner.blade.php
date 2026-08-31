@@ -8,7 +8,7 @@
 @php($bannerUrl = $group->bannerUrl())
 
 @php($palettes = [
-    'from-primary-500 to-primary-700',
+    'from-brand-500 to-brand-700',
     'from-emerald-500 to-teal-700',
     'from-sky-500 to-indigo-700',
     'from-amber-500 to-orange-700',
@@ -23,6 +23,6 @@
     @php($palette = $palettes[crc32((string) $group->id) % count($palettes)])
     <div data-group-banner="placeholder"
         {{ $attributes->merge(['class' => 'relative '.$height.' w-full overflow-hidden bg-gradient-to-br '.$palette]) }}>
-        <flux:icon icon="user-group" class="absolute -bottom-3 -end-2 size-20 text-white/20" />
+        <x-ui.icon name="user-group" class="absolute -bottom-3 -end-2 size-20 text-white/20" />
     </div>
 @endif

@@ -9,7 +9,7 @@
 
             <input type="hidden" name="token" value="{{ $token }}">
 
-            <flux:input
+            <x-ui.input
                 name="email"
                 value="{{ $email }}"
                 :label="__('Email')"
@@ -19,7 +19,7 @@
                 autocomplete="email"
             />
 
-            <flux:input
+            <x-ui.input
                 name="password"
                 :label="__('Password')"
                 type="password"
@@ -31,7 +31,7 @@
                 viewable
             />
 
-            <flux:input
+            <x-ui.input
                 name="password_confirmation"
                 :label="__('Confirm password')"
                 type="password"
@@ -43,9 +43,9 @@
             />
 
             <div class="flex items-center justify-end">
-                <flux:button type="submit" variant="primary" class="w-full" data-test="accept-invitation-button">
+                <x-ui.button type="submit" variant="primary" class="w-full" data-test="accept-invitation-button">
                     {{ __('Set password and sign in') }}
-                </flux:button>
+                </x-ui.button>
             </div>
         </form>
     </div>

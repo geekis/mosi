@@ -2,11 +2,11 @@
 
 {{--
     A plain-text textarea with @mention autocomplete. Any attributes (notably wire:model)
-    are forwarded to the underlying flux:textarea. The dropdown is driven by the Alpine
+    are forwarded to the underlying <x-ui.textarea>. The dropdown is driven by the Alpine
     `mentionBox` component in app.js; selecting a person inserts their @handle.
 --}}
 <div x-data="mentionBox(@js(array_values($mentionables)))" class="relative">
-    <flux:textarea :placeholder="$placeholder" rows="{{ $rows }}" {{ $attributes }} />
+    <x-ui.textarea :placeholder="$placeholder" :rows="$rows" {{ $attributes }} />
 
     <x-mention-suggestions placement="bottom" />
 </div>

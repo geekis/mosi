@@ -20,8 +20,8 @@
 
                 <div class="relative z-20 mt-auto">
                     <blockquote class="space-y-2">
-                        <flux:heading size="lg">&ldquo;{{ trim($message) }}&rdquo;</flux:heading>
-                        <footer><flux:heading>{{ trim($author) }}</flux:heading></footer>
+                        <x-ui.heading size="lg" class="text-white">&ldquo;{{ trim($message) }}&rdquo;</x-ui.heading>
+                        <footer><x-ui.heading class="text-white">{{ trim($author) }}</x-ui.heading></footer>
                     </blockquote>
                 </div>
             </div>
@@ -40,11 +40,7 @@
         </div>
 
         @persist('toast')
-            <flux:toast.group>
-                <flux:toast />
-            </flux:toast.group>
+            <x-ui.toasts />
         @endpersist
-
-        @fluxScripts
     </body>
 </html>

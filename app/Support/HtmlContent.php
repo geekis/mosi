@@ -8,7 +8,7 @@ use Symfony\Component\HtmlSanitizer\HtmlSanitizer;
 use Symfony\Component\HtmlSanitizer\HtmlSanitizerConfig;
 
 /**
- * Sanitises the rich-text HTML that flux:editor produces for posts and comments before
+ * Sanitises the rich-text HTML that the post composer produces for posts and comments before
  * it is stored, so a user cannot inject scripts or unsafe markup. A conservative
  * allow-list of formatting tags is kept, plus the data-mention attribute that the
  * mention parser relies on.

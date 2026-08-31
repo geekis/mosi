@@ -5,7 +5,6 @@ use App\Actions\Events\RespondToEvent;
 use App\Actions\Events\UpdateEventCover;
 use App\Enums\RsvpStatus;
 use App\Models\Event;
-use Flux\Flux;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Title;
 use Livewire\Component;
@@ -43,8 +42,8 @@ new #[Title('Events')] class extends Component {
         }
 
         $this->reset('title', 'location', 'starts_at', 'cover');
-        Flux::modal('create-event')->close();
-        Flux::toast(variant: 'success', text: __('Event created.'));
+        $this->dispatch('modal-close', name: 'create-event');
+        $this->dispatch('toast', variant: 'success', text: __('Event created.'));
     }
 
     public function respond(int $eventId, ?string $status, RespondToEvent $respondToEvent): void
@@ -77,17 +76,17 @@ new #[Title('Events')] class extends Component {
 
 <div class="mx-auto w-full max-w-3xl">
     <div class="flex items-center justify-between">
-        <flux:heading size="xl">{{ __('Events') }}</flux:heading>
+        <x-ui.heading size="xl">{{ __('Events') }}</x-ui.heading>
 
-        <flux:modal.trigger name="create-event">
-            <flux:button size="sm" variant="primary" icon="plus">{{ __('New event') }}</flux:button>
-        </flux:modal.trigger>
+        <x-ui.modal.trigger name="create-event">
+            <x-ui.button size="sm" variant="primary" icon="plus">{{ __('New event') }}</x-ui.button>
+        </x-ui.modal.trigger>
     </div>
 
     <div class="mt-6 space-y-4">
         @forelse ($events as $event)
             @php($mine = $event->rsvpFor($me = auth()->user()))
-            <flux:card wire:key="event-{{ $event->id }}">
+            <x-ui.card wire:key="event-{{ $event->id }}">
                 @if ($event->coverUrl())
                     <a href="{{ route('events.show', $event) }}" wire:navigate>
                         <img src="{{ $event->coverUrl() }}" alt="" class="mb-4 h-40 w-full rounded-lg object-cover" />
@@ -96,49 +95,48 @@ new #[Title('Events')] class extends Component {
                 <div class="flex items-start justify-between gap-4">
                     <div class="min-w-0">
                         <a href="{{ route('events.show', $event) }}" class="hover:underline" wire:navigate>
-                            <flux:heading size="lg">{{ $event->title }}</flux:heading>
+                            <x-ui.heading size="lg">{{ $event->title }}</x-ui.heading>
                         </a>
-                        <flux:text size="sm" class="mt-1 text-zinc-500 dark:text-zinc-400">
+                        <x-ui.text size="sm" class="mt-1">
                             {{ $event->starts_at->translatedFormat('j. M Y, H:i') }}
                             @if ($event->location) · {{ $event->location }} @endif
                             @if ($event->group) · {{ $event->group->name }} @endif
-                        </flux:text>
-                        <flux:text size="sm" class="mt-1 text-zinc-500 dark:text-zinc-400">
+                        </x-ui.text>
+                        <x-ui.text size="sm" class="mt-1">
                             {{ $event->attendees_count }} {{ __('attending') }}
-                        </flux:text>
+                        </x-ui.text>
                     </div>
 
-                    <flux:button.group>
-                        <flux:button size="sm" :variant="$mine === RsvpStatus::Going ? 'primary' : 'filled'" wire:click="respond({{ $event->id }}, 'going')">{{ __('Going') }}</flux:button>
-                        <flux:button size="sm" :variant="$mine === RsvpStatus::Maybe ? 'primary' : 'filled'" wire:click="respond({{ $event->id }}, 'maybe')">{{ __('Maybe') }}</flux:button>
-                        <flux:button size="sm" :variant="$mine === RsvpStatus::Declined ? 'primary' : 'filled'" wire:click="respond({{ $event->id }}, 'declined')">{{ __('Can’t go') }}</flux:button>
-                    </flux:button.group>
+                    <div class="inline-flex gap-1">
+                        <x-ui.button size="sm" :variant="$mine === RsvpStatus::Going ? 'primary' : 'filled'" wire:click="respond({{ $event->id }}, 'going')">{{ __('Going') }}</x-ui.button>
+                        <x-ui.button size="sm" :variant="$mine === RsvpStatus::Maybe ? 'primary' : 'filled'" wire:click="respond({{ $event->id }}, 'maybe')">{{ __('Maybe') }}</x-ui.button>
+                        <x-ui.button size="sm" :variant="$mine === RsvpStatus::Declined ? 'primary' : 'filled'" wire:click="respond({{ $event->id }}, 'declined')">{{ __('Can’t go') }}</x-ui.button>
+                    </div>
                 </div>
-            </flux:card>
+            </x-ui.card>
         @empty
-            <flux:callout icon="calendar">{{ __('No upcoming events.') }}</flux:callout>
+            <x-ui.alert icon="calendar">{{ __('No upcoming events.') }}</x-ui.alert>
         @endforelse
     </div>
 
     {{-- Create event modal --}}
-    <flux:modal name="create-event" class="w-full max-w-lg">
+    <x-ui.modal name="create-event" class="max-w-lg">
         <form wire:submit="create" class="space-y-4">
-            <flux:heading size="lg">{{ __('New event') }}</flux:heading>
-            <flux:input wire:model="title" :label="__('Title')" required />
-            <flux:input wire:model="location" :label="__('Location')" />
-            <flux:input type="datetime-local" wire:model="starts_at" :label="__('Starts at')" required />
+            <x-ui.heading size="lg">{{ __('New event') }}</x-ui.heading>
+            <x-ui.input wire:model="title" :label="__('Title')" required />
+            <x-ui.input wire:model="location" :label="__('Location')" />
+            <x-ui.input type="datetime-local" wire:model="starts_at" :label="__('Starts at')" required />
 
             <div>
-                <flux:input type="file" wire:model="cover" :label="__('Cover image')" accept="image/*" />
-                <flux:error name="cover" />
+                <x-ui.input type="file" wire:model="cover" :label="__('Cover image')" accept="image/*" />
                 @if ($cover && $cover->isPreviewable())
                     <img src="{{ $cover->temporaryUrl() }}" alt="" class="mt-2 h-32 w-full rounded-lg object-cover" />
                 @endif
             </div>
 
             <div class="flex justify-end">
-                <flux:button type="submit" variant="primary">{{ __('Create event') }}</flux:button>
+                <x-ui.button type="submit" variant="primary">{{ __('Create event') }}</x-ui.button>
             </div>
         </form>
-    </flux:modal>
+    </x-ui.modal>
 </div>

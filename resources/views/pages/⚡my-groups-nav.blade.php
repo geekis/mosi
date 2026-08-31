@@ -50,32 +50,26 @@ new class extends Component {
 
 <div wire:poll.60s>
     @if ($this->groups->isNotEmpty())
-        <flux:sidebar.nav>
-            {{-- Mirrors Flux's own sidebar-group label; hidden when the rail collapses. --}}
-            <div class="px-3 py-2 text-sm font-medium leading-none text-zinc-400 in-data-flux-sidebar-collapsed-desktop:hidden">
+        <x-ui.navlist class="mt-4">
+            <div class="px-3 py-2 text-xs font-medium leading-none text-mist-400 group-data-[collapsed=true]/shell:lg:hidden">
                 {{ __('My groups') }}
             </div>
 
             @foreach ($this->groups as $group)
-                <flux:sidebar.item
+                <x-ui.navlist.item
                     :href="route('groups.show', $group)"
                     :current="request()->routeIs('groups.show') && request()->route('group')?->is($group)"
                     :badge="($this->unread[$group->id] ?? 0) ?: null"
-                    badge-color="red"
-                    wire:navigate
                     wire:key="sidebar-group-{{ $group->id }}"
                 >
                     <x-slot:icon>
-                        @if ($group->avatarUrl())
-                            <flux:avatar :src="$group->avatarUrl()" size="xs" />
-                        @else
-                            <flux:icon icon="user-group" variant="outline" class="size-4" />
-                        @endif
+                        {{-- Sized to 20px so the group icon lines up with the other menu items' icons. --}}
+                        <x-avatar :src="$group->avatarUrl()" :name="$group->name" icon="user-group" :presence="false" size="xs" class="[&>span]:!size-5" />
                     </x-slot:icon>
 
                     {{ $group->name }}
-                </flux:sidebar.item>
+                </x-ui.navlist.item>
             @endforeach
-        </flux:sidebar.nav>
+        </x-ui.navlist>
     @endif
 </div>

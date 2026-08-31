@@ -17,6 +17,6 @@ new #[Title('Mosi')] class extends Component {
 }; ?>
 
 <div class="mx-auto w-full max-w-2xl">
-    <flux:heading size="xl">{{ $page->title }}</flux:heading>
+    <x-ui.heading size="xl">{{ $page->title }}</x-ui.heading>
     <div class="prose prose-sm mt-6 max-w-none whitespace-pre-line dark:prose-invert">{!! nl2br(e($page->body)) !!}</div>
 </div>

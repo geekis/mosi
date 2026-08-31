@@ -33,18 +33,6 @@ these, say so explicitly so it can be configured in Forge:
 Horizon and Reverb daemons must be restarted on deploy. That belongs in the deploy
 script, which a human maintains.
 
-## Flux Pro authentication
-
-Flux Pro is a private Composer package. `composer install` fails on the server without
-credentials.
-
-- Locally: `auth.json` in the project root, **gitignored**.
-- On Forge: the Composer Credentials feature (Server → Runtime → PHP, or Site →
-  Settings → Composer). Server-level if multiple sites use Flux.
-- Host `composer.fluxui.dev`.
-
-**Never commit `auth.json`. Never read it. Never print the licence key.**
-
 ## Environment
 
 `.env` is managed in the Forge UI, not in the repo. Never read or modify `.env`.

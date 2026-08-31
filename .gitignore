@@ -19,6 +19,7 @@ npm-debug.log
 yarn-error.log
 /auth.json
 /.claude/settings.local.json
+/.claude/scheduled_tasks.lock
 /.fleet
 /.idea
 /.nova

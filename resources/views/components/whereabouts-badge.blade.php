@@ -9,8 +9,8 @@
 @if ($entry)
     @php($absent = $entry->isAbsence())
     <span {{ $attributes->merge(['class' => 'inline-flex items-center gap-1 text-sm']) }}>
-        <flux:icon :icon="$absent ? 'minus-circle' : 'map-pin'" variant="micro"
-            class="{{ $absent ? 'text-amber-500' : 'text-primary-600 dark:text-primary-400' }}" />
-        <span class="{{ $absent ? 'text-zinc-500 dark:text-zinc-400' : '' }}">{{ $entry->statusLabel($reveal) }}</span>
+        <x-ui.icon :name="$absent ? 'minus-circle' : 'map-pin'" variant="micro"
+            class="{{ $absent ? 'text-amber-500' : 'text-brand-600 dark:text-brand-400' }}" />
+        <span class="{{ $absent ? 'text-mist-500 dark:text-zinc-400' : '' }}">{{ $entry->statusLabel($reveal) }}</span>
     </span>
 @endif

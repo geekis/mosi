@@ -20,8 +20,6 @@
         "laravel/socialite": "^5.30",
         "laravel/tinker": "^3.0",
         "livewire/blaze": "^1.0",
-        "livewire/flux": "^2.13.1",
-        "livewire/flux-pro": "^2.17",
         "livewire/livewire": "^4.1",
         "propaganistas/laravel-phone": "^6.0",
         "socialiteproviders/microsoft-azure": "^5.2",
@@ -138,12 +136,5 @@
         }
     },
     "minimum-stability": "stable",
-    "prefer-stable": true,
-    "repositories": [
-        {
-            "name": "flux-pro",
-            "type": "composer",
-            "url": "https://composer.fluxui.dev"
-        }
-    ]
+    "prefer-stable": true
 }

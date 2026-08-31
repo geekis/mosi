@@ -3,7 +3,6 @@
 use App\Actions\Groups\DeleteGroupMedia;
 use App\Actions\Groups\UploadGroupMedia;
 use App\Models\Group;
-use Flux\Flux;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
@@ -29,8 +28,8 @@ new class extends Component {
 
         $this->reset('upload');
         $this->group->load('media');
-        Flux::modal('upload-media')->close();
-        Flux::toast(variant: 'success', text: __('Media uploaded.'));
+        $this->dispatch('modal-close', name: 'upload-media');
+        $this->dispatch('toast', variant: 'success', text: __('Media uploaded.'));
     }
 
     public function delete(int $mediaId, DeleteGroupMedia $deleteGroupMedia): void
@@ -48,7 +47,7 @@ new class extends Component {
         }
 
         $this->group->load('media');
-        Flux::toast(variant: 'success', text: __('Media deleted.'));
+        $this->dispatch('toast', variant: 'success', text: __('Media deleted.'));
     }
 
     /**
@@ -65,20 +64,20 @@ new class extends Component {
 
 <div class="space-y-4">
     <div class="flex items-center justify-between">
-        <flux:heading size="lg">{{ __('Media') }}</flux:heading>
-        <flux:modal.trigger name="upload-media">
-            <flux:button size="sm" variant="primary" icon="plus">{{ __('Upload media') }}</flux:button>
-        </flux:modal.trigger>
+        <x-ui.heading size="lg">{{ __('Media') }}</x-ui.heading>
+        <x-ui.modal.trigger name="upload-media">
+            <x-ui.button size="sm" variant="primary" icon="plus">{{ __('Upload media') }}</x-ui.button>
+        </x-ui.modal.trigger>
     </div>
 
     @if ($items->isEmpty())
-        <flux:callout icon="photo">{{ __('No media yet.') }}</flux:callout>
+        <x-ui.alert icon="photo">{{ __('No media yet.') }}</x-ui.alert>
     @else
         <div class="grid grid-cols-2 gap-3 sm:grid-cols-3">
             @foreach ($items as $item)
                 @php($uploaderId = (int) $item->getCustomProperty('uploaded_by'))
                 @php($src = route('groups.attachments', [$group, $item]))
-                <div wire:key="media-{{ $item->id }}" class="group relative overflow-hidden rounded-lg bg-zinc-100 dark:bg-zinc-800">
+                <div wire:key="media-{{ $item->id }}" class="group relative overflow-hidden rounded-lg bg-sand-100 dark:bg-zinc-800">
                     @if (str_starts_with((string) $item->mime_type, 'video/'))
                         <video src="{{ $src }}" controls class="aspect-square w-full object-cover"></video>
                     @else
@@ -86,7 +85,7 @@ new class extends Component {
                     @endif
 
                     @if ($canManage || $uploaderId === auth()->id())
-                        <flux:button size="xs" variant="filled" icon="trash"
+                        <x-ui.button size="xs" variant="filled" icon="trash"
                             class="absolute right-1 top-1 opacity-0 transition group-hover:opacity-100"
                             wire:click="delete({{ $item->id }})"
                             wire:confirm="{{ __('Delete this item?') }}" />
@@ -97,17 +96,16 @@ new class extends Component {
     @endif
 
     {{-- Upload modal --}}
-    <flux:modal name="upload-media" class="w-full max-w-lg">
+    <x-ui.modal name="upload-media" class="max-w-lg">
         <form wire:submit="save" class="space-y-4">
-            <flux:heading size="lg">{{ __('Upload media') }}</flux:heading>
-            <flux:input type="file" wire:model="upload" :label="__('Media')" accept="image/*,video/*" />
-            <flux:error name="upload" />
+            <x-ui.heading size="lg">{{ __('Upload media') }}</x-ui.heading>
+            <x-ui.input type="file" wire:model="upload" :label="__('Media')" accept="image/*,video/*" />
             @if ($upload && $upload->isPreviewable())
                 <img src="{{ $upload->temporaryUrl() }}" alt="" class="max-h-48 w-full rounded-lg object-cover" />
             @endif
             <div class="flex justify-end">
-                <flux:button type="submit" variant="primary" icon="arrow-up-tray">{{ __('Upload') }}</flux:button>
+                <x-ui.button type="submit" variant="primary" icon="arrow-up-tray">{{ __('Upload') }}</x-ui.button>
             </div>
         </form>
-    </flux:modal>
+    </x-ui.modal>
 </div>

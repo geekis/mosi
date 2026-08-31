@@ -25,26 +25,26 @@ new #[Title('Search')] class extends Component {
 }; ?>
 
 <div class="mx-auto w-full max-w-3xl">
-    <flux:heading size="xl">{{ __('Search') }}</flux:heading>
+    <x-ui.heading size="xl">{{ __('Search') }}</x-ui.heading>
 
-    <flux:input wire:model.live.debounce.300ms="q" icon="magnifying-glass" :placeholder="__('Search Mosi…')" class="mt-4" autofocus />
+    <x-ui.input wire:model.live.debounce.300ms="q" icon="magnifying-glass" :placeholder="__('Search Mosi…')" class="mt-4" autofocus />
 
     @if (trim($q) === '')
-        <flux:text class="mt-6 text-zinc-500 dark:text-zinc-400">{{ __('Search people, groups, posts and events.') }}</flux:text>
+        <x-ui.text class="mt-6">{{ __('Search people, groups, posts and events.') }}</x-ui.text>
     @elseif (! $hasResults)
-        <flux:callout icon="magnifying-glass" class="mt-6">{{ __('Nothing found for “:term”.', ['term' => $q]) }}</flux:callout>
+        <x-ui.alert icon="magnifying-glass" class="mt-6">{{ __('Nothing found for “:term”.', ['term' => $q]) }}</x-ui.alert>
     @else
         {{-- People --}}
         @if ($results['people']->isNotEmpty())
-            <flux:heading size="sm" class="mt-6">{{ __('People') }}</flux:heading>
+            <x-ui.heading size="sm" class="mt-6">{{ __('People') }}</x-ui.heading>
             <div class="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-2">
                 @foreach ($results['people'] as $person)
                     <a wire:key="s-person-{{ $person->id }}" href="{{ $person->external_id ? route('people.show', $person) : '#' }}" wire:navigate
-                       class="flex items-center gap-3 rounded-lg border border-zinc-200 p-3 hover:bg-zinc-50 dark:border-zinc-700 dark:hover:bg-zinc-800">
+                       class="flex items-center gap-3 rounded-xl border border-sand-200 p-3 hover:bg-sand-50 dark:border-zinc-700 dark:hover:bg-zinc-800">
                         <x-avatar :user="$person" size="sm" />
                         <div class="min-w-0">
-                            <flux:text class="truncate font-medium">{{ $person->display_name }}</flux:text>
-                            @if ($person->job_title)<flux:text size="sm" class="truncate text-zinc-500 dark:text-zinc-400">{{ $person->job_title }}</flux:text>@endif
+                            <span class="block truncate text-sm font-medium">{{ $person->display_name }}</span>
+                            @if ($person->job_title)<x-ui.text size="sm" class="truncate">{{ $person->job_title }}</x-ui.text>@endif
                         </div>
                     </a>
                 @endforeach
@@ -53,13 +53,13 @@ new #[Title('Search')] class extends Component {
 
         {{-- Events --}}
         @if ($results['events']->isNotEmpty())
-            <flux:heading size="sm" class="mt-6">{{ __('Events') }}</flux:heading>
+            <x-ui.heading size="sm" class="mt-6">{{ __('Events') }}</x-ui.heading>
             <div class="mt-2 space-y-2">
                 @foreach ($results['events'] as $event)
                     <a wire:key="s-event-{{ $event->id }}" href="{{ route('events.show', $event) }}" wire:navigate
-                       class="block rounded-lg border border-zinc-200 p-3 hover:bg-zinc-50 dark:border-zinc-700 dark:hover:bg-zinc-800">
-                        <flux:text class="font-medium">{{ $event->title }}</flux:text>
-                        <flux:text size="sm" class="text-zinc-500 dark:text-zinc-400">{{ $event->starts_at->translatedFormat('j. M Y, H:i') }}</flux:text>
+                       class="block rounded-xl border border-sand-200 p-3 hover:bg-sand-50 dark:border-zinc-700 dark:hover:bg-zinc-800">
+                        <span class="block text-sm font-medium">{{ $event->title }}</span>
+                        <x-ui.text size="sm">{{ $event->starts_at->translatedFormat('j. M Y, H:i') }}</x-ui.text>
                     </a>
                 @endforeach
             </div>
@@ -67,12 +67,12 @@ new #[Title('Search')] class extends Component {
 
         {{-- Groups --}}
         @if ($results['groups']->isNotEmpty())
-            <flux:heading size="sm" class="mt-6">{{ __('Groups') }}</flux:heading>
+            <x-ui.heading size="sm" class="mt-6">{{ __('Groups') }}</x-ui.heading>
             <div class="mt-2 space-y-2">
                 @foreach ($results['groups'] as $group)
-                    <div wire:key="s-group-{{ $group->id }}" class="flex items-center gap-2 rounded-lg border border-zinc-200 p-3 dark:border-zinc-700">
-                        <flux:icon icon="user-group" variant="mini" class="text-zinc-400" />
-                        <flux:text class="truncate font-medium">{{ $group->name }}</flux:text>
+                    <div wire:key="s-group-{{ $group->id }}" class="flex items-center gap-2 rounded-xl border border-sand-200 p-3 dark:border-zinc-700">
+                        <x-ui.icon name="user-group" variant="mini" class="text-mist-400" />
+                        <span class="truncate text-sm font-medium">{{ $group->name }}</span>
                     </div>
                 @endforeach
             </div>
@@ -80,13 +80,13 @@ new #[Title('Search')] class extends Component {
 
         {{-- Posts --}}
         @if ($results['posts']->isNotEmpty())
-            <flux:heading size="sm" class="mt-6">{{ __('Posts') }}</flux:heading>
+            <x-ui.heading size="sm" class="mt-6">{{ __('Posts') }}</x-ui.heading>
             <div class="mt-2 space-y-2">
                 @foreach ($results['posts'] as $post)
-                    <div wire:key="s-post-{{ $post->id }}" class="rounded-lg border border-zinc-200 p-3 dark:border-zinc-700">
-                        <flux:text size="sm" class="text-zinc-500 dark:text-zinc-400">
+                    <div wire:key="s-post-{{ $post->id }}" class="rounded-xl border border-sand-200 p-3 dark:border-zinc-700">
+                        <x-ui.text size="sm">
                             {{ $post->author?->display_name }}@if ($post->group) · {{ $post->group->name }}@endif
-                        </flux:text>
+                        </x-ui.text>
                         <div class="prose prose-sm mt-1 max-w-none whitespace-pre-line dark:prose-invert">{{ $post->body }}</div>
                     </div>
                 @endforeach

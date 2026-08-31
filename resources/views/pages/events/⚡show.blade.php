@@ -4,7 +4,6 @@ use App\Actions\Events\RespondToEvent;
 use App\Actions\Events\UpdateEventCover;
 use App\Enums\RsvpStatus;
 use App\Models\Event;
-use Flux\Flux;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Title;
 use Livewire\Component;
@@ -43,8 +42,8 @@ new #[Title('Event')] class extends Component {
 
         $this->coverFile = null;
         $this->event->load('media');
-        Flux::modal('edit-cover')->close();
-        Flux::toast(variant: 'success', text: __('Cover updated.'));
+        $this->dispatch('modal-close', name: 'edit-cover');
+        $this->dispatch('toast', variant: 'success', text: __('Cover updated.'));
     }
 
     /**
@@ -63,73 +62,72 @@ new #[Title('Event')] class extends Component {
 <div class="mx-auto w-full max-w-3xl space-y-4">
     {{-- Event header: cover as a banner with details below, wrapped in a card so it
          reads clearly against the page background. --}}
-    <flux:card class="overflow-hidden p-0">
+    <x-ui.card class="overflow-hidden p-0">
         @if ($event->coverUrl())
             <img src="{{ $event->coverUrl() }}" alt="" class="max-h-[360px] w-full object-cover" />
         @endif
 
         <div class="px-6 pb-6 pt-5">
             <div class="flex items-start justify-between gap-3">
-                <flux:heading size="xl">{{ $event->title }}</flux:heading>
+                <x-ui.heading size="xl">{{ $event->title }}</x-ui.heading>
                 @if ($canManage)
-                    <flux:modal.trigger name="edit-cover">
-                        <flux:button size="sm" variant="ghost" icon="photo">{{ __('Change cover') }}</flux:button>
-                    </flux:modal.trigger>
+                    <x-ui.modal.trigger name="edit-cover">
+                        <x-ui.button size="sm" variant="ghost" icon="photo">{{ __('Change cover') }}</x-ui.button>
+                    </x-ui.modal.trigger>
                 @endif
             </div>
 
-            <flux:text class="mt-2 text-zinc-500">
+            <x-ui.text class="mt-2">
                 {{ $event->starts_at->translatedFormat('l j. F Y, H:i') }}
                 @if ($event->location) · {{ $event->location }} @endif
                 @if ($event->group) · {{ $event->group->name }} @endif
-            </flux:text>
+            </x-ui.text>
 
             <div class="mt-4 flex flex-wrap items-center gap-2">
-                <flux:button.group>
-                    <flux:button size="sm" :variant="$mine === RsvpStatus::Going ? 'primary' : 'ghost'" wire:click="respond('going')">{{ __('Going') }}</flux:button>
-                    <flux:button size="sm" :variant="$mine === RsvpStatus::Maybe ? 'primary' : 'ghost'" wire:click="respond('maybe')">{{ __('Maybe') }}</flux:button>
-                    <flux:button size="sm" :variant="$mine === RsvpStatus::Declined ? 'primary' : 'ghost'" wire:click="respond('declined')">{{ __('Can’t go') }}</flux:button>
-                </flux:button.group>
+                <div class="inline-flex gap-1">
+                    <x-ui.button size="sm" :variant="$mine === RsvpStatus::Going ? 'primary' : 'ghost'" wire:click="respond('going')">{{ __('Going') }}</x-ui.button>
+                    <x-ui.button size="sm" :variant="$mine === RsvpStatus::Maybe ? 'primary' : 'ghost'" wire:click="respond('maybe')">{{ __('Maybe') }}</x-ui.button>
+                    <x-ui.button size="sm" :variant="$mine === RsvpStatus::Declined ? 'primary' : 'ghost'" wire:click="respond('declined')">{{ __('Can’t go') }}</x-ui.button>
+                </div>
 
-                <flux:button size="sm" variant="ghost" icon="arrow-down-tray" href="{{ route('events.ics', $event) }}">
+                <x-ui.button size="sm" variant="ghost" icon="arrow-down-tray" :href="route('events.ics', $event)" :navigate="false">
                     {{ __('Add to calendar') }}
-                </flux:button>
+                </x-ui.button>
             </div>
 
             @if ($event->description)
                 <div class="prose prose-sm mt-6 max-w-none whitespace-pre-line">{{ $event->description }}</div>
             @endif
         </div>
-    </flux:card>
+    </x-ui.card>
 
     {{-- Attendees --}}
-    <flux:card>
-        <flux:heading size="sm">{{ __('Going') }} ({{ $attendees->count() }})</flux:heading>
+    <x-ui.card>
+        <x-ui.heading size="sm">{{ __('Going') }} ({{ $attendees->count() }})</x-ui.heading>
         <div class="mt-3 flex flex-wrap gap-3">
             @forelse ($attendees as $person)
                 <div wire:key="attendee-{{ $person->id }}" class="flex items-center gap-2">
                     <x-avatar :user="$person" size="xs" />
-                    <flux:text size="sm">{{ $person->display_name }}</flux:text>
+                    <x-ui.text size="sm">{{ $person->display_name }}</x-ui.text>
                 </div>
             @empty
-                <flux:text size="sm" class="text-zinc-500">{{ __('No one has responded yet.') }}</flux:text>
+                <x-ui.text size="sm">{{ __('No one has responded yet.') }}</x-ui.text>
             @endforelse
         </div>
-    </flux:card>
+    </x-ui.card>
 
     @if ($canManage)
-        <flux:modal name="edit-cover" class="w-full max-w-lg">
+        <x-ui.modal name="edit-cover" class="max-w-lg">
             <div class="space-y-4">
-                <flux:heading size="lg">{{ __('Change cover') }}</flux:heading>
-                <flux:input type="file" wire:model="coverFile" :label="__('Cover image')" accept="image/*" />
-                <flux:error name="coverFile" />
+                <x-ui.heading size="lg">{{ __('Change cover') }}</x-ui.heading>
+                <x-ui.input type="file" wire:model="coverFile" :label="__('Cover image')" accept="image/*" />
                 @if ($coverFile && $coverFile->isPreviewable())
                     <img src="{{ $coverFile->temporaryUrl() }}" alt="" class="h-40 w-full rounded-lg object-cover" />
                 @endif
                 <div class="flex justify-end">
-                    <flux:button variant="primary" wire:click="saveCover" data-test="save-event-cover">{{ __('Save') }}</flux:button>
+                    <x-ui.button variant="primary" wire:click="saveCover" data-test="save-event-cover">{{ __('Save') }}</x-ui.button>
                 </div>
             </div>
-        </flux:modal>
+        </x-ui.modal>
     @endif
 </div>

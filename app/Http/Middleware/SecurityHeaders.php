@@ -10,7 +10,7 @@ use Symfony\Component\HttpFoundation\Response;
 
 /**
  * Baseline hardening headers on every web response. A full Content-Security-Policy needs
- * per-request nonces to coexist with Livewire/Flux inline scripts and is configured at
+ * per-request nonces to coexist with Livewire's inline scripts and is configured at
  * the edge (Laravel Cloud); these are the safe, app-level defaults.
  *
  * Exception: when the app is opened as a Microsoft Teams tab (V2 phase 15,

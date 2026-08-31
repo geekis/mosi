@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Enums\GroupRole;
 use App\Models\Group;
 use App\Models\Post;
+use App\Models\Shortcut;
 use App\Models\User;
 use Livewire\Livewire;
 
@@ -74,6 +75,18 @@ test('the left rail shows the user profile and their groups', function () {
         ->test('pages::feed')
         ->assertSee($user->job_title)
         ->assertSee($group->name);
+});
+
+test('the left rail shows active shortcuts as tiles and hides inactive ones', function () {
+    $user = User::factory()->create();
+    Shortcut::factory()->create(['label' => 'Vinnustund', 'url' => 'https://vinnustund.example']);
+    Shortcut::factory()->inactive()->create(['label' => 'HiddenLink']);
+
+    Livewire::actingAs($user)
+        ->test('pages::feed')
+        ->assertSee('Vinnustund')
+        ->assertSee('https://vinnustund.example')
+        ->assertDontSee('HiddenLink');
 });
 
 test('the left rail shows a stranger who is not in the user’s groups is not listed', function () {

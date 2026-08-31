@@ -9,7 +9,7 @@
             @csrf
 
             <!-- Email Address -->
-            <flux:input
+            <x-ui.input
                 name="email"
                 :label="__('Email address')"
                 type="email"
@@ -18,14 +18,14 @@
                 placeholder="email@example.com"
             />
 
-            <flux:button variant="primary" type="submit" class="w-full" data-test="email-password-reset-link-button">
+            <x-ui.button variant="primary" type="submit" class="w-full" data-test="email-password-reset-link-button">
                 {{ __('Email password reset link') }}
-            </flux:button>
+            </x-ui.button>
         </form>
 
         <div class="space-x-1 rtl:space-x-reverse text-center text-sm text-zinc-400">
             <span>{{ __('Or, return to') }}</span>
-            <flux:link :href="route('login')" wire:navigate>{{ __('log in') }}</flux:link>
+            <x-ui.link :href="route('login')" navigate>{{ __('log in') }}</x-ui.link>
         </div>
     </div>
 </x-layouts::auth>

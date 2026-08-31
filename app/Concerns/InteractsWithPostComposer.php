@@ -11,7 +11,6 @@ use App\Actions\Reactions\Unreact;
 use App\Enums\ReactionType;
 use App\Models\Post;
 use App\Models\User;
-use Flux\Flux;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 use Livewire\WithFileUploads;
@@ -120,7 +119,7 @@ trait InteractsWithPostComposer
             })
             ->all();
 
-        Flux::modal('post-reactions')->show();
+        $this->dispatch('modal-show', name: 'post-reactions');
     }
 
     /**

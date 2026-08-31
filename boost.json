@@ -15,9 +15,9 @@
         "configuring-horizon",
         "scout-development",
         "socialite-development",
-        "fluxui-development",
         "livewire-development",
         "pest-testing",
+        "echo-development",
         "tailwindcss-development"
     ]
 }

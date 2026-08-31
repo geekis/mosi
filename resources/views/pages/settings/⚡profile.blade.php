@@ -5,7 +5,6 @@ use App\Models\User;
 /* @chisel-email-verification */
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 /* @end-chisel-email-verification */
-use Flux\Flux;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Validation\Rule;
@@ -59,7 +58,7 @@ new #[Title('Profile settings')] class extends Component {
 
         $user->save();
 
-        Flux::toast(variant: 'success', text: __('Profile updated.'));
+        $this->dispatch('toast', variant: 'success', text: __('Profile updated.'));
     }
 
     /**
@@ -73,7 +72,7 @@ new #[Title('Profile settings')] class extends Component {
         $updateProfilePhoto(Auth::user(), $this->avatar, 'avatar');
 
         $this->avatar = null;
-        Flux::toast(variant: 'success', text: __('Photo updated.'));
+        $this->dispatch('toast', variant: 'success', text: __('Photo updated.'));
     }
 
     public function saveBanner(UpdateProfilePhoto $updateProfilePhoto): void
@@ -83,7 +82,7 @@ new #[Title('Profile settings')] class extends Component {
         $updateProfilePhoto(Auth::user(), $this->banner, 'banner');
 
         $this->banner = null;
-        Flux::toast(variant: 'success', text: __('Banner updated.'));
+        $this->dispatch('toast', variant: 'success', text: __('Banner updated.'));
     }
 
     /* @chisel-email-verification */
@@ -123,83 +122,81 @@ new #[Title('Profile settings')] class extends Component {
 <section class="w-full">
     @include('partials.settings-heading')
 
-    <flux:heading class="sr-only">{{ __('Profile settings') }}</flux:heading>
+    <x-ui.heading class="sr-only">{{ __('Profile settings') }}</x-ui.heading>
 
     <x-pages::settings.layout :heading="__('Profile')" :subheading="__('Update your name and email address')">
         {{-- Photo & banner: each saves on its own, separate from the details form. --}}
         <div class="my-6 flex items-center gap-4">
-            <flux:avatar :name="auth()->user()->display_name" :initials="auth()->user()->initials()" :src="$avatar && $avatar->isPreviewable() ? $avatar->temporaryUrl() : auth()->user()->avatarUrl()" size="xl" />
+            <x-avatar :name="auth()->user()->display_name" :initials="auth()->user()->initials()" :src="$avatar && $avatar->isPreviewable() ? $avatar->temporaryUrl() : auth()->user()->avatarUrl()" :presence="false" size="xl" />
             <div class="space-y-2">
-                <flux:input type="file" wire:model="avatar" :label="__('Profile photo')" accept="image/*" class="max-w-xs" />
-                <flux:error name="avatar" />
+                <x-ui.input type="file" wire:model="avatar" :label="__('Profile photo')" accept="image/*" class="max-w-xs" />
                 @if ($avatar)
-                    <flux:button size="sm" variant="primary" wire:click="saveAvatar" data-test="save-avatar-button">{{ __('Save photo') }}</flux:button>
+                    <x-ui.button size="sm" variant="primary" wire:click="saveAvatar" data-test="save-avatar-button">{{ __('Save photo') }}</x-ui.button>
                 @endif
             </div>
         </div>
 
         <div class="my-6 space-y-2">
-            <flux:input type="file" wire:model="banner" :label="__('Profile banner')" accept="image/*" class="max-w-xs" />
-            <flux:error name="banner" />
+            <x-ui.input type="file" wire:model="banner" :label="__('Profile banner')" accept="image/*" class="max-w-xs" />
             @if ($banner)
-                <flux:button size="sm" variant="primary" wire:click="saveBanner" data-test="save-banner-button">{{ __('Save banner') }}</flux:button>
+                <x-ui.button size="sm" variant="primary" wire:click="saveBanner" data-test="save-banner-button">{{ __('Save banner') }}</x-ui.button>
             @endif
         </div>
 
-        <flux:separator variant="subtle" />
+        <x-ui.separator variant="subtle" />
 
         <form wire:submit="updateProfileInformation" class="my-6 w-full space-y-6">
-            <flux:input wire:model="display_name" :label="__('Name')" type="text" required autofocus autocomplete="name" />
+            <x-ui.input wire:model="display_name" :label="__('Name')" type="text" required autofocus autocomplete="name" />
 
             <div>
-                <flux:input wire:model="email" :label="__('Email')" type="email" required autocomplete="email" />
+                <x-ui.input wire:model="email" :label="__('Email')" type="email" required autocomplete="email" />
 
                 {{-- @chisel-email-verification --}}
                 @if ($this->hasUnverifiedEmail)
                     <div>
-                        <flux:text class="mt-4">
+                        <x-ui.text class="mt-4">
                             {{ __('Your email address is unverified.') }}
 
-                            <flux:link class="text-sm cursor-pointer" wire:click.prevent="resendVerificationNotification">
+                            <x-ui.link href="#" class="text-sm cursor-pointer" wire:click.prevent="resendVerificationNotification">
                                 {{ __('Click here to re-send the verification email.') }}
-                            </flux:link>
-                        </flux:text>
+                            </x-ui.link>
+                        </x-ui.text>
 
                         @if (session('status') === 'verification-link-sent')
-                            <flux:text class="mt-2 font-medium !dark:text-green-400 !text-green-600">
+                            <x-ui.text class="mt-2 font-medium text-brand-600 dark:text-brand-400">
                                 {{ __('A new verification link has been sent to your email address.') }}
-                            </flux:text>
+                            </x-ui.text>
                         @endif
                     </div>
                 @endif
                 {{-- @end-chisel-email-verification --}}
             </div>
 
-            <flux:textarea wire:model="bio" :label="__('About')" :placeholder="__('A short introduction shown on your profile.')" rows="4" />
+            <x-ui.textarea wire:model="bio" :label="__('About')" :placeholder="__('A short introduction shown on your profile.')" rows="4" />
 
             <div class="flex items-center gap-4">
                 <div class="flex items-center justify-end">
-                    <flux:button variant="primary" type="submit" class="w-full" data-test="update-profile-button">
+                    <x-ui.button variant="primary" type="submit" class="w-full" data-test="update-profile-button">
                         {{ __('Save') }}
-                    </flux:button>
+                    </x-ui.button>
                 </div>
 
             </div>
         </form>
 
-        <flux:separator variant="subtle" class="my-6" />
+        <x-ui.separator variant="subtle" class="my-6" />
 
         <div class="flex items-center justify-between">
             <div>
-                <flux:heading size="sm">{{ __('Your data') }}</flux:heading>
-                <flux:text size="sm" class="text-zinc-500 dark:text-zinc-400">{{ __('Download a copy of your personal data.') }}</flux:text>
+                <x-ui.heading size="sm">{{ __('Your data') }}</x-ui.heading>
+                <x-ui.text size="sm">{{ __('Download a copy of your personal data.') }}</x-ui.text>
             </div>
-            <flux:button size="sm" variant="ghost" icon="arrow-down-tray" href="{{ route('me.export') }}">
+            <x-ui.button size="sm" variant="ghost" icon="arrow-down-tray" :href="route('me.export')" :navigate="false">
                 {{ __('Download') }}
-            </flux:button>
+            </x-ui.button>
         </div>
 
-        <flux:separator variant="subtle" class="my-6" />
+        <x-ui.separator variant="subtle" class="my-6" />
 
         {{-- @chisel-email-verification --}}
         @if ($this->showDeleteUser)
